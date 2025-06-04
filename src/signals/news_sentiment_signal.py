@@ -1,169 +1,241 @@
 """
-News Sentiment Signal using OpenAI
-Analyzes RTX and defense sector news for trading signals
+News Sentiment Analysis Signal
+AI-powered analysis of RTX and defense sector news
 """
+import openai
 import asyncio
 import aiohttp
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
-import openai
-from openai import OpenAI
+from typing import Dict, List, Optional
+import yfinance as yf
+from loguru import logger
 
-from .base_signal import BaseSignal, SignalResult
 from config.trading_config import config
 
-class NewsSentimentSignal(BaseSignal):
-    """OpenAI-powered news sentiment analysis for RTX"""
+class NewsSentimentSignal:
+    """Analyze news sentiment for RTX and defense sector"""
     
     def __init__(self):
-        super().__init__("news_sentiment", config.SIGNAL_WEIGHTS["news_sentiment"])
-        self.client = OpenAI(api_key=config.OPENAI_API_KEY)
-        self.news_sources = [
-            "https://finance.yahoo.com/quote/RTX/news",
-            "defense-aerospace",
-            "military-contracts"
-        ]
-    
-    async def get_rtx_news(self) -> List[Dict[str, str]]:
-        """Fetch recent RTX and defense sector news"""
-        # Placeholder for news fetching - you can integrate with news APIs
-        # For now, we'll simulate news data
-        sample_news = [
-            {
-                "title": "RTX wins $2B military contract",
-                "content": "Raytheon Technologies secured a major defense contract...",
-                "source": "Defense News",
-                "timestamp": datetime.now().isoformat()
-            },
-            {
-                "title": "Defense spending increases in 2024 budget",
-                "content": "Pentagon allocates increased funding for aerospace...",
-                "source": "Reuters",
-                "timestamp": (datetime.now() - timedelta(hours=2)).isoformat()
-            }
-        ]
-        return sample_news
-    
-    async def analyze_news_with_ai(self, news_items: List[Dict]) -> Dict[str, Any]:
-        """Use OpenAI to analyze news sentiment and trading implications"""
+        self.signal_name = "news_sentiment"
+        self.weight = config.SIGNAL_WEIGHTS.get(self.signal_name, 0.15)
+        self.news_cache = {}
+        self.last_analysis = None
         
-        # Prepare news context for AI
-        news_context = "\n".join([
-            f"Title: {item['title']}\nContent: {item['content'][:200]}...\n"
-            for item in news_items[:5]  # Limit to 5 most recent
-        ])
-        
-        prompt = f"""
-        Analyze the following RTX (Raytheon Technologies) related news for options trading signals.
-        
-        News Context:
-        {news_context}
-        
-        Consider:
-        1. Impact on RTX stock price (positive/negative/neutral)
-        2. Timeframe of impact (immediate/short-term/long-term)
-        3. Confidence level (0.0 to 1.0)
-        4. Best options strategy (calls/puts, timeframe)
-        5. Defense sector implications
-        
-        Respond in JSON format:
-        {{
-            "sentiment": "positive/negative/neutral",
-            "confidence": 0.0-1.0,
-            "timeframe": "immediate/short-term/long-term",
-            "impact_magnitude": "low/medium/high",
-            "recommended_action": "BUY_CALLS/BUY_PUTS/HOLD",
-            "reasoning": "detailed explanation",
-            "suggested_expiry": "days from now",
-            "risk_factors": ["list", "of", "risks"]
-        }}
-        """
+    async def analyze(self, symbol: str = "RTX") -> Dict:
+        """Analyze news sentiment for trading signals"""
         
         try:
-            response = self.client.chat.completions.create(
-                model=config.OPENAI_MODEL,
-                messages=[
-                    {"role": "system", "content": "You are an expert options trader specializing in defense sector stocks. Analyze news for trading opportunities."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.3
+            # Get recent news
+            news_data = await self._get_rtx_news(symbol)
+            
+            if not news_data:
+                return self._create_neutral_signal("No recent news found")
+            
+            # Analyze sentiment with AI
+            sentiment_analysis = await self._analyze_sentiment_with_ai(news_data)
+            
+            # Generate signal
+            signal = self._generate_signal(sentiment_analysis)
+            
+            self.last_analysis = signal
+            return signal
+            
+        except Exception as e:
+            logger.error(f"📰 News sentiment error: {e}")
+            return self._create_neutral_signal(f"Analysis error: {str(e)}")
+    
+    async def _get_rtx_news(self, symbol: str) -> List[Dict]:
+        """Get recent RTX-related news"""
+        try:
+            # Use yfinance for news (free and reliable)
+            ticker = yf.Ticker(symbol)
+            news = ticker.news
+            
+            # Filter recent news (last 24 hours)
+            recent_news = []
+            cutoff_time = datetime.now() - timedelta(hours=24)
+            
+            for article in news[:10]:  # Top 10 articles
+                publish_time = datetime.fromtimestamp(article.get('providerPublishTime', 0))
+                
+                if publish_time > cutoff_time:
+                    recent_news.append({
+                        'title': article.get('title', ''),
+                        'summary': article.get('summary', ''),
+                        'publisher': article.get('publisher', ''),
+                        'publish_time': publish_time.isoformat(),
+                        'url': article.get('link', '')
+                    })
+            
+            logger.info(f"📰 Found {len(recent_news)} recent {symbol} articles")
+            return recent_news
+            
+        except Exception as e:
+            logger.error(f"📰 News retrieval error: {e}")
+            return []
+    
+    async def _analyze_sentiment_with_ai(self, news_data: List[Dict]) -> Dict:
+        """Analyze news sentiment using OpenAI"""
+        
+        if not news_data:
+            return {"sentiment": "neutral", "confidence": 0.5, "reasoning": "No news to analyze"}
+        
+        # Prepare news text for analysis
+        news_text = "\n\n".join([
+            f"Title: {article['title']}\nSummary: {article.get('summary', 'No summary')}"
+            for article in news_data[:5]  # Analyze top 5 articles
+        ])
+        
+        try:
+            # Use OpenAI for sentiment analysis
+            import openai
+            import os
+            
+            client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            
+            prompt = f"""
+            You are a professional financial analyst. Analyze the following RTX Corporation news for trading sentiment.
+            
+            NEWS ARTICLES:
+            {news_text}
+            
+            Provide analysis in this JSON format:
+            {{
+                "sentiment": "bullish|bearish|neutral",
+                "confidence": 0.0-1.0,
+                "reasoning": "brief explanation",
+                "key_factors": ["factor1", "factor2"],
+                "time_horizon": "short|medium|long"
+            }}
+            
+            Focus on:
+            - Defense spending trends
+            - Contract wins/losses
+            - Geopolitical factors
+            - Company performance
+            - Market conditions
+            """
+            
+            response = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: client.chat.completions.create(
+                    model="gpt-4",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=500
+                )
             )
             
-            # Parse AI response (simplified - add proper JSON parsing)
+            # Parse AI response
             ai_analysis = response.choices[0].message.content
             
-            # Simplified parsing - in production, use proper JSON parsing
-            if "positive" in ai_analysis.lower():
-                sentiment = "positive"
-                direction = "BUY"
-                trade_type = "CALL"
-            elif "negative" in ai_analysis.lower():
-                sentiment = "negative"
-                direction = "SELL" 
-                trade_type = "PUT"
+            # Extract sentiment data (simplified parsing)
+            if "bullish" in ai_analysis.lower():
+                sentiment = "bullish"
+                confidence = 0.7
+            elif "bearish" in ai_analysis.lower():
+                sentiment = "bearish"
+                confidence = 0.7
             else:
                 sentiment = "neutral"
-                direction = "HOLD"
-                trade_type = None
-            
-            # Extract confidence (simplified)
-            confidence = 0.7  # Default - parse from AI response in production
+                confidence = 0.5
             
             return {
                 "sentiment": sentiment,
                 "confidence": confidence,
-                "direction": direction,
-                "trade_type": trade_type,
-                "ai_analysis": ai_analysis,
-                "news_count": len(news_items)
+                "reasoning": ai_analysis[:200] + "..." if len(ai_analysis) > 200 else ai_analysis,
+                "articles_analyzed": len(news_data),
+                "ai_response": ai_analysis
             }
             
         except Exception as e:
-            print(f"OpenAI analysis failed: {e}")
-            return {
-                "sentiment": "neutral",
-                "confidence": 0.0,
-                "direction": "HOLD",
-                "trade_type": None,
-                "ai_analysis": f"Error: {e}",
-                "news_count": 0
-            }
+            logger.error(f"🤖 AI sentiment analysis error: {e}")
+            
+            # Fallback: Simple keyword analysis
+            return await self._simple_sentiment_analysis(news_data)
     
-    async def analyze(self, symbol: str) -> SignalResult:
-        """Main analysis method"""
-        if symbol != "RTX":
-            # For now, only analyze RTX
-            return SignalResult(
-                signal_name=self.name,
-                timestamp=datetime.now(),
-                confidence=0.0,
-                direction="HOLD",
-                reasoning="Only RTX analysis supported"
-            )
+    async def _simple_sentiment_analysis(self, news_data: List[Dict]) -> Dict:
+        """Fallback sentiment analysis using keywords"""
         
-        # Get news and analyze
-        news_items = await self.get_rtx_news()
-        ai_result = await self.analyze_news_with_ai(news_items)
+        positive_keywords = [
+            "contract", "award", "win", "revenue", "growth", "profit",
+            "defense", "military", "partnership", "expansion", "innovation"
+        ]
         
-        return SignalResult(
-            signal_name=self.name,
-            timestamp=datetime.now(),
-            confidence=ai_result["confidence"],
-            direction=ai_result["direction"],
-            reasoning=f"AI News Analysis: {ai_result['sentiment']} sentiment from {ai_result['news_count']} articles",
-            data=ai_result,
-            trade_type=ai_result["trade_type"],
-            expiry_suggestion="7-14 days",  # Default for news-driven trades
-            strike_suggestion=None  # Will be calculated by execution engine
-        )
-    
-    async def backtest(self, symbol: str, start_date: str, end_date: str) -> Dict[str, Any]:
-        """Backtest news sentiment strategy"""
-        # Placeholder for backtesting logic
+        negative_keywords = [
+            "loss", "cut", "layoff", "decline", "issue", "problem",
+            "lawsuit", "fine", "investigation", "concern", "risk"
+        ]
+        
+        positive_score = 0
+        negative_score = 0
+        
+        for article in news_data:
+            text = (article.get('title', '') + ' ' + article.get('summary', '')).lower()
+            
+            positive_score += sum(1 for keyword in positive_keywords if keyword in text)
+            negative_score += sum(1 for keyword in negative_keywords if keyword in text)
+        
+        # Determine sentiment
+        if positive_score > negative_score + 1:
+            sentiment = "bullish"
+            confidence = min(0.8, 0.5 + (positive_score - negative_score) * 0.1)
+        elif negative_score > positive_score + 1:
+            sentiment = "bearish"
+            confidence = min(0.8, 0.5 + (negative_score - positive_score) * 0.1)
+        else:
+            sentiment = "neutral"
+            confidence = 0.5
+        
         return {
-            "total_trades": 0,
-            "win_rate": 0.0,
-            "total_return": 0.0,
-            "note": "Backtesting not implemented yet"
+            "sentiment": sentiment,
+            "confidence": confidence,
+            "reasoning": f"Keyword analysis: {positive_score} positive, {negative_score} negative signals",
+            "method": "keyword_fallback"
+        }
+    
+    def _generate_signal(self, sentiment_analysis: Dict) -> Dict:
+        """Generate trading signal from sentiment analysis"""
+        
+        sentiment = sentiment_analysis.get("sentiment", "neutral")
+        confidence = sentiment_analysis.get("confidence", 0.5)
+        
+        # Convert sentiment to trading signal
+        if sentiment == "bullish" and confidence > 0.6:
+            direction = "BUY"
+            signal_strength = confidence * self.weight
+        elif sentiment == "bearish" and confidence > 0.6:
+            direction = "SELL"
+            signal_strength = confidence * self.weight
+        else:
+            direction = "HOLD"
+            signal_strength = 0.1
+        
+        return {
+            "signal_name": self.signal_name,
+            "direction": direction,
+            "strength": signal_strength,
+            "confidence": confidence,
+            "reasoning": sentiment_analysis.get("reasoning", "Sentiment analysis"),
+            "timestamp": datetime.now().isoformat(),
+            "raw_data": sentiment_analysis
+        }
+    
+    def _create_neutral_signal(self, reason: str) -> Dict:
+        """Create neutral signal with reason"""
+        return {
+            "signal_name": self.signal_name,
+            "direction": "HOLD",
+            "strength": 0.1,
+            "confidence": 0.5,
+            "reasoning": reason,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    def get_signal_status(self) -> Dict:
+        """Get current signal status"""
+        return {
+            "signal_name": self.signal_name,
+            "weight": self.weight,
+            "last_analysis": self.last_analysis,
+            "status": "operational"
         } 

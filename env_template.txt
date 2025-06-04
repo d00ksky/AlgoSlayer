@@ -1,18 +1,99 @@
-# RTX AlgoSlayer Environment Variables
-# Copy this to .env and fill in your actual keys
+# RTX Autonomous Trading System - Environment Configuration
+# Copy this file to .env and fill in your actual values
 
-# OpenAI API Key for news sentiment analysis
-OPENAI_API_KEY=your_openai_api_key
+# === OPENAI CONFIGURATION ===
+OPENAI_API_KEY=your_openai_api_key_here
 
-# Interactive Brokers Configuration
-IB_USERNAME=your_ib_username
-IB_PASSWORD=your_ib_password
+# === TELEGRAM BOT CONFIGURATION ===
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+TELEGRAM_CHAT_ID=your_telegram_chat_id_here
 
-# Optional: News API keys for better news data
-NEWS_API_KEY=your_news_api_key
-ALPHA_VANTAGE_KEY=your_alpha_vantage_key
+# === INTERACTIVE BROKERS CONFIGURATION ===
+IBKR_HOST=127.0.0.1
+IBKR_PAPER_PORT=7497
+IBKR_LIVE_PORT=7496
+IBKR_CLIENT_ID=1
 
-# Trading Configuration
-PAPER_TRADING=true
+# === TRADING MODE CONTROLS ===
+# Master trading switch - controls all trading activity
+TRADING_ENABLED=false
+
+# Trading mode selection
+PAPER_TRADING=true              # true = paper money, false = real money
+PREDICTION_ONLY=false           # true = predictions only, no orders
+
+# IBKR connection settings
+IBKR_REQUIRED=false             # true = fail if no IBKR, false = continue without
+AUTO_CONNECT_IBKR=true          # try to connect to IBKR automatically
+
+# === SYSTEM CONFIGURATION ===
+LOG_LEVEL=INFO
+PREDICTION_INTERVAL_MINUTES=15
+CONFIDENCE_THRESHOLD=0.35
+
+# === RISK MANAGEMENT ===
 STARTING_CAPITAL=1000
-MAX_DAILY_LOSS=50 
+MAX_POSITION_SIZE=200
+MAX_DAILY_LOSS=50
+STOP_LOSS_PERCENTAGE=0.15
+
+# === ACCELERATED LEARNING ===
+LEARNING_SPEED_MULTIPLIER=180
+LEARNING_LOOKBACK_DAYS=180
+
+# === TELEGRAM NOTIFICATIONS ===
+SEND_PREDICTIONS=true
+SEND_TRADE_ALERTS=true
+SEND_DAILY_SUMMARY=true
+SEND_SYSTEM_STATUS=true
+
+# === PRODUCTION DEPLOYMENT (Optional) ===
+# DigitalOcean or other cloud provider settings
+CLOUD_PROVIDER=digitalocean
+SERVER_IP=your_server_ip_here
+SSH_KEY_PATH=~/.ssh/id_rsa
+
+# === TRADING MODE EXAMPLES ===
+# 
+# 🔸 SAFE PREDICTION MODE (Recommended for testing):
+# TRADING_ENABLED=false
+# PREDICTION_ONLY=true
+# IBKR_REQUIRED=false
+#
+# 🔸 PAPER TRADING MODE:
+# TRADING_ENABLED=true  
+# PAPER_TRADING=true
+# IBKR_REQUIRED=false
+#
+# 🔸 LIVE TRADING MODE (Use with extreme caution!):
+# TRADING_ENABLED=true
+# PAPER_TRADING=false
+# IBKR_REQUIRED=true
+
+# === QUICK START INSTRUCTIONS ===
+#
+# 1. GET TELEGRAM BOT TOKEN:
+#    - Message @BotFather on Telegram
+#    - Create new bot: /newbot
+#    - Copy the token
+#
+# 2. GET TELEGRAM CHAT ID:
+#    - Message your bot
+#    - Visit: https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates
+#    - Copy the chat ID
+#
+# 3. GET OPENAI API KEY:
+#    - Visit: https://platform.openai.com/api-keys
+#    - Create new key
+#    - Copy the key
+#
+# 4. START IN SAFE MODE:
+#    - Set TRADING_ENABLED=false
+#    - Set PREDICTION_ONLY=true
+#    - Run: python test_accelerated_learning.py
+#
+# 5. ENABLE PAPER TRADING:
+#    - Install TWS or IBKR Gateway
+#    - Set TRADING_ENABLED=true
+#    - Set PAPER_TRADING=true
+#    - Run: python run_server.py 

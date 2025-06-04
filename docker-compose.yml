@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # IBKR Gateway Container
+  ibkr-gateway:
+    image: gnzsnz/ib-gateway:stable
+    container_name: rtx-ibkr-gateway
+    environment:
+      - TWSUSERID=${IBKR_USERNAME}
+      - TWSPASSWORD=${IBKR_PASSWORD}
+      - TRADING_MODE=${PAPER_TRADING:-true}
+      - TWOFA=${IBKR_2FA:-}
+    ports:
+      - "7497:7497"  # Paper trading port
+      - "7496:7496"  # Live trading port
+      - "5900:5900"  # VNC access
+    volumes:
+      - ibkr_data:/root/Jts
+    restart: unless-stopped
+    networks:
+      - rtx-trading
+
+  # RTX Trading Application
+  rtx-trader:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rtx-trading-app
+    environment:
+      # Trading Configuration
+      - TRADING_ENABLED=${TRADING_ENABLED:-false}
+      - PAPER_TRADING=${PAPER_TRADING:-true}
+      - PREDICTION_ONLY=${PREDICTION_ONLY:-false}
+      - IBKR_REQUIRED=${IBKR_REQUIRED:-false}
+      - AUTO_CONNECT_IBKR=${AUTO_CONNECT_IBKR:-true}
+      
+      # API Keys
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      
+      # IBKR Connection
+      - IBKR_HOST=ibkr-gateway
+      - IBKR_PAPER_PORT=7497
+      - IBKR_LIVE_PORT=7496
+      - IBKR_CLIENT_ID=1
+      
+      # Risk Management
+      - STARTING_CAPITAL=${STARTING_CAPITAL:-1000}
+      - MAX_POSITION_SIZE=${MAX_POSITION_SIZE:-200}
+      - MAX_DAILY_LOSS=${MAX_DAILY_LOSS:-50}
+      
+      # System Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PREDICTION_INTERVAL_MINUTES=${PREDICTION_INTERVAL_MINUTES:-15}
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.35}
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    depends_on:
+      - ibkr-gateway
+      - redis
+    restart: unless-stopped
+    networks:
+      - rtx-trading
+
+  # Redis for caching and data storage
+  redis:
+    image: redis:7-alpine
+    container_name: rtx-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - rtx-trading
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: rtx-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+    depends_on:
+      - rtx-trader
+    restart: unless-stopped
+    networks:
+      - rtx-trading
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: rtx-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - rtx-trading
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: rtx-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-rtx2024}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - rtx-trading
+
+  # Database backup service
+  backup:
+    image: alpine:latest
+    container_name: rtx-backup
+    volumes:
+      - ./data:/app/data:ro
+      - ./backups:/backups
+    command: >
+      sh -c "
+        while true; do
+          tar -czf /backups/rtx-backup-$(date +%Y%m%d_%H%M%S).tar.gz /app/data
+          find /backups -name '*.tar.gz' -mtime +7 -delete
+          sleep 86400
+        done
+      "
+    restart: unless-stopped
+    networks:
+      - rtx-trading
+
+volumes:
+  ibkr_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  rtx-trading:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 
