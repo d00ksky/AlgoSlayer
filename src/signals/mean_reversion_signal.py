@@ -6,7 +6,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Dict, List
 from loguru import logger
 
 from config.trading_config import config

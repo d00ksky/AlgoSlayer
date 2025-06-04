@@ -13,6 +13,12 @@ from src.core.telegram_bot import telegram_bot
 from src.core.accelerated_learning import learning_engine
 from src.signals.news_sentiment_signal import NewsSentimentSignal
 from src.signals.technical_analysis_signal import TechnicalAnalysisSignal
+from src.signals.options_flow_signal import OptionsFlowSignal
+from src.signals.volatility_analysis_signal import VolatilityAnalysisSignal
+from src.signals.momentum_signal import MomentumSignal
+from src.signals.sector_correlation_signal import SectorCorrelationSignal
+from src.signals.mean_reversion_signal import MeanReversionSignal
+from src.signals.market_regime_signal import MarketRegimeSignal
 
 class RTXTradingScheduler:
     """Main scheduler for autonomous RTX trading"""
@@ -25,7 +31,13 @@ class RTXTradingScheduler:
         # Initialize AI signals
         self.signals = {
             "news_sentiment": NewsSentimentSignal(),
-            "technical_analysis": TechnicalAnalysisSignal()
+            "technical_analysis": TechnicalAnalysisSignal(),
+            "options_flow": OptionsFlowSignal(),
+            "volatility_analysis": VolatilityAnalysisSignal(),
+            "momentum": MomentumSignal(),
+            "sector_correlation": SectorCorrelationSignal(),
+            "mean_reversion": MeanReversionSignal(),
+            "market_regime": MarketRegimeSignal()
         }
         
         # Trading state
