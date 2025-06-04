@@ -1,0 +1,18 @@
+# RTX AlgoSlayer Environment Variables
+# Copy this to .env and fill in your actual keys
+
+# OpenAI API Key for news sentiment analysis
+OPENAI_API_KEY=your_openai_api_key
+
+# Interactive Brokers Configuration
+IB_USERNAME=your_ib_username
+IB_PASSWORD=your_ib_password
+
+# Optional: News API keys for better news data
+NEWS_API_KEY=your_news_api_key
+ALPHA_VANTAGE_KEY=your_alpha_vantage_key
+
+# Trading Configuration
+PAPER_TRADING=true
+STARTING_CAPITAL=1000
+MAX_DAILY_LOSS=50 
