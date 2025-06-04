@@ -131,7 +131,7 @@ fi
 # Install Python dependencies
 if [[ -f "requirements.txt" ]]; then
     echo "📦 Installing Python dependencies..."
-    pip3 install -r requirements.txt
+    pip3 install -r requirements.txt --break-system-packages
     echo "✅ Dependencies installed"
 fi
 
