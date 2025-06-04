@@ -1,0 +1,61 @@
+### AI Rules for Rapid Algo Trading Bot Development
+
+#### **Primary Goal: Ship Fast, Iterate Quick**
+- Prioritize working code over perfect code
+- Build MVP first, refine later
+- Every suggestion should get us closer to a testable trading strategy
+
+#### **Core Strategy: Multi-AI Signal Fusion for RTX Options**
+- **Primary Target**: RTX (Raytheon) options trading with 9 shares starting capital (~$1,000)
+- **Strategy**: Multi-AI signal system that combines multiple data sources for high-confidence trades
+- **Architecture**: Modular signal system - easy to add/remove/test new AI signals
+- **Goal**: Prove profitability with small capital, then scale with additional funds (€1,200 GME available)
+
+#### **AI Signal Sources (Planned)**
+- **News Sentiment**: OpenAI analysis of RTX + defense sector news
+- **Options Flow**: Unusual activity detection and smart money following
+- **Technical Analysis**: Mean reversion, volatility patterns, sector correlation
+- **Event Prediction**: Geopolitical events, defense spending, earnings sentiment
+- **Signal Fusion**: Only trade when multiple AI systems agree (high confidence)
+
+#### **Trading-Specific Focus**
+- **Libraries**: Prefer `ib_insync` for Interactive Brokers API, `yfinance` for data, `pandas` for analysis
+- **Strategy Development**: High-probability trades (80-90% win rate target) suitable for small capital
+- **Capital Constraints**: Starting with only 9 RTX shares (~$1,000). Must optimize for limited capital
+- **Commission Awareness**: Always consider IB fees (~$0.65 per options contract) - critical with small positions
+- **Risk Management**: Conservative position sizing due to limited capital, strict loss limits
+- **Paper Trading First**: Code should easily switch between paper and live trading
+
+#### **Development Principles**
+- **Modular Signal Architecture**: Each AI signal as separate, pluggable module
+- **Configuration-Driven**: Make everything tweakable via config files/variables
+- **Signal Weight System**: Easy to adjust importance of different AI signals
+- **Backtesting Ready**: All signals must be backtestable with historical data
+- **Minimal Dependencies**: Only essential packages
+- **Ubuntu Deployment Ready**: Consider Linux paths, systemd services, cron jobs
+- **Error Handling**: Basic try/catch for API calls, but don't over-engineer
+- **Comprehensive Logging**: Log all signal outputs, decisions, and trade results
+
+#### **Code Style**
+- Clean, readable Python
+- Use type hints for trading functions
+- Comment strategy logic clearly
+- Separate strategy logic from execution logic
+
+#### **What to Skip (For Now)**
+- Extensive unit testing
+- Complex documentation
+- Advanced security measures
+- Code reviews
+- GDPR compliance
+
+#### **Windows Development Notes**
+- Use PowerShell-compatible commands when suggesting terminal operations
+- Handle Windows path separators in file operations
+- Consider Windows service deployment for later
+
+#### **Interactive Brokers Specifics**
+- Handle market hours and weekend limitations
+- Account for paper trading vs live account differences
+- Implement proper connection retry logic
+- Consider TWS vs Gateway connection options
