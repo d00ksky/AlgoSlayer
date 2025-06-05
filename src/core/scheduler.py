@@ -296,7 +296,10 @@ class RTXTradingScheduler:
     
     def _is_market_hours(self) -> bool:
         """Check if market is currently open"""
-        current_time = datetime.now().time()
+        # Use Eastern Time for US markets
+        import pytz
+        eastern = pytz.timezone('US/Eastern')
+        current_time = datetime.now(eastern).time()
         return config.MARKET_OPEN <= current_time <= config.MARKET_CLOSE
     
     def _create_neutral_signal(self, signal_name: str) -> Dict:

@@ -13,6 +13,7 @@ from loguru import logger
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.core.scheduler import scheduler
+from src.core.config_validator import ConfigValidator
 from config.trading_config import config, TradingModeConfig
 
 class RTXTradingServer:
@@ -130,33 +131,18 @@ class RTXTradingServer:
     def _check_environment(self):
         """Check environment configuration"""
         
-        logger.info("🔍 Checking environment configuration...")
+        logger.info("🔍 Validating configuration...")
         
-        # Check required environment variables
-        required_vars = ["OPENAI_API_KEY"]
-        missing_vars = []
+        # Use the config validator
+        is_valid, errors = ConfigValidator.validate()
         
-        for var in required_vars:
-            if not os.getenv(var):
-                missing_vars.append(var)
+        if not is_valid:
+            logger.error("❌ Configuration validation failed!")
+            logger.error("Please fix the errors above and restart")
+            sys.exit(1)
         
-        if missing_vars:
-            logger.warning(f"⚠️ Missing environment variables: {', '.join(missing_vars)}")
-            logger.info("💡 Some features may not work without proper configuration")
-        
-        # Check optional but recommended variables
-        recommended_vars = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
-        missing_recommended = []
-        
-        for var in recommended_vars:
-            if not os.getenv(var):
-                missing_recommended.append(var)
-        
-        if missing_recommended:
-            logger.info(f"💡 Recommended variables not set: {', '.join(missing_recommended)}")
-            logger.info("📱 Telegram notifications will be disabled")
-        
-        logger.success("✅ Environment check complete")
+        # Print configuration summary
+        ConfigValidator.print_config_summary()
     
     async def stop(self):
         """Stop the RTX trading server"""

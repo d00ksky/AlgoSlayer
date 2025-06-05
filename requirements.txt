@@ -20,8 +20,7 @@ aiohttp>=3.9.0
 requests>=2.31.0
 
 # === TECHNICAL ANALYSIS ===
-ta-lib>=0.4.25
-talib>=0.4.25
+TA-Lib>=0.4.25
 
 # === DATA PROCESSING ===
 scipy>=1.11.0
@@ -54,8 +53,9 @@ cryptography>=41.0.0
 bcrypt>=4.1.0
 
 # === DATABASE (Optional) ===
-sqlite3  # Built-in
+# sqlite3  # Built-in - don't include in requirements
 redis>=5.0.0
+psycopg2-binary>=2.9.0
 
 # === DEVELOPMENT TOOLS ===
 black>=23.0.0
@@ -64,4 +64,5 @@ mypy>=1.7.0
 
 # === SYSTEM UTILITIES ===
 psutil>=5.9.0
-schedule>=1.2.0 
+schedule>=1.2.0
+pytz>=2023.3 

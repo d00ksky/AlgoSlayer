@@ -76,16 +76,28 @@ class TradingModeConfig:
         from dotenv import load_dotenv
         load_dotenv()
         
+        # Helper function to parse boolean env vars
+        def parse_bool(value: str, default: bool) -> bool:
+            if value is None:
+                return default
+            return value.lower() in ['true', '1', 'yes', 'on']
+        
         # Override from environment
-        cls.TRADING_ENABLED = os.getenv("TRADING_ENABLED", "false").lower() == "true"
-        cls.PAPER_TRADING = os.getenv("PAPER_TRADING", "true").lower() == "true" 
-        cls.PREDICTION_ONLY = os.getenv("PREDICTION_ONLY", "false").lower() == "true"
-        cls.IBKR_REQUIRED = os.getenv("IBKR_REQUIRED", "false").lower() == "true"
-        cls.AUTO_CONNECT_IBKR = os.getenv("AUTO_CONNECT_IBKR", "true").lower() == "true"
+        cls.TRADING_ENABLED = parse_bool(os.getenv("TRADING_ENABLED"), False)
+        cls.PAPER_TRADING = parse_bool(os.getenv("PAPER_TRADING"), True)
+        cls.PREDICTION_ONLY = parse_bool(os.getenv("PREDICTION_ONLY"), False)
+        cls.IBKR_REQUIRED = parse_bool(os.getenv("IBKR_REQUIRED"), False)
+        cls.AUTO_CONNECT_IBKR = parse_bool(os.getenv("AUTO_CONNECT_IBKR"), True)
         
         # Validation
         if cls.PREDICTION_ONLY:
             cls.TRADING_ENABLED = False  # Prediction-only mode disables trading
+            
+        # Log loaded configuration
+        from loguru import logger
+        logger.info(f"Trading Mode: {cls.get_mode_description()}")
+        logger.info(f"IBKR Required: {cls.IBKR_REQUIRED}")
+        logger.info(f"Auto Connect IBKR: {cls.AUTO_CONNECT_IBKR}")
             
         return cls
     
