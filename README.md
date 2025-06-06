@@ -27,7 +27,8 @@ This is a **production-ready autonomous trading system** designed specifically f
 ```bash
 git clone https://github.com/yourusername/RTX-Trading-System.git
 cd RTX-Trading-System
-pip install -r requirements.txt
+# Install all dependencies and set up a virtual environment
+./codex_launch.sh
 ```
 
 ### 2. Configure Environment
