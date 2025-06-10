@@ -14,7 +14,9 @@
       "Bash(shellcheck:*)",
       "Bash(bash:*)",
       "Bash(/home/dooksky/repo/AlgoSlayer/test_ibkr_download.sh:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(systemctl status:*)",
+      "Bash(hostname)"
     ],
     "deny": []
   }

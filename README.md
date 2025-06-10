@@ -268,6 +268,167 @@ This script will:
 - **Live Logs**: `journalctl -u rtx-trading -f`
 - **IBKR Logs**: `journalctl -u rtx-ibkr -f`
 
+### Complete IBKR Gateway Setup Guide
+
+#### Step 1: Deploy to DigitalOcean
+```bash
+# Create 2GB droplet ($24/month) - 1GB may have memory issues
+# Choose Ubuntu 22.04, NYC region
+
+# SSH into droplet and clone repository
+ssh root@YOUR_DROPLET_IP
+git clone https://github.com/your-username/AlgoSlayer.git
+cd AlgoSlayer
+sudo ./setup_server_with_ibkr.sh
+```
+
+#### Step 2: Handle Low Memory Issues (if on 1GB droplet)
+```bash
+# If you see "out of memory" during IBKR installation:
+sudo ./fix_ibkr_memory.sh
+# Then retry setup or use the low-memory installer:
+/tmp/install_ibkr_lowmem.sh
+```
+
+#### Step 3: Initial IBKR Login via VNC
+```bash
+# From your local computer, create SSH tunnel:
+ssh -L 5900:localhost:5900 root@YOUR_DROPLET_IP
+
+# Install VNC viewer on your local machine:
+# Ubuntu/Debian: sudo apt install tigervnc-viewer
+# macOS: brew install tigervnc-viewer
+# Windows: Download from https://github.com/TigerVNC/tigervnc/releases
+
+# Connect VNC viewer to:
+vncviewer localhost:5900
+# Or use GUI and enter: localhost:5900
+
+# In IBKR Gateway window:
+# 1. Enter username and password
+# 2. CHECK "Keep me logged in" ✓
+# 3. Select Paper/Live trading mode
+# 4. Use IB API (not FIX CTCI)
+# 5. Complete 2FA if prompted
+# 6. Wait for "Connected" status
+# 7. Close VNC viewer
+```
+
+#### Step 4: Verify Everything is Working
+```bash
+# Check services are running
+ssh root@YOUR_DROPLET_IP "systemctl status rtx-trading rtx-ibkr"
+
+# View recent logs
+ssh root@YOUR_DROPLET_IP "journalctl -u rtx-trading -n 50"
+
+# Monitor live activity
+ssh root@YOUR_DROPLET_IP "journalctl -u rtx-trading -f"
+
+# Check system health
+ssh root@YOUR_DROPLET_IP "/opt/rtx-trading/monitor_system.sh"
+```
+
+#### Step 5: Telegram Notifications
+You should now receive:
+- 🚀 System startup confirmation
+- 🏦 IBKR connection status
+- 📊 RTX predictions every 15 minutes
+- 💰 Trade alerts (when confidence > 80%)
+- 📈 Daily reports at 5 PM ET
+
+#### Troubleshooting IBKR Connection
+```bash
+# If IBKR won't connect:
+# 1. Check VNC to see if Gateway is running
+ssh -L 5900:localhost:5900 root@YOUR_DROPLET_IP
+vncviewer localhost:5900
+
+# 2. Restart services
+ssh root@YOUR_DROPLET_IP
+systemctl restart rtx-ibkr
+systemctl restart rtx-trading
+
+# 3. Check firewall allows IBKR ports
+ufw status | grep -E "7497|7496"
+
+# 4. Verify paper vs live port settings in .env
+cat /opt/rtx-trading/.env | grep IBKR_PORT
+```
+
+#### Common Setup Issues & Solutions
+
+**❌ Service fails with "can't open file" error:**
+```bash
+# Problem: Systemd security restrictions prevent access to /root/
+# Solution: Update service file security settings
+
+nano /etc/systemd/system/rtx-trading.service
+
+# Change these lines:
+# FROM:
+ProtectHome=true
+ReadWritePaths=/opt/rtx-trading
+
+# TO:
+ProtectHome=false
+ReadWritePaths=/opt/rtx-trading /root/AlgoSlayer
+
+# Then reload:
+systemctl daemon-reload
+systemctl restart rtx-trading
+```
+
+**❌ Memory issues during IBKR installation:**
+```bash
+# If you see "out of memory" errors:
+sudo ./fix_ibkr_memory.sh
+
+# This will:
+# - Create 4GB swap file
+# - Increase file descriptor limits  
+# - Optimize memory settings
+# - Provide low-memory installer
+```
+
+**❌ Symlink issues in /opt/rtx-trading:**
+```bash
+# If files aren't linking properly:
+cd /opt/rtx-trading
+
+# Remove broken symlinks
+rm -f logs data
+
+# Link only necessary files (avoid directory conflicts)
+ln -sf /root/AlgoSlayer/run_server.py .
+ln -sf /root/AlgoSlayer/src .
+ln -sf /root/AlgoSlayer/config .
+ln -sf /root/AlgoSlayer/requirements.txt .
+
+# Copy .env instead of linking (security)
+cp /root/AlgoSlayer/.env /opt/rtx-trading/.env
+```
+
+**✅ Verify Everything is Working:**
+```bash
+# Check services are running
+systemctl status rtx-trading rtx-ibkr
+
+# Should show: Active: active (running)
+# Should show high-confidence BUY/SELL signals (>80%)
+
+# Monitor live predictions
+journalctl -u rtx-trading -f | grep -E "BUY|SELL|confidence"
+
+# Check system health
+/opt/rtx-trading/monitor_system.sh
+```
+
+#### IBKR Maintenance
+- **Monthly**: Re-login via VNC when password expires
+- **Daily**: IBKR auto-restarts at 11:45 PM ET
+- **Monitoring**: Check Telegram for disconnection alerts
+
 ## 🧪 Testing
 
 ### Comprehensive Test Suite
