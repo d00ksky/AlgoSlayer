@@ -52,6 +52,27 @@ if [[ $TOTAL_MEM_GB -lt 4 ]]; then
     fi
 fi
 
+# Fix file descriptor limits for Java applications
+echo "🔧 Configuring system limits for IBKR Gateway..."
+cat >> /etc/security/limits.conf << EOF
+* soft nofile 65536
+* hard nofile 65536
+* soft nproc 32768
+* hard nproc 32768
+EOF
+
+# Apply limits to current session
+ulimit -n 65536
+ulimit -u 32768
+
+# Configure sysctl for better Java performance
+cat >> /etc/sysctl.conf << EOF
+fs.file-max = 100000
+vm.swappiness = 10
+vm.max_map_count = 262144
+EOF
+sysctl -p
+
 # Configure firewall
 echo "🔥 Configuring firewall..."
 ufw --force enable
@@ -182,20 +203,73 @@ if [[ ! -f "$IBKR_INSTALLER" ]]; then
     chmod +x "$IBKR_INSTALLER"
 fi
 
-# Install IBKR Gateway
+# Prepare system for IBKR Gateway installation
+echo "🔧 Preparing system for IBKR Gateway installation..."
+
+# Increase file descriptor limits before installation
+echo "📊 Setting file descriptor limits..."
+ulimit -n 65536
+ulimit -u 32768
+
+# Ensure swap is active if needed
+if [[ $TOTAL_MEM_GB -lt 2 ]]; then
+    echo "⚠️ Low memory detected. Ensuring swap is active..."
+    swapon -a
+    free -h
+fi
+
+# Install IBKR Gateway with memory-conscious settings
 echo "📦 Installing IBKR Gateway..."
-if ./"$IBKR_INSTALLER" -q -dir $APP_DIR/ibkr/IBJts; then
+
+# Set lower memory limits for installation on small VMs
+export _JAVA_OPTIONS="-Xmx512m -Xms256m"
+export INSTALL4J_JAVA_HOME_OVERRIDE=/usr/lib/jvm/java-11-openjdk-amd64
+
+# Try installation with reduced memory
+if ./"$IBKR_INSTALLER" -q -dir $APP_DIR/ibkr/IBJts -J-Xmx512m; then
     echo "✅ IBKR Gateway installed successfully"
 else
-    echo "❌ IBKR Gateway installation failed"
-    echo "💡 You can manually download from: https://www.interactivebrokers.com/en/trading/ib-gateway-download.php"
-    echo "💡 Or try running this again later"
-    read -p "Continue anyway? (y/n): " -n 1 CONTINUE_ANYWAY
-    echo ""
-    if [[ ! $CONTINUE_ANYWAY =~ ^[Yy]$ ]]; then
-        echo "❌ Setup aborted due to IBKR Gateway installation failure"
-        exit 1
+    echo "⚠️ Standard installation failed, trying manual extraction..."
+    
+    # Create installation directory
+    mkdir -p $APP_DIR/ibkr/IBJts
+    
+    # Try to extract manually as the installer is a self-extracting archive
+    echo "📦 Attempting manual extraction..."
+    
+    # First, make the installer think it has more memory by using a wrapper
+    cat > /tmp/java_wrapper.sh << 'WRAPPER_EOF'
+#!/bin/bash
+# Wrapper to force lower memory usage
+exec /usr/bin/java -Xmx512m -Xms256m "$@"
+WRAPPER_EOF
+    chmod +x /tmp/java_wrapper.sh
+    
+    # Try installation with wrapper
+    PATH="/tmp:$PATH" JAVA=/tmp/java_wrapper.sh ./"$IBKR_INSTALLER" -q -dir $APP_DIR/ibkr/IBJts 2>/dev/null
+    
+    if [[ -d "$APP_DIR/ibkr/IBJts/ibgateway" ]]; then
+        echo "✅ IBKR Gateway installed successfully with memory wrapper"
+    else
+        echo "❌ IBKR Gateway installation failed due to memory constraints"
+        echo ""
+        echo "💡 MANUAL INSTALLATION REQUIRED:"
+        echo "   1. Download IBKR Gateway on a computer with more memory"
+        echo "   2. Install it there and copy the folder to this server"
+        echo "   3. Or upgrade to a droplet with at least 2GB RAM"
+        echo ""
+        echo "📋 Alternative: Use IBKR Web API instead of Gateway"
+        echo ""
+        read -p "Continue anyway? (y/n): " -n 1 CONTINUE_ANYWAY
+        echo ""
+        if [[ ! $CONTINUE_ANYWAY =~ ^[Yy]$ ]]; then
+            echo "❌ Setup aborted due to IBKR Gateway installation failure"
+            exit 1
+        fi
     fi
+    
+    # Clean up wrapper
+    rm -f /tmp/java_wrapper.sh
 fi
 
 # Create IBKR configuration
