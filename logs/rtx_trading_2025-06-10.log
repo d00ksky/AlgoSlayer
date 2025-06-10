@@ -1,0 +1,211 @@
+2025-06-10 16:36:29 | INFO     | config.trading_config:load_from_env:98 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:36:29 | INFO     | config.trading_config:load_from_env:99 - IBKR Required: False
+2025-06-10 16:36:29 | INFO     | config.trading_config:load_from_env:100 - Auto Connect IBKR: True
+2025-06-10 16:36:29 | INFO     | __main__:start:96 - 🚀 RTX AUTONOMOUS TRADING SYSTEM
+2025-06-10 16:36:29 | INFO     | __main__:start:97 - ============================================================
+2025-06-10 16:36:29 | INFO     | __main__:start:98 - 📊 Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:36:29 | INFO     | __main__:start:99 - 🎯 Target: RTX Corporation
+2025-06-10 16:36:29 | INFO     | __main__:start:100 - 💰 Capital: $1,000
+2025-06-10 16:36:29 | INFO     | __main__:start:101 - 🔍 Analysis: Every 15 minutes
+2025-06-10 16:36:29 | INFO     | __main__:start:102 - 🤖 AI Signals: 8 signals active
+2025-06-10 16:36:29 | INFO     | __main__:start:103 - ⚡ Learning: 180x speed
+2025-06-10 16:36:29 | INFO     | __main__:start:104 - ============================================================
+2025-06-10 16:36:29 | INFO     | __main__:start:108 - 🛡️ TRADING DISABLED - Running in prediction mode only
+2025-06-10 16:36:29 | INFO     | __main__:_check_environment:134 - 🔍 Validating configuration...
+2025-06-10 16:36:29 | ERROR    | src.core.config_validator:validate:102 - Configuration validation failed:
+2025-06-10 16:36:29 | ERROR    | src.core.config_validator:validate:104 -   ❌ Missing required: OPENAI_API_KEY - OpenAI API key for news sentiment analysis
+2025-06-10 16:36:29 | WARNING  | src.core.config_validator:validate:107 - Configuration warnings:
+2025-06-10 16:36:29 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: TELEGRAM_BOT_TOKEN - Telegram bot token for notifications
+2025-06-10 16:36:29 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: TELEGRAM_CHAT_ID - Telegram chat ID for notifications
+2025-06-10 16:36:29 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: STARTING_CAPITAL - Starting capital amount (default: 1000)
+2025-06-10 16:36:29 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: MAX_POSITION_SIZE - Maximum position size (default: 200)
+2025-06-10 16:36:29 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: MAX_DAILY_LOSS - Maximum daily loss (default: 50)
+2025-06-10 16:36:29 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: CONFIDENCE_THRESHOLD - Minimum confidence to trade (default: 0.35)
+2025-06-10 16:36:29 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: PREDICTION_INTERVAL_MINUTES - How often to run predictions (default: 15)
+2025-06-10 16:36:29 | ERROR    | __main__:_check_environment:140 - ❌ Configuration validation failed!
+2025-06-10 16:36:29 | ERROR    | __main__:_check_environment:141 - Please fix the errors above and restart
+2025-06-10 16:45:55 | INFO     | config.trading_config:load_from_env:98 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:45:55 | INFO     | config.trading_config:load_from_env:99 - IBKR Required: False
+2025-06-10 16:45:55 | INFO     | config.trading_config:load_from_env:100 - Auto Connect IBKR: True
+2025-06-10 16:45:55 | INFO     | __main__:start:96 - 🚀 RTX AUTONOMOUS TRADING SYSTEM
+2025-06-10 16:45:55 | INFO     | __main__:start:97 - ============================================================
+2025-06-10 16:45:55 | INFO     | __main__:start:98 - 📊 Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:45:55 | INFO     | __main__:start:99 - 🎯 Target: RTX Corporation
+2025-06-10 16:45:55 | INFO     | __main__:start:100 - 💰 Capital: $1,000
+2025-06-10 16:45:55 | INFO     | __main__:start:101 - 🔍 Analysis: Every 15 minutes
+2025-06-10 16:45:55 | INFO     | __main__:start:102 - 🤖 AI Signals: 8 signals active
+2025-06-10 16:45:55 | INFO     | __main__:start:103 - ⚡ Learning: 180x speed
+2025-06-10 16:45:55 | INFO     | __main__:start:104 - ============================================================
+2025-06-10 16:45:55 | INFO     | __main__:start:108 - 🛡️ TRADING DISABLED - Running in prediction mode only
+2025-06-10 16:45:55 | INFO     | __main__:_check_environment:134 - 🔍 Validating configuration...
+2025-06-10 16:45:55 | WARNING  | src.core.config_validator:validate:107 - Configuration warnings:
+2025-06-10 16:45:55 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: MAX_POSITION_SIZE - Maximum position size (default: 200)
+2025-06-10 16:45:55 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: CONFIDENCE_THRESHOLD - Minimum confidence to trade (default: 0.35)
+2025-06-10 16:45:55 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: PREDICTION_INTERVAL_MINUTES - How often to run predictions (default: 15)
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:121 - ==================================================
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:122 - CONFIGURATION SUMMARY
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:123 - ==================================================
+2025-06-10 16:45:55 | INFO     | config.trading_config:load_from_env:98 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:45:55 | INFO     | config.trading_config:load_from_env:99 - IBKR Required: False
+2025-06-10 16:45:55 | INFO     | config.trading_config:load_from_env:100 - Auto Connect IBKR: True
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:127 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:131 - OpenAI API: ✅ Configured
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:134 - Telegram Bot: ✅ Configured
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:137 - Starting Capital: $1000
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:138 - Max Position Size: $200
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:139 - Max Daily Loss: $50
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:140 - Confidence Threshold: 0.35
+2025-06-10 16:45:55 | INFO     | src.core.config_validator:print_config_summary:142 - ==================================================
+2025-06-10 16:45:55 | INFO     | __main__:start:120 - 🔄 Starting trading scheduler...
+2025-06-10 16:45:55 | INFO     | src.core.scheduler:start:61 - 🚀 Starting RTX Trading System...
+2025-06-10 16:45:55 | WARNING  | src.core.telegram_bot:send_message:31 - 📱 Telegram not configured - message not sent
+2025-06-10 16:45:55 | INFO     | src.core.scheduler:_initialize_connections:75 - 🔌 Initializing system connections...
+2025-06-10 16:45:55 | INFO     | src.core.scheduler:_initialize_connections:86 - 🧠 Testing accelerated learning system...
+2025-06-10 16:45:55 | INFO     | src.core.accelerated_learning:learn_from_historical_data:29 - 🚀 Starting accelerated learning for RTX
+2025-06-10 16:45:55 | INFO     | src.core.accelerated_learning:learn_from_historical_data:30 - 📊 Learning from 1 months of historical data
+2025-06-10 16:45:55 | INFO     | src.core.accelerated_learning:learn_from_historical_data:38 - 📅 Data range: 2025-05-11 to 2025-06-10
+2025-06-10 16:45:56 | INFO     | src.core.accelerated_learning:learn_from_historical_data:48 - 📈 Loaded 21 days of RTX data
+2025-06-10 16:45:56 | SUCCESS  | src.core.accelerated_learning:learn_from_historical_data:106 - ✅ Accelerated learning completed!
+2025-06-10 16:45:56 | INFO     | src.core.accelerated_learning:learn_from_historical_data:107 - 📊 Results: 1 predictions, 100.0% accuracy
+2025-06-10 16:45:56 | INFO     | src.core.accelerated_learning:learn_from_historical_data:108 - ⚡ Speed: 5,318,592x real-time
+2025-06-10 16:45:56 | SUCCESS  | src.core.scheduler:_initialize_connections:89 - ✅ System initialization complete
+2025-06-10 16:45:56 | INFO     | src.core.scheduler:_main_trading_loop:94 - 🔄 Starting main trading loop (every 15 minutes)
+2025-06-10 16:45:56 | INFO     | src.core.scheduler:_run_prediction_cycle:122 - 🎯 Running prediction cycle...
+2025-06-10 16:45:56 | INFO     | src.core.scheduler:_run_ai_signals:166 - 🤖 Running AI signal analysis...
+2025-06-10 16:45:56 | INFO     | src.signals.news_sentiment_signal:_get_rtx_news:70 - 📰 Found 0 recent RTX articles
+2025-06-10 16:45:57 | INFO     | src.signals.technical_analysis_signal:_get_price_data:51 - 📊 Loaded 60 days of RTX price data
+2025-06-10 16:45:57 | INFO     | src.signals.options_flow_signal:_get_options_data:68 - 📊 Options data: 32 calls, 42 puts for 2025-06-13
+2025-06-10 16:45:57 | INFO     | src.signals.volatility_analysis_signal:_get_price_data:54 - 📊 Loaded 90 days of RTX data for volatility analysis
+2025-06-10 16:45:57 | INFO     | src.signals.momentum_signal:_get_price_data:54 - 📊 Loaded 60 days for momentum analysis
+2025-06-10 16:45:59 | INFO     | src.signals.sector_correlation_signal:_get_correlation_data:74 - 📊 Loaded correlation data for 9 tickers
+2025-06-10 16:45:59 | INFO     | src.signals.mean_reversion_signal:_get_price_data:54 - 📊 Loaded 60 days for mean reversion analysis
+2025-06-10 16:45:59 | INFO     | src.signals.market_regime_signal:_get_market_data:71 - 📊 Loaded market data for 2 indices
+2025-06-10 16:45:59 | INFO     | src.core.scheduler:_run_ai_signals:184 - 📊 Analyzed 8 AI signals
+2025-06-10 16:45:59 | WARNING  | src.core.telegram_bot:send_message:31 - 📱 Telegram not configured - message not sent
+2025-06-10 16:45:59 | INFO     | src.core.scheduler:_execute_trade_decision:249 - 📊 Trade signal: BUY (81.2%) - Trading disabled
+2025-06-10 16:45:59 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.2%)
+2025-06-10 16:46:09 | INFO     | __main__:signal_handler:73 - 📡 Received signal 15, initiating graceful shutdown...
+2025-06-10 16:55:44 | INFO     | config.trading_config:load_from_env:98 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:55:44 | INFO     | config.trading_config:load_from_env:99 - IBKR Required: False
+2025-06-10 16:55:44 | INFO     | config.trading_config:load_from_env:100 - Auto Connect IBKR: True
+2025-06-10 16:55:44 | INFO     | __main__:start:96 - 🚀 RTX AUTONOMOUS TRADING SYSTEM
+2025-06-10 16:55:44 | INFO     | __main__:start:97 - ============================================================
+2025-06-10 16:55:44 | INFO     | __main__:start:98 - 📊 Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:55:44 | INFO     | __main__:start:99 - 🎯 Target: RTX Corporation
+2025-06-10 16:55:44 | INFO     | __main__:start:100 - 💰 Capital: $1,000
+2025-06-10 16:55:44 | INFO     | __main__:start:101 - 🔍 Analysis: Every 15 minutes
+2025-06-10 16:55:44 | INFO     | __main__:start:102 - 🤖 AI Signals: 8 signals active
+2025-06-10 16:55:44 | INFO     | __main__:start:103 - ⚡ Learning: 180x speed
+2025-06-10 16:55:44 | INFO     | __main__:start:104 - ============================================================
+2025-06-10 16:55:44 | INFO     | __main__:start:108 - 🛡️ TRADING DISABLED - Running in prediction mode only
+2025-06-10 16:55:44 | INFO     | __main__:_check_environment:134 - 🔍 Validating configuration...
+2025-06-10 16:55:44 | WARNING  | src.core.config_validator:validate:107 - Configuration warnings:
+2025-06-10 16:55:44 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: MAX_POSITION_SIZE - Maximum position size (default: 200)
+2025-06-10 16:55:44 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: CONFIDENCE_THRESHOLD - Minimum confidence to trade (default: 0.35)
+2025-06-10 16:55:44 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: PREDICTION_INTERVAL_MINUTES - How often to run predictions (default: 15)
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:121 - ==================================================
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:122 - CONFIGURATION SUMMARY
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:123 - ==================================================
+2025-06-10 16:55:44 | INFO     | config.trading_config:load_from_env:98 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:55:44 | INFO     | config.trading_config:load_from_env:99 - IBKR Required: False
+2025-06-10 16:55:44 | INFO     | config.trading_config:load_from_env:100 - Auto Connect IBKR: True
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:127 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:131 - OpenAI API: ✅ Configured
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:134 - Telegram Bot: ✅ Configured
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:137 - Starting Capital: $1000
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:138 - Max Position Size: $200
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:139 - Max Daily Loss: $50
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:140 - Confidence Threshold: 0.35
+2025-06-10 16:55:44 | INFO     | src.core.config_validator:print_config_summary:142 - ==================================================
+2025-06-10 16:55:44 | INFO     | __main__:start:120 - 🔄 Starting trading scheduler...
+2025-06-10 16:55:44 | INFO     | src.core.scheduler:start:61 - 🚀 Starting RTX Trading System...
+2025-06-10 16:55:44 | WARNING  | src.core.telegram_bot:send_message:31 - 📱 Telegram not configured - message not sent
+2025-06-10 16:55:44 | INFO     | src.core.scheduler:_initialize_connections:75 - 🔌 Initializing system connections...
+2025-06-10 16:55:44 | INFO     | src.core.scheduler:_initialize_connections:86 - 🧠 Testing accelerated learning system...
+2025-06-10 16:55:44 | INFO     | src.core.accelerated_learning:learn_from_historical_data:29 - 🚀 Starting accelerated learning for RTX
+2025-06-10 16:55:44 | INFO     | src.core.accelerated_learning:learn_from_historical_data:30 - 📊 Learning from 1 months of historical data
+2025-06-10 16:55:44 | INFO     | src.core.accelerated_learning:learn_from_historical_data:38 - 📅 Data range: 2025-05-11 to 2025-06-10
+2025-06-10 16:55:45 | INFO     | src.core.accelerated_learning:learn_from_historical_data:48 - 📈 Loaded 21 days of RTX data
+2025-06-10 16:55:45 | SUCCESS  | src.core.accelerated_learning:learn_from_historical_data:106 - ✅ Accelerated learning completed!
+2025-06-10 16:55:45 | INFO     | src.core.accelerated_learning:learn_from_historical_data:107 - 📊 Results: 1 predictions, 100.0% accuracy
+2025-06-10 16:55:45 | INFO     | src.core.accelerated_learning:learn_from_historical_data:108 - ⚡ Speed: 4,799,289x real-time
+2025-06-10 16:55:45 | SUCCESS  | src.core.scheduler:_initialize_connections:89 - ✅ System initialization complete
+2025-06-10 16:55:45 | INFO     | src.core.scheduler:_main_trading_loop:94 - 🔄 Starting main trading loop (every 15 minutes)
+2025-06-10 16:55:45 | INFO     | src.core.scheduler:_run_prediction_cycle:122 - 🎯 Running prediction cycle...
+2025-06-10 16:55:45 | INFO     | src.core.scheduler:_run_ai_signals:166 - 🤖 Running AI signal analysis...
+2025-06-10 16:55:45 | INFO     | src.signals.news_sentiment_signal:_get_rtx_news:70 - 📰 Found 0 recent RTX articles
+2025-06-10 16:55:46 | INFO     | src.signals.technical_analysis_signal:_get_price_data:51 - 📊 Loaded 60 days of RTX price data
+2025-06-10 16:55:46 | INFO     | src.signals.options_flow_signal:_get_options_data:68 - 📊 Options data: 32 calls, 42 puts for 2025-06-13
+2025-06-10 16:55:46 | INFO     | src.signals.volatility_analysis_signal:_get_price_data:54 - 📊 Loaded 90 days of RTX data for volatility analysis
+2025-06-10 16:55:46 | INFO     | src.signals.momentum_signal:_get_price_data:54 - 📊 Loaded 60 days for momentum analysis
+2025-06-10 16:55:48 | INFO     | src.signals.sector_correlation_signal:_get_correlation_data:74 - 📊 Loaded correlation data for 9 tickers
+2025-06-10 16:55:48 | INFO     | src.signals.mean_reversion_signal:_get_price_data:54 - 📊 Loaded 60 days for mean reversion analysis
+2025-06-10 16:55:48 | INFO     | src.signals.market_regime_signal:_get_market_data:71 - 📊 Loaded market data for 2 indices
+2025-06-10 16:55:48 | INFO     | src.core.scheduler:_run_ai_signals:184 - 📊 Analyzed 8 AI signals
+2025-06-10 16:55:48 | WARNING  | src.core.telegram_bot:send_message:31 - 📱 Telegram not configured - message not sent
+2025-06-10 16:55:48 | INFO     | src.core.scheduler:_execute_trade_decision:249 - 📊 Trade signal: BUY (80.4%) - Trading disabled
+2025-06-10 16:55:48 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (80.4%)
+2025-06-10 16:56:02 | INFO     | __main__:signal_handler:73 - 📡 Received signal 15, initiating graceful shutdown...
+2025-06-10 16:59:52 | INFO     | config.trading_config:load_from_env:98 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:59:52 | INFO     | config.trading_config:load_from_env:99 - IBKR Required: False
+2025-06-10 16:59:52 | INFO     | config.trading_config:load_from_env:100 - Auto Connect IBKR: True
+2025-06-10 16:59:52 | INFO     | __main__:start:96 - 🚀 RTX AUTONOMOUS TRADING SYSTEM
+2025-06-10 16:59:52 | INFO     | __main__:start:97 - ============================================================
+2025-06-10 16:59:52 | INFO     | __main__:start:98 - 📊 Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:59:52 | INFO     | __main__:start:99 - 🎯 Target: RTX Corporation
+2025-06-10 16:59:52 | INFO     | __main__:start:100 - 💰 Capital: $1,000
+2025-06-10 16:59:52 | INFO     | __main__:start:101 - 🔍 Analysis: Every 15 minutes
+2025-06-10 16:59:52 | INFO     | __main__:start:102 - 🤖 AI Signals: 8 signals active
+2025-06-10 16:59:52 | INFO     | __main__:start:103 - ⚡ Learning: 180x speed
+2025-06-10 16:59:52 | INFO     | __main__:start:104 - ============================================================
+2025-06-10 16:59:52 | INFO     | __main__:start:108 - 🛡️ TRADING DISABLED - Running in prediction mode only
+2025-06-10 16:59:52 | INFO     | __main__:_check_environment:134 - 🔍 Validating configuration...
+2025-06-10 16:59:52 | WARNING  | src.core.config_validator:validate:107 - Configuration warnings:
+2025-06-10 16:59:52 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: MAX_POSITION_SIZE - Maximum position size (default: 200)
+2025-06-10 16:59:52 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: CONFIDENCE_THRESHOLD - Minimum confidence to trade (default: 0.35)
+2025-06-10 16:59:52 | WARNING  | src.core.config_validator:validate:109 -   ⚠️  Missing recommended: PREDICTION_INTERVAL_MINUTES - How often to run predictions (default: 15)
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:121 - ==================================================
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:122 - CONFIGURATION SUMMARY
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:123 - ==================================================
+2025-06-10 16:59:52 | INFO     | config.trading_config:load_from_env:98 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:59:52 | INFO     | config.trading_config:load_from_env:99 - IBKR Required: False
+2025-06-10 16:59:52 | INFO     | config.trading_config:load_from_env:100 - Auto Connect IBKR: True
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:127 - Trading Mode: TRADING DISABLED - Predictions only
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:131 - OpenAI API: ✅ Configured
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:134 - Telegram Bot: ✅ Configured
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:137 - Starting Capital: $1000
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:138 - Max Position Size: $200
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:139 - Max Daily Loss: $50
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:140 - Confidence Threshold: 0.35
+2025-06-10 16:59:52 | INFO     | src.core.config_validator:print_config_summary:142 - ==================================================
+2025-06-10 16:59:52 | INFO     | __main__:start:120 - 🔄 Starting trading scheduler...
+2025-06-10 16:59:52 | INFO     | src.core.scheduler:start:61 - 🚀 Starting RTX Trading System...
+2025-06-10 16:59:52 | DEBUG    | src.core.telegram_bot:send_message:46 - 📱 Telegram message sent successfully
+2025-06-10 16:59:52 | INFO     | src.core.scheduler:_initialize_connections:75 - 🔌 Initializing system connections...
+2025-06-10 16:59:52 | DEBUG    | src.core.telegram_bot:send_message:46 - 📱 Telegram message sent successfully
+2025-06-10 16:59:52 | SUCCESS  | src.core.telegram_bot:test_connection:268 - 📱 Telegram bot test successful
+2025-06-10 16:59:52 | INFO     | src.core.scheduler:_initialize_connections:86 - 🧠 Testing accelerated learning system...
+2025-06-10 16:59:52 | INFO     | src.core.accelerated_learning:learn_from_historical_data:29 - 🚀 Starting accelerated learning for RTX
+2025-06-10 16:59:52 | INFO     | src.core.accelerated_learning:learn_from_historical_data:30 - 📊 Learning from 1 months of historical data
+2025-06-10 16:59:52 | INFO     | src.core.accelerated_learning:learn_from_historical_data:38 - 📅 Data range: 2025-05-11 to 2025-06-10
+2025-06-10 16:59:53 | INFO     | src.core.accelerated_learning:learn_from_historical_data:48 - 📈 Loaded 21 days of RTX data
+2025-06-10 16:59:53 | SUCCESS  | src.core.accelerated_learning:learn_from_historical_data:106 - ✅ Accelerated learning completed!
+2025-06-10 16:59:53 | INFO     | src.core.accelerated_learning:learn_from_historical_data:107 - 📊 Results: 1 predictions, 100.0% accuracy
+2025-06-10 16:59:53 | INFO     | src.core.accelerated_learning:learn_from_historical_data:108 - ⚡ Speed: 5,474,603x real-time
+2025-06-10 16:59:53 | SUCCESS  | src.core.scheduler:_initialize_connections:89 - ✅ System initialization complete
+2025-06-10 16:59:53 | INFO     | src.core.scheduler:_main_trading_loop:94 - 🔄 Starting main trading loop (every 15 minutes)
+2025-06-10 16:59:53 | INFO     | src.core.scheduler:_run_prediction_cycle:122 - 🎯 Running prediction cycle...
+2025-06-10 16:59:53 | INFO     | src.core.scheduler:_run_ai_signals:166 - 🤖 Running AI signal analysis...
+2025-06-10 16:59:53 | INFO     | src.signals.news_sentiment_signal:_get_rtx_news:70 - 📰 Found 0 recent RTX articles
+2025-06-10 16:59:53 | INFO     | src.signals.technical_analysis_signal:_get_price_data:51 - 📊 Loaded 60 days of RTX price data
+2025-06-10 16:59:54 | INFO     | src.signals.options_flow_signal:_get_options_data:68 - 📊 Options data: 32 calls, 42 puts for 2025-06-13
+2025-06-10 16:59:54 | INFO     | src.signals.volatility_analysis_signal:_get_price_data:54 - 📊 Loaded 90 days of RTX data for volatility analysis
+2025-06-10 16:59:54 | INFO     | src.signals.momentum_signal:_get_price_data:54 - 📊 Loaded 60 days for momentum analysis
+2025-06-10 16:59:55 | INFO     | src.signals.sector_correlation_signal:_get_correlation_data:74 - 📊 Loaded correlation data for 9 tickers
+2025-06-10 16:59:55 | INFO     | src.signals.mean_reversion_signal:_get_price_data:54 - 📊 Loaded 60 days for mean reversion analysis
+2025-06-10 16:59:56 | INFO     | src.signals.market_regime_signal:_get_market_data:71 - 📊 Loaded market data for 2 indices
+2025-06-10 16:59:56 | INFO     | src.core.scheduler:_run_ai_signals:184 - 📊 Analyzed 8 AI signals
+2025-06-10 16:59:56 | DEBUG    | src.core.telegram_bot:send_message:46 - 📱 Telegram message sent successfully
+2025-06-10 16:59:56 | INFO     | src.core.scheduler:_execute_trade_decision:249 - 📊 Trade signal: BUY (80.4%) - Trading disabled
+2025-06-10 16:59:56 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (80.4%)
+2025-06-10 17:00:05 | INFO     | __main__:signal_handler:73 - 📡 Received signal 15, initiating graceful shutdown...

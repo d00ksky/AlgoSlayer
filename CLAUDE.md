@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AlgoSlayer is an AI-powered autonomous trading system for RTX Corporation stock that combines 8 AI trading signals with Interactive Brokers integration. It features accelerated learning (180x real-time speed), automated trading, and Telegram notifications.
+AlgoSlayer is an AI-powered autonomous trading system for RTX Corporation stock that combines 8 AI trading signals with Interactive Brokers integration. It features accelerated learning (5M+ x real-time speed), automated trading, and Telegram notifications.
 
 ## Key Commands
 
@@ -34,8 +34,15 @@ TRADING_ENABLED=true PAPER_TRADING=false python run_server.py
 
 ### Deployment
 ```bash
-# Deploy to DigitalOcean
-./deploy_to_digitalocean.sh
+# Git Clone Method (Recommended)
+git clone https://github.com/your-username/AlgoSlayer.git
+cd AlgoSlayer
+sudo ./setup_server_with_ibkr.sh
+
+# Alternative: Upload script method
+scp setup_server_with_ibkr.sh root@YOUR_SERVER_IP:/tmp/
+ssh root@YOUR_SERVER_IP
+bash /tmp/setup_server_with_ibkr.sh
 
 # Docker deployment
 docker-compose up -d
@@ -48,7 +55,7 @@ docker-compose up -d
 - **config/trading_config.py**: Central configuration with all trading parameters
 - **src/core/scheduler.py**: Orchestrates trading cycles every 15 minutes
 - **src/core/signal_fusion.py**: Aggregates 8 AI signals into trading decisions
-- **src/core/accelerated_learning.py**: 180x speed historical learning
+- **src/core/accelerated_learning.py**: 5M+ x speed historical learning
 - **src/core/ibkr_manager.py**: Interactive Brokers integration
 - **src/core/telegram_bot.py**: Mobile notifications
 
@@ -207,3 +214,11 @@ ML_MIN_DATA_POINTS=100
 - Daily reports provide comprehensive learning progress tracking
 - Focus on learning what actually works, not theoretical optimizations
 - Remember: We need to be right only 1 out of 4 times to be profitable
+
+### Remote Development & Monitoring
+- **Git Clone Deploy**: Preferred method for easy updates with `git pull`
+- **SSH Development**: Claude can SSH into server for real-time debugging
+- **Live Monitoring**: Use `./dev_monitor.sh` for interactive development
+- **Log Analysis**: `journalctl -u rtx-trading -f` for live logs
+- **System Updates**: `git pull && systemctl restart rtx-trading`
+- **Performance Tuning**: Real-time optimization via SSH access

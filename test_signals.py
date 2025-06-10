@@ -7,7 +7,10 @@ import os
 from datetime import datetime
 
 # Set up basic environment
-os.environ["OPENAI_API_KEY"] = "your-openai-key-here"  # Replace with your key
+if not os.getenv("OPENAI_API_KEY"):
+    print("⚠️ Set OPENAI_API_KEY environment variable to run this test")
+    print("💡 Example: export OPENAI_API_KEY='your-key-here'")
+    exit(1)
 
 from src.core.signal_fusion import SignalFusionEngine
 from config.trading_config import config
@@ -56,7 +59,7 @@ async def test_rtx_signals():
         print(f"\n⚙️  CONFIGURATION:")
         print(f"Paper Trading: {config.PAPER_TRADING}")
         print(f"Min Signals Required: {config.MIN_SIGNALS_REQUIRED}")
-        print(f"Min Confidence Threshold: {config.MIN_CONFIDENCE_THRESHOLD:.1%}")
+        print(f"Min Confidence Threshold: {config.CONFIDENCE_THRESHOLD:.1%}")
         print(f"Max Position Size: ${config.MAX_POSITION_SIZE}")
         
     except Exception as e:

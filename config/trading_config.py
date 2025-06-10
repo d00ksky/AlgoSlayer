@@ -15,6 +15,7 @@ class RTXTradingConfig:
     # === CAPITAL MANAGEMENT ===
     STARTING_CAPITAL = 1000
     MAX_POSITION_SIZE = 200  # Maximum per trade
+    POSITION_SIZE_PCT = 0.20  # 20% of capital per position
     MAX_DAILY_LOSS = 50
     COMMISSION_PER_CONTRACT = 0.65
     
@@ -159,9 +160,18 @@ class IBKRConfig:
 class TelegramConfig:
     """Telegram bot settings"""
     
-    # Bot credentials (from environment)
-    BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-    CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+    # Bot credentials (loaded dynamically from environment)
+    @property
+    def BOT_TOKEN(self):
+        from dotenv import load_dotenv
+        load_dotenv()
+        return os.getenv("TELEGRAM_BOT_TOKEN")
+    
+    @property 
+    def CHAT_ID(self):
+        from dotenv import load_dotenv
+        load_dotenv()
+        return os.getenv("TELEGRAM_CHAT_ID")
     
     # Notification settings
     SEND_PREDICTIONS = True

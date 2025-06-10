@@ -4,7 +4,15 @@
       "Bash(chmod:*)",
       "Bash(python:*)",
       "Bash(pip install:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(ls:*)",
+      "Bash(timeout:*)",
+      "Bash(docker build:*)",
+      "Bash(find:*)",
+      "Bash(shellcheck:*)",
+      "Bash(bash:*)"
     ],
     "deny": []
   }

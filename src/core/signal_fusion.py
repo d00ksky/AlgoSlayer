@@ -176,8 +176,8 @@ class SignalFusionEngine:
         decision.risk_score = self.calculate_risk_score(signals)
         
         # Check confidence threshold
-        if decision.confidence < config.MIN_CONFIDENCE_THRESHOLD:
-            decision.reasoning = f"Low confidence: {decision.confidence:.2f} < {config.MIN_CONFIDENCE_THRESHOLD} threshold"
+        if decision.confidence < config.CONFIDENCE_THRESHOLD:
+            decision.reasoning = f"Low confidence: {decision.confidence:.2f} < {config.CONFIDENCE_THRESHOLD} threshold"
             logger.info(decision.reasoning)
             return decision
         
