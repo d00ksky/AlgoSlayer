@@ -496,6 +496,18 @@ This software is for educational and informational purposes. Users are responsib
 # Check trading mode configuration
 ```
 
+**IBKR Gateway Download Failed (404 Error)**
+```bash
+# IBKR updates download URLs frequently
+# Test current URLs:
+./test_ibkr_download.sh
+
+# Manual download alternative:
+# 1. Visit: https://www.interactivebrokers.com/en/trading/ib-gateway-download.php
+# 2. Download latest Linux x64 standalone version
+# 3. Upload to server and run setup script
+```
+
 **Telegram Notifications Not Working**
 ```bash
 # Verify bot token and chat ID

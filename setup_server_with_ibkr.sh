@@ -169,18 +169,34 @@ echo "🏦 Installing IBKR Gateway..."
 cd $APP_DIR/ibkr
 
 # Download IB Gateway (standalone version)
-IBKR_VERSION="10.25.1d"
-IBKR_INSTALLER="ibgateway-${IBKR_VERSION}-standalone-linux-x64.sh"
+IBKR_INSTALLER="ibgateway-stable-standalone-linux-x64.sh"
 
 if [[ ! -f "$IBKR_INSTALLER" ]]; then
-    echo "📥 Downloading IBKR Gateway..."
-    wget "https://download2.interactivebrokers.com/installers/ibgateway/stable-standalone/${IBKR_INSTALLER}"
+    echo "📥 Downloading IBKR Gateway (latest stable)..."
+    # Try latest stable first
+    if ! wget "https://download.interactivebrokers.com/installers/ibgateway/stable-standalone/${IBKR_INSTALLER}"; then
+        echo "⚠️ Stable download failed, trying latest version..."
+        IBKR_INSTALLER="ibgateway-latest-standalone-linux-x64.sh"
+        wget "https://download.interactivebrokers.com/installers/ibgateway/latest-standalone/${IBKR_INSTALLER}"
+    fi
     chmod +x "$IBKR_INSTALLER"
 fi
 
 # Install IBKR Gateway
 echo "📦 Installing IBKR Gateway..."
-./"$IBKR_INSTALLER" -q -dir $APP_DIR/ibkr/IBJts
+if ./"$IBKR_INSTALLER" -q -dir $APP_DIR/ibkr/IBJts; then
+    echo "✅ IBKR Gateway installed successfully"
+else
+    echo "❌ IBKR Gateway installation failed"
+    echo "💡 You can manually download from: https://www.interactivebrokers.com/en/trading/ib-gateway-download.php"
+    echo "💡 Or try running this again later"
+    read -p "Continue anyway? (y/n): " -n 1 CONTINUE_ANYWAY
+    echo ""
+    if [[ ! $CONTINUE_ANYWAY =~ ^[Yy]$ ]]; then
+        echo "❌ Setup aborted due to IBKR Gateway installation failure"
+        exit 1
+    fi
+fi
 
 # Create IBKR configuration
 echo "⚙️ Configuring IBKR Gateway..."
