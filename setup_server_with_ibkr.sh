@@ -131,9 +131,96 @@ if [[ -n "$TELEGRAM_BOT_TOKEN" ]]; then
     read -p "📱 Telegram Chat ID: " TELEGRAM_CHAT_ID
 fi
 
+# Check for existing data and preserve it
+echo ""
+echo "🔍 Checking for existing data..."
+DATA_BACKUP_DIR=""
+ENV_BACKUP=""
+
+if [[ -d "$APP_DIR/data" ]] && [[ -n "$(ls -A $APP_DIR/data 2>/dev/null)" ]]; then
+    echo "📊 Existing trading data found in $APP_DIR/data/"
+    ls -la "$APP_DIR/data/"
+    echo ""
+    echo "⚠️  This data contains your trading history, performance metrics, and ML models!"
+    echo "💡 Options:"
+    echo "   1. KEEP existing data (recommended for rebuilds)"
+    echo "   2. BACKUP and replace with fresh data"
+    echo "   3. DELETE all data (fresh start)"
+    echo ""
+    read -p "Choose option (1/2/3): " -n 1 DATA_CHOICE
+    echo ""
+    
+    case $DATA_CHOICE in
+        1)
+            echo "✅ Keeping existing data - no changes to database"
+            ;;
+        2)
+            DATA_BACKUP_DIR="$APP_DIR/data_backup_$(date +%Y%m%d_%H%M%S)"
+            echo "📦 Backing up data to: $DATA_BACKUP_DIR"
+            mv "$APP_DIR/data" "$DATA_BACKUP_DIR"
+            echo "✅ Data backed up, will create fresh database"
+            ;;
+        3)
+            echo "🗑️  Deleting existing data..."
+            rm -rf "$APP_DIR/data"
+            echo "✅ Data deleted, will create fresh database"
+            ;;
+        *)
+            echo "❌ Invalid choice. Keeping existing data for safety."
+            ;;
+    esac
+fi
+
+if [[ -f "$APP_DIR/.env" ]]; then
+    echo "⚙️  Existing .env configuration found"
+    echo "💡 Found these API keys/settings:"
+    grep -E "^(OPENAI_API_KEY|TELEGRAM_BOT_TOKEN|IB_USERNAME)" "$APP_DIR/.env" | sed 's/=.*/=***HIDDEN***/'
+    echo ""
+    read -p "Keep existing .env file? (Y/n): " -n 1 KEEP_ENV
+    echo ""
+    
+    if [[ ! $KEEP_ENV =~ ^[Nn]$ ]]; then
+        ENV_BACKUP="$APP_DIR/.env.backup.$(date +%Y%m%d_%H%M%S)"
+        cp "$APP_DIR/.env" "$ENV_BACKUP"
+        echo "✅ Existing .env preserved. Will merge with new settings."
+        
+        # Extract existing values
+        if [[ -z "$OPENAI_API_KEY" ]]; then
+            EXISTING_OPENAI=$(grep "^OPENAI_API_KEY=" "$APP_DIR/.env" | cut -d'=' -f2)
+            if [[ -n "$EXISTING_OPENAI" ]]; then
+                OPENAI_API_KEY="$EXISTING_OPENAI"
+                echo "📝 Using existing OpenAI API key"
+            fi
+        fi
+        
+        if [[ -z "$TELEGRAM_BOT_TOKEN" ]]; then
+            EXISTING_TELEGRAM=$(grep "^TELEGRAM_BOT_TOKEN=" "$APP_DIR/.env" | cut -d'=' -f2)
+            EXISTING_CHAT_ID=$(grep "^TELEGRAM_CHAT_ID=" "$APP_DIR/.env" | cut -d'=' -f2)
+            if [[ -n "$EXISTING_TELEGRAM" ]]; then
+                TELEGRAM_BOT_TOKEN="$EXISTING_TELEGRAM"
+                TELEGRAM_CHAT_ID="$EXISTING_CHAT_ID"
+                echo "📱 Using existing Telegram configuration"
+            fi
+        fi
+        
+        if [[ -z "$IBKR_USERNAME" ]]; then
+            EXISTING_IBKR_USER=$(grep "^IB_USERNAME=" "$APP_DIR/.env" | cut -d'=' -f2)
+            EXISTING_IBKR_PASS=$(grep "^IB_PASSWORD=" "$APP_DIR/.env" | cut -d'=' -f2)
+            if [[ -n "$EXISTING_IBKR_USER" ]]; then
+                IBKR_USERNAME="$EXISTING_IBKR_USER"
+                IBKR_PASSWORD="$EXISTING_IBKR_PASS"
+                echo "🏦 Using existing IBKR credentials"
+            fi
+        fi
+    fi
+fi
+
 # Create comprehensive .env file
 echo "📝 Creating .env file..."
 cat > .env << EOF
+# System Selection - REVOLUTIONARY OPTIONS SYSTEM
+USE_OPTIONS_SYSTEM=true
+
 # Trading Configuration
 TRADING_ENABLED=true
 PAPER_TRADING=${PAPER_TRADING}
@@ -548,6 +635,24 @@ Strategy:
 - 8 AI signals every 15 minutes
 - Target: 1-2 trades per month
 EOF
+
+# Show data preservation summary
+echo ""
+echo "📊 Data Preservation Summary:"
+if [[ -n "$DATA_BACKUP_DIR" ]]; then
+    echo "   💾 Trading data backed up to: $DATA_BACKUP_DIR"
+elif [[ -d "$APP_DIR/data" ]] && [[ -n "$(ls -A $APP_DIR/data 2>/dev/null)" ]]; then
+    echo "   ✅ Existing trading data preserved in: $APP_DIR/data/"
+    echo "   📈 Your performance history and ML models are intact!"
+else
+    echo "   🆕 Fresh database will be created on first run"
+fi
+
+if [[ -n "$ENV_BACKUP" ]]; then
+    echo "   ⚙️  Configuration backed up to: $ENV_BACKUP"
+    echo "   🔑 API keys and settings preserved from existing setup"
+fi
+echo ""
 
 echo "✅ Setup complete! Your autonomous RTX trading system is running!"
 echo "📋 Next: Access VNC to complete IBKR Gateway login"

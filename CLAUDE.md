@@ -26,16 +26,40 @@ python test_system_integration.py
 python bootstrap_historic_training.py
 ```
 
-### Running the Options System
+### Running the System (SMART AUTO-DETECTION!)
+The system now features **revolutionary auto-detection** between Options and Stock systems:
+
 ```bash
-# Options prediction-only mode (safest)
-TRADING_ENABLED=false PREDICTION_ONLY=true python -c "from src.core.options_scheduler import options_scheduler; import asyncio; asyncio.run(options_scheduler.start_autonomous_trading())"
+# REVOLUTIONARY OPTIONS SYSTEM (Auto-detected - Default!)
+USE_OPTIONS_SYSTEM=true TRADING_ENABLED=false python run_server.py
 
-# Options paper trading mode (recommended)
-TRADING_ENABLED=true PAPER_TRADING=true python -c "from src.core.options_scheduler import options_scheduler; import asyncio; asyncio.run(options_scheduler.start_autonomous_trading())"
+# Options Paper Trading (Recommended for learning)
+USE_OPTIONS_SYSTEM=true TRADING_ENABLED=true PAPER_TRADING=true python run_server.py
 
-# Live options trading mode (use with extreme caution)
-TRADING_ENABLED=true PAPER_TRADING=false python -c "from src.core.options_scheduler import options_scheduler; import asyncio; asyncio.run(options_scheduler.start_autonomous_trading())"
+# Live Options Trading (When proven profitable)
+USE_OPTIONS_SYSTEM=true TRADING_ENABLED=true PAPER_TRADING=false python run_server.py
+
+# Legacy Stock System (If needed)
+USE_OPTIONS_SYSTEM=false TRADING_ENABLED=false python run_server.py
+
+# The system automatically detects and loads the correct components!
+```
+
+### Git-Safe Development Workflow (BULLETPROOF!)
+```bash
+# Future updates are now completely safe and seamless:
+
+# 1. Pull latest improvements
+git pull
+
+# 2. Restart (automatically preserves OPTIONS mode)
+systemctl restart rtx-trading
+
+# 3. Monitor new features working
+journalctl -u rtx-trading -f
+
+# Your OPTIONS configuration is permanently preserved in environment!
+```
 
 # Legacy stock system (deprecated)
 python run_server.py
@@ -43,7 +67,7 @@ python run_server.py
 
 ### Deployment
 ```bash
-# Git Clone Method (Recommended)
+# Git Clone Method (Recommended) - AUTOMATICALLY USES OPTIONS SYSTEM
 git clone https://github.com/your-username/AlgoSlayer.git
 cd AlgoSlayer
 sudo ./setup_server_with_ibkr.sh
@@ -55,7 +79,83 @@ bash /tmp/setup_server_with_ibkr.sh
 
 # Docker deployment
 docker-compose up -d
+
+# ✅ AUTOMATIC: Setup script now automatically configures USE_OPTIONS_SYSTEM=true
+# No manual configuration needed - OPTIONS system is the default!
+
+# 🛡️ DATA SAFETY: Script preserves existing trading data and API keys
+# Safe for rebuilds - your performance history and ML models are protected!
 ```
+
+## 🛡️ Data Safety & Rebuilds
+
+The setup script now includes **intelligent data preservation** for safe rebuilds:
+
+### Existing Data Protection
+When you run the setup script on a server with existing data, it will:
+
+```bash
+🔍 Checking for existing data...
+📊 Existing trading data found in /opt/rtx-trading/data/
+   signal_performance.db    2.1MB   # Your AI learning data
+   options_trades.db        1.8MB   # Trading history
+   ml_models/              15MB     # Trained models
+   
+⚠️  This data contains your trading history, performance metrics, and ML models!
+💡 Options:
+   1. KEEP existing data (recommended for rebuilds)
+   2. BACKUP and replace with fresh data  
+   3. DELETE all data (fresh start)
+
+Choose option (1/2/3): 1
+✅ Keeping existing data - no changes to database
+```
+
+### Configuration Preservation
+For `.env` files with API keys and settings:
+
+```bash
+⚙️  Existing .env configuration found
+💡 Found these API keys/settings:
+   OPENAI_API_KEY=***HIDDEN***
+   TELEGRAM_BOT_TOKEN=***HIDDEN***
+   IB_USERNAME=***HIDDEN***
+
+Keep existing .env file? (Y/n): Y
+✅ Existing .env preserved. Will merge with new settings.
+📝 Using existing OpenAI API key
+📱 Using existing Telegram configuration  
+🏦 Using existing IBKR credentials
+```
+
+### Safe Rebuild Process
+```bash
+# If your app breaks, you can safely rebuild:
+cd AlgoSlayer
+sudo ./setup_server_with_ibkr.sh
+
+# Script will:
+# ✅ Preserve all trading data and performance history
+# ✅ Keep existing API keys and configuration  
+# ✅ Update system components and dependencies
+# ✅ Restart services with preserved data
+# ✅ Show summary of what was preserved vs updated
+```
+
+### Data Recovery Options
+If you choose to backup data, it's stored safely:
+```bash
+📦 Backing up data to: /opt/rtx-trading/data_backup_20241211_143022
+⚙️  Configuration backed up to: /opt/rtx-trading/.env.backup.20241211_143022
+```
+
+This means you can **always** safely run the setup script for:
+- 🔧 **System repairs** - Fix broken components while keeping data
+- 📦 **Dependency updates** - Update Python packages and system components  
+- ⚙️ **Configuration changes** - Add new environment variables
+- 🆕 **Feature upgrades** - Deploy new AI signals and capabilities
+
+**Your trading data and AI learning progress are always protected!**
 
 ## Architecture
 

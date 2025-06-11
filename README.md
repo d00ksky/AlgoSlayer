@@ -135,7 +135,7 @@ python bootstrap_historic_training.py
 
 ### 5. Deploy to Cloud
 ```bash
-# Git Clone Method (Recommended)
+# Git Clone Method (Recommended) - AUTOMATICALLY USES OPTIONS SYSTEM ✅
 ssh root@YOUR_SERVER_IP
 git clone https://github.com/your-username/AlgoSlayer.git
 cd AlgoSlayer
@@ -146,39 +146,39 @@ scp setup_server_with_ibkr.sh root@YOUR_SERVER_IP:/tmp/
 ssh root@YOUR_SERVER_IP
 bash /tmp/setup_server_with_ibkr.sh
 
-# Or local testing (legacy stock system)
-python run_server.py
+# ✅ AUTOMATIC: Setup script automatically configures OPTIONS system as default!
+# No manual configuration needed - revolutionary system ready to go!
 
-# Run OPTIONS system locally (NEW!)
-python -c "
-from src.core.options_scheduler import options_scheduler
-import asyncio
-asyncio.run(options_scheduler.start_autonomous_trading())
-"
+# 🛡️ SAFE REBUILDS: Script preserves existing trading data and API keys
+# Your performance history and AI learning models are protected!
+python run_server.py
 ```
 
-### 6. Options Trading Modes
+### 6. Smart System Selection (AUTO-DETECTS!)
+The system now automatically chooses between OPTIONS and STOCK systems based on environment variables:
+
+```bash
+# REVOLUTIONARY OPTIONS SYSTEM (Default - Recommended!)
+USE_OPTIONS_SYSTEM=true python run_server.py
+
+# Classic Stock System (Legacy)
+USE_OPTIONS_SYSTEM=false python run_server.py
+
+# The system auto-detects and loads the appropriate components!
+```
+
+### 7. Options Trading Modes
 ```bash
 # Paper trading (recommended for learning)
-TRADING_ENABLED=true PAPER_TRADING=true python -c "
-from src.core.options_scheduler import options_scheduler
-import asyncio
-asyncio.run(options_scheduler.start_autonomous_trading())
-"
+USE_OPTIONS_SYSTEM=true TRADING_ENABLED=true PAPER_TRADING=true python run_server.py
 
 # Live trading (when proven profitable)
-TRADING_ENABLED=true PAPER_TRADING=false python -c "
-from src.core.options_scheduler import options_scheduler
-import asyncio
-asyncio.run(options_scheduler.start_autonomous_trading())
-"
+USE_OPTIONS_SYSTEM=true TRADING_ENABLED=true PAPER_TRADING=false python run_server.py
 
 # Prediction only (safest)
-TRADING_ENABLED=false python -c "
-from src.core.options_scheduler import options_scheduler
-import asyncio
-asyncio.run(options_scheduler.start_autonomous_trading())
-"
+USE_OPTIONS_SYSTEM=true TRADING_ENABLED=false python run_server.py
+
+# All modes work with the same run_server.py - smart detection!
 ```
 
 ## 📊 System Architecture
