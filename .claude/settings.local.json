@@ -22,7 +22,8 @@
       "Bash(./setup_local_ml.sh:*)",
       "Bash(./fetch_data.sh:*)",
       "Bash(mv:*)",
-      "Bash(./train_now.sh:*)"
+      "Bash(./train_now.sh:*)",
+      "Bash(ssh:*)"
     ],
     "deny": []
   }
