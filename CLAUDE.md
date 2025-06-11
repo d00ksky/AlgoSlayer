@@ -194,15 +194,68 @@ ML_MIN_DATA_POINTS=100
 - Adapt signal weights based on real performance, not theoretical models
 - Build database of what works in different market conditions
 
-## Next Development Phase: Enhanced Learning System
+## Real Learning System Architecture (NEW)
 
-### Enhanced Learning Components (✅ COMPLETED)
-1. **✅ Signal Performance Tracker** (`src/core/signal_performance_tracker.py`) - Tracks which signals actually predict profitable RTX options trades
-2. **✅ RTX Earnings Calendar Integration** (`src/core/rtx_earnings_calendar.py`) - Predictable volatility spikes every quarter
-3. **✅ Defense Sector Momentum Analysis** (`src/core/defense_sector_analyzer.py`) - RTX vs ITA ETF correlation
-4. **✅ Walk-Forward Backtesting** (`src/core/walk_forward_backtester.py`) - Proper validation to prevent overfitting
-5. **✅ Market Regime Detection** (`src/core/market_regime_detector.py`) - Adapt strategy based on bull/bear/sideways markets
-6. **✅ Enhanced RTX Signal Orchestrator** - Integrates all learning components with adaptive weights and thresholds
+### Hybrid Cloud-Local ML Architecture
+**Problem Solved**: 2GB cloud server can't handle heavy ML, local machine runs irregularly
+
+**Solution**: Split ML workload between cloud (24/7 data collection) and local (powerful training)
+
+#### Cloud Server (2GB RAM) - Lightweight Operations
+```bash
+# Runs continuously on cloud
+- Collect all predictions with timestamp, confidence, signals used
+- Track actual RTX price movements 1hr, 4hr, 24hr after prediction
+- Calculate simple performance metrics (accuracy, profit/loss)
+- Run lightweight models (LogisticRegression, basic RandomForest)
+- Store everything in SQLite for later training
+- Make real-time predictions with current best model
+```
+
+#### Local Machine - Heavy ML Training
+```bash
+# Run via cron on boot or manually
+python sync_and_train_ml.py
+
+# This script will:
+1. SSH to cloud server and fetch all accumulated data
+2. Train advanced models (XGBoost, Neural Networks, LSTM)
+3. Backtest with walk-forward validation
+4. Calculate which signal combinations work best
+5. Generate new model weights and configurations
+6. Upload optimized models back to cloud
+7. Cloud automatically uses new models for predictions
+```
+
+#### Daily Learning Cycle
+- **5 PM ET**: Generate comprehensive report
+- **Track**: Yesterday's predictions vs actual outcomes
+- **Calculate**: Options P&L if we had traded
+- **Identify**: Which signals performed best
+- **Adjust**: Signal weights based on 30-day performance
+- **Report**: Send to Telegram with insights
+
+### Options-Specific Learning Features
+1. **IV Percentile Tracking** - Where is RTX IV vs historical range
+2. **Earnings Volatility Patterns** - How much does RTX move on earnings
+3. **Strike Selection AI** - Which strikes offer best risk/reward
+4. **Greeks Analysis** - Delta/Gamma for position sizing
+5. **Put/Call Ratio Trends** - Smart money positioning
+
+### Risk Management for $1000 Portfolio
+- **Max per trade**: $200 (20% of capital)
+- **Stop loss**: 50% on options (they're volatile)
+- **Confidence threshold**: 85%+ for real trades
+- **Trade frequency**: 1-4 per month maximum
+- **Paper trade period**: 14 days for new strategies
+
+### Performance Metrics That Matter for Options
+1. **Options Win Rate**: % of trades profitable (target: 40%+)
+2. **Options Profit Factor**: Total wins / Total losses (target: 2.5+)
+3. **Average Winner**: +150% (leverage advantage)
+4. **Average Loser**: -50% (defined risk)
+5. **High-Conviction Accuracy**: When confidence >85%
+6. **Monthly ROI**: Target 10-20%
 
 ### Development Tips
 - Always test changes with `test_system_integration.py`

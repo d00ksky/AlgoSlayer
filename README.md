@@ -14,13 +14,14 @@ This is a **production-ready autonomous trading system** designed specifically f
 ### ⚡ Key Features
 
 - **🤖 8 AI Trading Signals**: News sentiment, technical analysis, options flow, volatility, momentum, sector correlation, mean reversion, market regime
-- **⚡ Accelerated Learning**: Learn from 6 months of data in 3 minutes (5M+ x real-time speed)
-- **📱 Telegram Notifications**: Real-time alerts, daily summaries, system status
+- **🧠 Real Learning System**: Tracks predictions vs outcomes, adapts signal weights automatically
+- **🔄 Hybrid ML Architecture**: Cloud data collection + local advanced training
+- **📱 Telegram Notifications**: Real-time alerts, daily learning reports, system status
 - **🏦 IBKR Integration**: Full cloud IBKR Gateway with VNC access
 - **☁️ Cloud Native**: Complete DigitalOcean deployment with autonomous trading
 - **📺 Remote Access**: VNC-based IBKR management for travelers
-- **🛡️ Risk Management**: Multiple safety controls and position sizing
-- **🔄 Autonomous Operation**: 24/7 monitoring and prediction cycles
+- **🛡️ Risk Management**: Options-focused with $1000 capital optimization
+- **📊 Performance Tracking**: SQLite database tracks every prediction and outcome
 
 ## 🚀 Quick Start
 
@@ -46,7 +47,43 @@ python test_accelerated_learning.py
 python test_system_integration.py
 ```
 
-### 4. Deploy to Cloud
+### 4. Setup Hybrid ML Training (Local Machine)
+```bash
+# Setup automated ML training on your local machine
+./setup_local_ml.sh
+
+# INITIAL BOOTSTRAP (Run once for massive historic training)
+python bootstrap_historic_training.py
+
+# Train models manually when needed
+./train_now.sh
+
+# Fetch cloud data for analysis
+./fetch_cloud_stats.sh
+```
+
+**ML Training Options:**
+```bash
+# AUTOMATIC (Recommended)
+# Training runs automatically when you boot your machine
+# No action needed - models improve over time
+
+# MANUAL TRAINING
+./train_now.sh
+# • Fetches latest cloud data
+# • Trains advanced ML models locally  
+# • Uploads improved models to cloud
+# • Restarts trading service with new models
+
+# HISTORIC BOOTSTRAP (Run once initially)
+python bootstrap_historic_training.py
+# • Downloads 3 years of RTX historic data
+# • Generates thousands of predictions with outcomes
+# • Trains initial models on massive dataset
+# • Gives system excellent starting point
+```
+
+### 5. Deploy to Cloud
 ```bash
 # Git Clone Method (Recommended)
 ssh root@YOUR_SERVER_IP
@@ -128,7 +165,7 @@ CONFIDENCE_THRESHOLD=0.35
 
 ### 1. News Sentiment Analysis
 - **Function**: Analyzes RTX and defense sector news
-- **AI Model**: OpenAI GPT-4 for sentiment analysis
+- **AI Model**: OpenAI GPT-4o for sentiment analysis
 - **Data Sources**: yfinance news feed
 - **Weight**: 15%
 
@@ -581,11 +618,50 @@ AlgoSlayer/
 
 **Git-Based Development Workflow:**
 ```bash
-# Update system on server
+# SIMPLE DEPLOYMENT (Recommended)
+# After pushing changes to git repository:
 ssh root@YOUR_SERVER_IP
 cd /opt/rtx-trading
 git pull
 systemctl restart rtx-trading
+
+# That's it! No rebuild needed for Python code changes.
+# The systemd service automatically uses the updated code.
+```
+
+**When to Rebuild vs Simple Restart:**
+```bash
+# SIMPLE RESTART (90% of cases) - Use for:
+# • Python code changes (signals, logic, fixes)
+# • Configuration updates
+# • New features in existing files
+systemctl restart rtx-trading
+
+# FULL REBUILD (rare) - Only needed for:
+# • New system dependencies in requirements.txt
+# • New systemd service files
+# • Environmental/system-level changes
+cd /root/AlgoSlayer
+pip install -r requirements.txt
+systemctl daemon-reload
+systemctl restart rtx-trading
+
+# DATABASE MIGRATIONS (if needed)
+# • Database schema changes
+# • New tables or columns
+python -c "from src.core.performance_tracker import performance_tracker"
+```
+
+**Quick Health Check After Deployment:**
+```bash
+# Verify service is running
+systemctl status rtx-trading
+
+# Check recent logs for errors
+journalctl -u rtx-trading -n 20
+
+# Verify predictions are being generated
+journalctl -u rtx-trading -f | grep -E "BUY|SELL|Prediction cycle"
 ```
 
 **Real-Time Development:**

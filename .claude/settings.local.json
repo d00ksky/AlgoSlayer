@@ -16,7 +16,11 @@
       "Bash(/home/dooksky/repo/AlgoSlayer/test_ibkr_download.sh:*)",
       "Bash(git add:*)",
       "Bash(systemctl status:*)",
-      "Bash(hostname)"
+      "Bash(hostname)",
+      "Bash(sqlite3:*)",
+      "Bash(./fetch_cloud_stats.sh:*)",
+      "Bash(./setup_local_ml.sh:*)",
+      "Bash(./fetch_data.sh:*)"
     ],
     "deny": []
   }

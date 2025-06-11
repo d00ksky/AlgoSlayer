@@ -119,7 +119,7 @@ class NewsSentimentSignal:
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: client.chat.completions.create(
-                    model="gpt-4",
+                    model="gpt-4o",
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=500
                 )

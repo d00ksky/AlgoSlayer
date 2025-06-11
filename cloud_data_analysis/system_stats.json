@@ -1,0 +1,7 @@
+{
+  "service_active": true,
+  "service_status": "\u25cf rtx-trading.service - RTX Trading System - AI Trading with IBKR\n     Loaded: loaded (/etc/systemd/system/rtx-trading.service; enabled; preset: enabled)\n     Active: active (running) since Tue 2025-06-10 17:46:18 UTC; 21h ago\n Invocation: c099add50a4a402ea00db8511d29ed13\n   Main PID: 31086 (python)\n      Tasks: 2 (limit: 2318)\n     Memory: 82.6M (limit: 1.4G peak: 82.9M)\n        CPU: 41.296s\n     CGroup: /system.slice/rtx-trading.service\n             \u2514\u250031086 /opt/rtx-trading/rtx-env/bin/python /opt/rtx-trading/run_server.py",
+  "uptime": "ActiveEnterTimestamp=Tue 2025-06-10 17:46:18 UTC",
+  "memory_usage": "MemoryCurrent=86675456",
+  "disk_usage": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/vda1        48G  6.8G   41G  15% /"
+}

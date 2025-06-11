@@ -11,6 +11,7 @@ from config.trading_config import config, TradingModeConfig
 from src.core.ibkr_manager import ibkr_manager
 from src.core.telegram_bot import telegram_bot
 from src.core.accelerated_learning import learning_engine
+from src.core.performance_tracker import performance_tracker
 from src.signals.news_sentiment_signal import NewsSentimentSignal
 from src.signals.technical_analysis_signal import TechnicalAnalysisSignal
 from src.signals.options_flow_signal import OptionsFlowSignal
@@ -135,6 +136,14 @@ class RTXTradingScheduler:
         # Aggregate signals
         prediction = self._aggregate_signals(signal_results, current_price)
         
+        # Record prediction for learning
+        await performance_tracker.record_prediction(
+            direction=prediction["direction"],
+            confidence=prediction["confidence"],
+            signal_data=signal_results,
+            reasoning=prediction["reasoning"]
+        )
+        
         # Send prediction notification
         await telegram_bot.send_prediction_alert(prediction)
         
@@ -212,12 +221,20 @@ class RTXTradingScheduler:
                 reasoning_parts.append(f"{name}: {direction} ({confidence:.1%})")
         
         # Determine overall direction
-        if buy_strength > sell_strength and buy_strength > 0.2:
+        strength_diff = abs(buy_strength - sell_strength)
+        total_strength = buy_strength + sell_strength
+        
+        # Require meaningful signal strength and agreement
+        if buy_strength > sell_strength and buy_strength > 0.3 and strength_diff > 0.2:
             final_direction = "BUY"
-            final_confidence = min(0.95, (buy_strength / (buy_strength + sell_strength + 0.1)))
-        elif sell_strength > buy_strength and sell_strength > 0.2:
+            # Confidence based on signal agreement and total strength
+            signal_agreement = strength_diff / max(total_strength, 0.1)
+            final_confidence = min(0.95, signal_agreement * total_strength)
+        elif sell_strength > buy_strength and sell_strength > 0.3 and strength_diff > 0.2:
             final_direction = "SELL"
-            final_confidence = min(0.95, (sell_strength / (buy_strength + sell_strength + 0.1)))
+            # Confidence based on signal agreement and total strength
+            signal_agreement = strength_diff / max(total_strength, 0.1)
+            final_confidence = min(0.95, signal_agreement * total_strength)
         else:
             final_direction = "HOLD"
             final_confidence = 0.5

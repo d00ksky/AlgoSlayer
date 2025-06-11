@@ -1,0 +1,4 @@
+PAPER_TRADING=true
+TRADING_ENABLED=false
+PAPER_TRADING=true          # true = fake money, false = real money
+PREDICTION_ONLY=false       # true = notifications only, no orders
