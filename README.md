@@ -1,27 +1,71 @@
-# 🤖 RTX Autonomous Trading System
+# 🎯 RTX Autonomous OPTIONS Trading System
 
-**Professional AI-powered autonomous trading system targeting RTX Corporation with 8 advanced signals, 5M+ x accelerated learning, full cloud deployment with IBKR Gateway integration.**
+**Revolutionary AI-powered autonomous OPTIONS trading system that predicts specific RTX option contracts, learns from real P&L outcomes, and adapts signal weights automatically. Features 8 advanced AI signals, real options data validation, and machine learning from actual trading profits.**
 
-![RTX Trading System](https://img.shields.io/badge/RTX-Trading%20System-blue?style=for-the-badge)
+![RTX Options System](https://img.shields.io/badge/RTX-OPTIONS%20SYSTEM-gold?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3.11+-green?style=for-the-badge)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge)
-![AI Powered](https://img.shields.io/badge/AI-Powered-purple?style=for-the-badge)
+![Options Trading](https://img.shields.io/badge/OPTIONS-TRADING-red?style=for-the-badge)
+![AI Powered](https://img.shields.io/badge/AI-POWERED-purple?style=for-the-badge)
+![Self Learning](https://img.shields.io/badge/SELF-LEARNING-blue?style=for-the-badge)
 
 ## 🎯 System Overview
 
-This is a **production-ready autonomous trading system** designed specifically for RTX Corporation (Raytheon Technologies). The system combines multiple AI signals, accelerated learning capabilities, and professional-grade risk management.
+This is a **revolutionary autonomous OPTIONS trading system** designed specifically for RTX Corporation options. The system predicts specific option contracts, tracks real P&L outcomes, and learns from actual trading performance to continuously improve its predictions.
 
-### ⚡ Key Features
+### 🎯 Revolutionary Features
 
-- **🤖 8 AI Trading Signals**: News sentiment, technical analysis, options flow, volatility, momentum, sector correlation, mean reversion, market regime
-- **🧠 Real Learning System**: Tracks predictions vs outcomes, adapts signal weights automatically
-- **🔄 Hybrid ML Architecture**: Cloud data collection + local advanced training
-- **📱 Telegram Notifications**: Real-time alerts, daily learning reports, system status
-- **🏦 IBKR Integration**: Full cloud IBKR Gateway with VNC access
-- **☁️ Cloud Native**: Complete DigitalOcean deployment with autonomous trading
-- **📺 Remote Access**: VNC-based IBKR management for travelers
-- **🛡️ Risk Management**: Options-focused with $1000 capital optimization
-- **📊 Performance Tracking**: SQLite database tracks every prediction and outcome
+- **🎯 Specific Options Predictions**: Predicts exact contracts like "RTX240615C125 @ $2.45" not just "RTX up"
+- **💰 Real P&L Learning**: Learns from actual options profits/losses, not just stock direction
+- **📊 Live Options Data**: Real-time RTX options chains with bid/ask validation
+- **⚖️ Adaptive Signal Weights**: Top performing signals get higher weights automatically
+- **🧠 Options-Specific ML**: Features include Greeks, IV, time decay, strike selection
+- **🛡️ Intelligent Risk Management**: 75% confidence threshold, position sizing, stop losses
+- **💸 Real Commission Tracking**: Includes actual IBKR costs ($0.65/contract + $0.50/trade)
+- **📱 Enhanced Telegram Alerts**: Contract-specific notifications with Greeks and IV
+- **🔄 Paper Trading Simulation**: Realistic options trading with slippage and commissions
+- **📈 Performance Analytics**: Win rate, profit factor, signal performance ranking
+
+## 🎯 Options System Highlights
+
+### What Makes This Revolutionary
+
+#### Before (Stock Trading)
+```
+Prediction: "RTX will go up 2% in 24 hours"
+Learning: Stock moved +1.8% → 90% accurate
+Problem: No leverage, commissions kill profits
+```
+
+#### After (Options Trading)
+```
+Prediction: "BUY RTX240615C125 @ $2.45 - expect +150% profit"
+Learning: Option went $2.45 → $6.10 → +149% profit ✅
+Result: Real leverage, real profits, real learning
+```
+
+### Live Example Prediction
+```
+🎯 **Options Signal**: BUY_TO_OPEN_CALL
+📈 **Contract**: RTX240615C125 (RTX Jun 15 2024 $125 Call)
+💰 **Entry**: $2.45 x1 contract ($245 total + $1.15 commission)
+🧠 **Confidence**: 87% (6/8 AI signals agree)
+📊 **Expected Profit**: +150% in 3-5 days
+⚖️ **Greeks**: Delta 0.65 | IV 28.5% | 21 DTE
+🛡️ **Risk**: Stop -50% | Target +100% | Exit before 5 DTE
+```
+
+### Real Learning in Action
+```
+📊 **Signal Performance Update**:
+1. technical_analysis: 15.2% weight (↑ performing well)
+2. news_sentiment: 14.8% weight (consistent)  
+3. momentum: 12.1% weight (↓ recent poor performance)
+4. options_flow: 11.5% weight
+5. volatility_analysis: 8.2% weight (↓ adapted down)
+
+💡 **System learned**: Technical analysis + news sentiment 
+    combination has 78% win rate for weekly calls
+```
 
 ## 🚀 Quick Start
 
@@ -38,13 +82,19 @@ cp env_template.txt .env
 # Edit .env with your API keys
 ```
 
-### 3. Test the System
+### 3. Test the Options System
 ```bash
+# Test options components (NEW!)
+python simple_options_test.py
+
 # Test accelerated learning (safe)
 python test_accelerated_learning.py
 
 # Full system integration test
 python test_system_integration.py
+
+# Comprehensive options system test
+python test_options_system.py
 ```
 
 ### 4. Setup Hybrid ML Training (Local Machine)
@@ -96,8 +146,39 @@ scp setup_server_with_ibkr.sh root@YOUR_SERVER_IP:/tmp/
 ssh root@YOUR_SERVER_IP
 bash /tmp/setup_server_with_ibkr.sh
 
-# Or local testing
+# Or local testing (legacy stock system)
 python run_server.py
+
+# Run OPTIONS system locally (NEW!)
+python -c "
+from src.core.options_scheduler import options_scheduler
+import asyncio
+asyncio.run(options_scheduler.start_autonomous_trading())
+"
+```
+
+### 6. Options Trading Modes
+```bash
+# Paper trading (recommended for learning)
+TRADING_ENABLED=true PAPER_TRADING=true python -c "
+from src.core.options_scheduler import options_scheduler
+import asyncio
+asyncio.run(options_scheduler.start_autonomous_trading())
+"
+
+# Live trading (when proven profitable)
+TRADING_ENABLED=true PAPER_TRADING=false python -c "
+from src.core.options_scheduler import options_scheduler
+import asyncio
+asyncio.run(options_scheduler.start_autonomous_trading())
+"
+
+# Prediction only (safest)
+TRADING_ENABLED=false python -c "
+from src.core.options_scheduler import options_scheduler
+import asyncio
+asyncio.run(options_scheduler.start_autonomous_trading())
+"
 ```
 
 ## 📊 System Architecture
