@@ -40,44 +40,12 @@ class HistoricTrainingBootstrap:
         import os
         os.makedirs("data", exist_ok=True)
         
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
+        # Use the same schema as performance_tracker.py
+        from src.core.performance_tracker import PerformanceTracker
         
-        # Create tables if they don't exist
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS predictions (
-            prediction_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            symbol TEXT DEFAULT 'RTX',
-            direction TEXT NOT NULL,
-            confidence REAL NOT NULL,
-            expected_move REAL,
-            signal_data TEXT,
-            price_at_prediction REAL,
-            reasoning TEXT
-        )
-        """)
+        # This will create the correct schema if it doesn't exist
+        tracker = PerformanceTracker(self.db_path)
         
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS prediction_outcomes (
-            outcome_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            prediction_id INTEGER,
-            timestamp_checked DATETIME DEFAULT CURRENT_TIMESTAMP,
-            actual_direction TEXT,
-            actual_move_1h REAL,
-            actual_move_4h REAL,
-            actual_move_24h REAL,
-            max_move_24h REAL,
-            price_1h REAL,
-            price_4h REAL,
-            price_24h REAL,
-            options_profit_potential REAL,
-            FOREIGN KEY (prediction_id) REFERENCES predictions(prediction_id)
-        )
-        """)
-        
-        conn.commit()
-        conn.close()
         logger.info("📊 Database initialized for historic training")
     
     async def download_historic_data(self, years: int = 3) -> pd.DataFrame:
@@ -292,6 +260,7 @@ class HistoricTrainingBootstrap:
             "timestamp": date,
             "direction": final_direction,
             "confidence": final_confidence,
+            "expected_move": strength_diff,  # Use strength difference as expected move
             "price_at_prediction": price,
             "signal_data": signal_results
         }
@@ -328,15 +297,16 @@ class HistoricTrainingBootstrap:
                     # Calculate options profit potential
                     options_profit = self._calculate_options_profit(move_24h)
                     
-                    # Store prediction
+                    # Store prediction (convert pandas Timestamp to string)
                     cursor.execute("""
                     INSERT INTO predictions 
-                    (timestamp, direction, confidence, signal_data, price_at_prediction, reasoning)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    (timestamp, direction, confidence, expected_move, signal_data, price_at_prediction, reasoning)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     """, (
-                        pred_date,
+                        pred_date.strftime('%Y-%m-%d %H:%M:%S'),
                         pred['direction'],
                         pred['confidence'],
+                        pred.get('expected_move', 0.0),
                         json.dumps(pred['signal_data']),
                         pred_price,
                         f"Historic training prediction"
@@ -398,7 +368,13 @@ class HistoricTrainingBootstrap:
         """)
         
         result = cursor.fetchone()
-        total, correct, avg_conf, avg_profit = result
+        total, correct, avg_conf, avg_profit = result or (0, 0, 0.0, 0.0)
+        
+        # Handle None values
+        total = total or 0
+        correct = correct or 0
+        avg_conf = avg_conf or 0.0
+        avg_profit = avg_profit or 0.0
         
         accuracy = correct / total if total > 0 else 0
         
@@ -413,7 +389,10 @@ class HistoricTrainingBootstrap:
         """)
         
         hc_result = cursor.fetchone()
-        hc_total, hc_correct = hc_result
+        hc_total, hc_correct = hc_result or (0, 0)
+        
+        hc_total = hc_total or 0
+        hc_correct = hc_correct or 0
         hc_accuracy = hc_correct / hc_total if hc_total > 0 else 0
         
         conn.close()

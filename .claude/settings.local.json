@@ -20,7 +20,9 @@
       "Bash(sqlite3:*)",
       "Bash(./fetch_cloud_stats.sh:*)",
       "Bash(./setup_local_ml.sh:*)",
-      "Bash(./fetch_data.sh:*)"
+      "Bash(./fetch_data.sh:*)",
+      "Bash(mv:*)",
+      "Bash(./train_now.sh:*)"
     ],
     "deny": []
   }
