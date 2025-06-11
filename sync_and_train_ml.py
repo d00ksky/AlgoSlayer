@@ -68,14 +68,14 @@ class MLTrainingPipeline:
         
         conn = sqlite3.connect(db_path)
         
-        # Query to get predictions with outcomes
+        # Query to get predictions with outcomes (handle missing expected_move)
         query = """
         SELECT 
             p.prediction_id,
             p.timestamp,
             p.direction,
             p.confidence,
-            p.expected_move,
+            COALESCE(p.expected_move, 0.0) as expected_move,
             p.signal_data,
             o.actual_direction,
             o.actual_move_1h,
@@ -113,7 +113,7 @@ class MLTrainingPipeline:
             # Extract features from each signal
             feature_dict = {
                 'confidence': row['confidence'],
-                'expected_move': row['expected_move'],
+                'expected_move': row.get('expected_move', 0.0) if pd.notna(row.get('expected_move')) else 0.0,
                 'hour': pd.to_datetime(row['timestamp']).hour,
                 'day_of_week': pd.to_datetime(row['timestamp']).dayofweek,
             }
@@ -163,7 +163,7 @@ class MLTrainingPipeline:
             'random_forest': RandomForestClassifier(n_estimators=100, random_state=42),
             'xgboost': xgb.XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss'),
             'gradient_boost': GradientBoostingClassifier(n_estimators=100, random_state=42),
-            'neural_net': MLPClassifier(hidden_layers=(100, 50), max_iter=1000, random_state=42)
+            'neural_net': MLPClassifier(hidden_layer_sizes=(100, 50), max_iter=1000, random_state=42)
         }
         
         # Train each model on direction prediction (primary objective)
