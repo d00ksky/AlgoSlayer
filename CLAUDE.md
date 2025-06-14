@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AlgoSlayer is an AI-powered autonomous RTX **OPTIONS** trading system that combines 8 AI trading signals with real options data, paper trading simulation, and machine learning. It predicts specific option contracts, tracks real P&L, and learns from actual trading outcomes to improve over time.
+AlgoSlayer is an AI-powered autonomous RTX **OPTIONS** trading system that combines 12 AI trading signals with real options data, paper trading simulation, and machine learning. It predicts specific option contracts, tracks real P&L, and learns from actual trading outcomes to improve over time.
 
 ## Key Commands
 
@@ -18,6 +18,9 @@ python test_accelerated_learning.py
 
 # Test all AI signals
 python test_signals.py
+
+# Test new high-value signals
+python test_new_signals.py
 
 # Full system integration test
 python test_system_integration.py

@@ -1,6 +1,6 @@
 # 🎯 RTX Autonomous OPTIONS Trading System
 
-**Revolutionary AI-powered autonomous OPTIONS trading system that predicts specific RTX option contracts, learns from real P&L outcomes, and adapts signal weights automatically. Features 8 advanced AI signals, real options data validation, and machine learning from actual trading profits.**
+**Revolutionary AI-powered autonomous OPTIONS trading system that predicts specific RTX option contracts, learns from real P&L outcomes, and adapts signal weights automatically. Features 12 advanced AI signals, real options data validation, and machine learning from actual trading profits.**
 
 ![RTX Options System](https://img.shields.io/badge/RTX-OPTIONS%20SYSTEM-gold?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3.11+-green?style=for-the-badge)
@@ -48,7 +48,7 @@ Result: Real leverage, real profits, real learning
 🎯 **Options Signal**: BUY_TO_OPEN_CALL
 📈 **Contract**: RTX240615C125 (RTX Jun 15 2024 $125 Call)
 💰 **Entry**: $2.45 x1 contract ($245 total + $1.15 commission)
-🧠 **Confidence**: 87% (6/8 AI signals agree)
+🧠 **Confidence**: 87% (8/12 AI signals agree)
 📊 **Expected Profit**: +150% in 3-5 days
 ⚖️ **Greeks**: Delta 0.65 | IV 28.5% | 21 DTE
 🛡️ **Risk**: Stop -50% | Target +100% | Exit before 5 DTE
@@ -290,7 +290,31 @@ CONFIDENCE_THRESHOLD=0.35
 - **Regimes**: Trending, ranging, volatile markets
 - **Adaptation**: Strategy adjustment by regime
 - **Context**: Macro market environment
+- **Weight**: 8%
+
+### 9. RTX Earnings Calendar Signal ⭐ NEW
+- **Function**: IV expansion/contraction timing around earnings
+- **Strategy**: Buy before earnings (IV expansion), sell after (IV crush)
+- **Intelligence**: RTX-specific earnings patterns and timing
 - **Weight**: 10%
+
+### 10. Options IV Percentile Signal ⭐ NEW
+- **Function**: Entry timing based on historical IV levels
+- **Strategy**: Buy when IV low (cheap options), sell when IV high
+- **Data**: 1-year IV history and percentile ranking
+- **Weight**: 10%
+
+### 11. Defense Contract News Signal ⭐ NEW
+- **Function**: RTX-specific catalyst detection
+- **Sources**: DoD contracts, defense budget news, geopolitical events
+- **Intelligence**: Real-time defense sector sentiment analysis
+- **Weight**: 8%
+
+### 12. Trump Geopolitical Signal ⭐ NEW
+- **Function**: Political sentiment impact on defense sector
+- **Sources**: Political news affecting defense spending and geopolitics
+- **Strategy**: Pro-defense rhetoric = BUY, isolationist = SELL
+- **Weight**: 5%
 
 ## ⚡ Accelerated Learning System
 
@@ -563,7 +587,7 @@ python test_system_integration.py
 
 ### Test Coverage
 - **Configuration**: Trading modes, risk management
-- **AI Signals**: All 8 signals with real data
+- **AI Signals**: All 12 signals with real data
 - **Learning Engine**: Speed and accuracy benchmarks
 - **IBKR Integration**: Connection and fallback systems
 - **Telegram Bot**: Notification delivery
@@ -603,7 +627,7 @@ python test_system_integration.py
 ## 📈 Trading Strategy
 
 ### Signal Fusion Algorithm
-1. **Collect Signals**: Run all 8 AI signals in parallel
+1. **Collect Signals**: Run all 12 AI signals in parallel
 2. **Weight Application**: Apply configured weights to each signal
 3. **Confidence Calculation**: Aggregate confidence scores
 4. **Direction Determination**: BUY/SELL/HOLD based on signal consensus
@@ -874,7 +898,7 @@ For technical support:
 
 ✅ **PRODUCTION READY** - Complete AI-powered RTX options trading system  
 ✅ **DEPLOYED & RUNNING** - Cloud server operational 24/7 (`root@64.226.96.90`)  
-✅ **REAL AI SIGNALS** - 8 signals analyzing live market data (not placeholders)  
+✅ **REAL AI SIGNALS** - 12 signals analyzing live market data (not placeholders)  
 ✅ **OPTIONS SYSTEM ACTIVE** - 55 RTX options contracts loaded and validated  
 ✅ **PAPER TRADING READY** - $1000 balance, realistic commissions and slippage  
 ✅ **ML AUTOMATION** - Travel-optimized training with Telegram control  
