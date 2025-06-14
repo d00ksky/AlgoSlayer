@@ -270,6 +270,130 @@ class TelegramBot:
             logger.error("📱 Telegram bot test failed")
         
         return result
+    
+    async def send_explanation_guide(self) -> bool:
+        """Send comprehensive explanation of trading terms and signals"""
+        
+        explanation = """
+RTX OPTIONS BASICS:
+
+Call = Right to buy
+Put = Right to sell
+75%+ confidence = Trade
+Less than 75% = Wait
+
+Commands:
+/terms - Options terms
+/signals - AI signals
+        """
+        
+        return await self.send_message(explanation.strip())
+    
+    async def send_terms_guide(self) -> bool:
+        """Send options terms guide"""
+        terms = """
+📚 <b>OPTIONS TERMS</b>
+
+<b>$145C:</b> Call option at $145 strike
+<b>$145P:</b> Put option at $145 strike
+<b>ATM:</b> At-The-Money (strike = price)
+<b>OTM:</b> Out-of-The-Money
+<b>ITM:</b> In-The-Money
+<b>DTE:</b> Days To Expiration
+<b>IV:</b> Implied Volatility
+<b>C/P Ratio:</b> Call/Put volume ratio
+
+<b>STRATEGIES:</b>
+ATM calls: Buy at current price
+OTM calls: Buy above current price
+Put spreads: Bearish strategy
+Iron condors: Sideways strategy
+        """
+        return await self.send_message(terms.strip())
+    
+    async def send_signals_guide(self) -> bool:
+        """Send AI signals guide"""
+        signals = """
+🤖 <b>AI SIGNALS EXPLAINED</b>
+
+<b>📈 Technical:</b> RSI, MACD, Bollinger Bands
+<b>📊 Options Flow:</b> Call/put activity analysis
+<b>📰 News:</b> AI sentiment from RTX news
+<b>⚡ Volatility:</b> Price movement patterns
+<b>🚀 Momentum:</b> Price acceleration trends
+<b>🏭 Sector:</b> Defense stocks correlation
+<b>🔄 Mean Reversion:</b> Overbought/oversold
+<b>🌍 Market Regime:</b> Overall market state
+
+<b>NEW SIGNALS:</b>
+<b>📅 Earnings:</b> IV expansion timing
+<b>📊 IV Percentile:</b> Options expense level
+<b>🏦 Defense Contracts:</b> Government news
+<b>🗳️ Geopolitical:</b> Political impact
+        """
+        return await self.send_message(signals.strip())
+    
+    async def handle_command(self, command: str) -> bool:
+        """Handle incoming Telegram commands"""
+        command = command.lower().strip()
+        
+        if command == "/explain" or command == "explain":
+            return await self.send_explanation_guide()
+        elif command == "/terms" or command == "terms":
+            return await self.send_terms_guide()
+        elif command == "/signals" or command == "signals":
+            return await self.send_signals_guide()
+        elif command == "/help" or command == "help":
+            return await self.send_help_message()
+        elif command == "/status" or command == "status":
+            return await self.send_status_message()
+        else:
+            return await self.send_message(f"❓ Unknown command: {command}\n\nType /help for available commands")
+    
+    async def send_help_message(self) -> bool:
+        """Send help message with available commands"""
+        help_text = """
+🤖 <b>RTX TRADING BOT COMMANDS</b>
+
+📚 <b>/explain</b> - Quick options guide
+📝 <b>/terms</b> - Options terminology
+🤖 <b>/signals</b> - AI signals explained
+📊 <b>/status</b> - System status
+📱 <b>/help</b> - This help message
+
+🎯 <b>AUTO NOTIFICATIONS:</b>
+• Predictions every 15 minutes
+• High confidence alerts (75%+)
+• Daily reports at 5 PM ET
+
+⚡ <b>SYSTEM:</b>
+• 12 AI signals active
+• Paper trading ($1,000)
+• 75% confidence threshold
+• Ready for Monday!
+        """
+        return await self.send_message(help_text.strip())
+    
+    async def send_status_message(self) -> bool:
+        """Send current system status"""
+        # This will be enhanced when we integrate with the scheduler
+        status_text = """
+📊 <b>RTX TRADING SYSTEM STATUS</b>
+
+✅ <b>System:</b> Online and operational
+🤖 <b>AI Signals:</b> 12 signals active
+📊 <b>Trading Mode:</b> Paper trading ($1,000)
+⚡ <b>Confidence:</b> 75% threshold for trades
+📱 <b>Notifications:</b> Enabled
+
+🎯 <b>NEXT STEPS:</b>
+• Monitor predictions during market hours
+• Watch for high-confidence alerts (75%+)
+• Review options strategies in notifications
+
+⏰ <b>Last Updated:</b> """ + datetime.now().strftime('%H:%M:%S')
+        
+        return await self.send_message(status_text.strip())
 
 # Global telegram bot instance
 telegram_bot = TelegramBot() 
