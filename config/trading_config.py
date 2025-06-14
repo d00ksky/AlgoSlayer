@@ -21,14 +21,21 @@ class RTXTradingConfig:
     
     # === SIGNAL WEIGHTS ===
     SIGNAL_WEIGHTS = {
-        "news_sentiment": 0.15,
-        "technical_analysis": 0.15,
-        "options_flow": 0.15,
-        "volatility_analysis": 0.15,
-        "sector_correlation": 0.10,
-        "momentum": 0.10,
-        "market_regime": 0.10,
-        "mean_reversion": 0.10
+        # Core signals (rebalanced)
+        "news_sentiment": 0.12,
+        "technical_analysis": 0.12,
+        "options_flow": 0.12,
+        "volatility_analysis": 0.12,
+        "sector_correlation": 0.08,
+        "momentum": 0.08,
+        "market_regime": 0.08,
+        "mean_reversion": 0.08,
+        
+        # NEW HIGH-VALUE OPTIONS SIGNALS
+        "rtx_earnings": 0.10,           # RTX earnings calendar for IV timing
+        "options_iv_percentile": 0.10,  # IV percentile for entry timing
+        "defense_contract": 0.08,       # Defense contract news/catalysts
+        "trump_geopolitical": 0.05      # Political/geopolitical impact
     }
     
     # === TRADING THRESHOLDS ===

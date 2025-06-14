@@ -9,6 +9,18 @@ from loguru import logger
 
 from src.signals.base_signal import BaseSignal, SignalResult
 from src.signals.news_sentiment_signal import NewsSentimentSignal
+from src.signals.technical_analysis_signal import TechnicalAnalysisSignal
+from src.signals.options_flow_signal import OptionsFlowSignal
+from src.signals.volatility_analysis_signal import VolatilityAnalysisSignal
+from src.signals.momentum_signal import MomentumSignal
+from src.signals.sector_correlation_signal import SectorCorrelationSignal
+from src.signals.mean_reversion_signal import MeanReversionSignal
+from src.signals.market_regime_signal import MarketRegimeSignal
+# NEW HIGH-VALUE SIGNALS
+from src.signals.rtx_earnings_signal import RTXEarningsSignal
+from src.signals.options_iv_percentile_signal import OptionsIVPercentileSignal
+from src.signals.defense_contract_signal import DefenseContractSignal
+from src.signals.trump_geopolitical_signal import TrumpGeopoliticalSignal
 from config.trading_config import config
 
 class TradingDecision:
@@ -48,14 +60,23 @@ class SignalFusionEngine:
     
     def initialize_signals(self):
         """Initialize all AI signals"""
-        # Add news sentiment signal
+        # Core signals
         self.signals.append(NewsSentimentSignal())
+        self.signals.append(TechnicalAnalysisSignal())
+        self.signals.append(OptionsFlowSignal())
+        self.signals.append(VolatilityAnalysisSignal())
+        self.signals.append(MomentumSignal())
+        self.signals.append(SectorCorrelationSignal())
+        self.signals.append(MeanReversionSignal())
+        self.signals.append(MarketRegimeSignal())
         
-        # TODO: Add more signals as we build them
-        # self.signals.append(OptionsFlowSignal())
-        # self.signals.append(TechnicalAnalysisSignal())
-        # self.signals.append(VolatilitySignal())
-        # self.signals.append(SectorCorrelationSignal())
+        # NEW HIGH-VALUE OPTIONS SIGNALS
+        self.signals.append(RTXEarningsSignal())
+        self.signals.append(OptionsIVPercentileSignal())
+        self.signals.append(DefenseContractSignal())
+        self.signals.append(TrumpGeopoliticalSignal())
+        
+        logger.success(f"✅ Initialized {len(self.signals)} AI signals for options trading")
     
     async def get_all_signals(self, symbol: str) -> List[SignalResult]:
         """Gather signals from all enabled AI modules"""

@@ -33,3 +33,185 @@ Sat Jun 14 13:59:58 CEST 2025: 🏁 Smart ML training finished
   - Uptime: 1h since boot
   - New predictions: 0
   - Training executed: true
+Sat Jun 14 15:15:05 CEST 2025: 🤖 Smart ML Training Starting...
+Sat Jun 14 15:15:06 CEST 2025: ✅ Starting ML training - First time training
+2025-06-14 15:15:11.830 | INFO     | __main__:main:385 - 🚀 Starting ML Training Pipeline
+2025-06-14 15:15:11.830 | INFO     | __main__:fetch_cloud_data:51 - 📥 Fetching data from cloud server...
+2025-06-14 15:15:14.335 | SUCCESS  | __main__:fetch_cloud_data:59 - ✅ Downloaded database to ml_training_data/signal_performance.db
+2025-06-14 15:15:14.335 | INFO     | __main__:load_training_data:67 - 📊 Loading training data...
+2025-06-14 15:15:14.353 | SUCCESS  | __main__:load_training_data:99 - ✅ Loaded 4 predictions with outcomes
+2025-06-14 15:15:14.354 | INFO     | __main__:engineer_features:104 - 🔧 Engineering features...
+2025-06-14 15:15:14.383 | SUCCESS  | __main__:engineer_features:156 - ✅ Created 36 features
+2025-06-14 15:15:14.383 | INFO     | __main__:train_models:161 - 🤖 Training ML models...
+2025-06-14 15:15:14.383 | INFO     | __main__:train_models:177 - Training logistic...
+Traceback (most recent call last):
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 428, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 406, in main
+    pipeline.train_models(X, y)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 180, in train_models
+    for train_idx, test_idx in tscv.split(X):
+                               ~~~~~~~~~~^^^
+  File "/home/dooksky/.pyenv/versions/3.13.4/lib/python3.13/site-packages/sklearn/model_selection/_split.py", line 1276, in _split
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Cannot have number of folds=6 greater than the number of samples=4.
+Sat Jun 14 15:15:14 CEST 2025: ❌ ML training failed with exit code 1
+Sat Jun 14 15:15:17 CEST 2025: 🏁 Smart ML training finished
+  - Uptime: 2h since boot
+  - New predictions: 0
+  - Training executed: true
+Sat Jun 14 15:18:48 CEST 2025: 🤖 Smart ML Training Starting...
+Sat Jun 14 15:18:52 CEST 2025: ✅ Starting ML training - First time training
+2025-06-14 15:18:57.734 | INFO     | __main__:main:399 - 🚀 Starting ML Training Pipeline
+2025-06-14 15:18:57.734 | INFO     | __main__:fetch_cloud_data:51 - 📥 Fetching data from cloud server...
+2025-06-14 15:19:00.482 | SUCCESS  | __main__:fetch_cloud_data:59 - ✅ Downloaded database to ml_training_data/signal_performance.db
+2025-06-14 15:19:00.482 | INFO     | __main__:load_training_data:67 - 📊 Loading training data...
+2025-06-14 15:19:00.492 | SUCCESS  | __main__:load_training_data:99 - ✅ Loaded 4 predictions with outcomes
+2025-06-14 15:19:00.493 | INFO     | __main__:engineer_features:104 - 🔧 Engineering features...
+2025-06-14 15:19:00.520 | SUCCESS  | __main__:engineer_features:156 - ✅ Created 36 features
+2025-06-14 15:19:00.520 | INFO     | __main__:train_models:161 - 🤖 Training ML models...
+2025-06-14 15:19:00.520 | WARNING  | __main__:train_models:168 - ⚠️ Only 4 samples available - using simple train/test split
+2025-06-14 15:19:00.520 | INFO     | __main__:train_models:178 - 📊 Using 1 validation splits for 4 samples
+2025-06-14 15:19:00.521 | INFO     | __main__:train_models:191 - Training logistic...
+Traceback (most recent call last):
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 442, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 420, in main
+    pipeline.train_models(X, y)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 204, in train_models
+    model.fit(X_train_scaled, y_train['direction_correct'])
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dooksky/.pyenv/versions/3.13.4/lib/python3.13/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/home/dooksky/.pyenv/versions/3.13.4/lib/python3.13/site-packages/sklearn/linear_model/_logistic.py", line 1301, in fit
+    raise ValueError(
+    ...<3 lines>...
+    )
+ValueError: This solver needs samples of at least 2 classes in the data, but the data contains only one class: np.int64(1)
+Sat Jun 14 15:19:00 CEST 2025: ❌ ML training failed with exit code 1
+Sat Jun 14 15:19:04 CEST 2025: 🏁 Smart ML training finished
+  - Uptime: 2h since boot
+  - New predictions: 0
+  - Training executed: true
+Sat Jun 14 15:20:44 CEST 2025: 🤖 Smart ML Training Starting...
+Sat Jun 14 15:20:47 CEST 2025: ✅ Starting ML training - First time training
+2025-06-14 15:20:51.420 | INFO     | __main__:main:399 - 🚀 Starting ML Training Pipeline
+2025-06-14 15:20:51.420 | INFO     | __main__:fetch_cloud_data:51 - 📥 Fetching data from cloud server...
+2025-06-14 15:20:52.897 | SUCCESS  | __main__:fetch_cloud_data:59 - ✅ Downloaded database to ml_training_data/signal_performance.db
+2025-06-14 15:20:52.897 | INFO     | __main__:load_training_data:67 - 📊 Loading training data...
+2025-06-14 15:20:52.907 | SUCCESS  | __main__:load_training_data:99 - ✅ Loaded 4 predictions with outcomes
+2025-06-14 15:20:52.908 | INFO     | __main__:engineer_features:104 - 🔧 Engineering features...
+2025-06-14 15:20:52.935 | SUCCESS  | __main__:engineer_features:156 - ✅ Created 36 features
+2025-06-14 15:20:52.935 | INFO     | __main__:train_models:161 - 🤖 Training ML models...
+2025-06-14 15:20:52.935 | WARNING  | __main__:train_models:168 - ⚠️ Only 4 samples available - using simple train/test split
+2025-06-14 15:20:52.936 | INFO     | __main__:train_models:178 - 📊 Using 1 validation splits for 4 samples
+2025-06-14 15:20:52.936 | INFO     | __main__:train_models:191 - Training logistic...
+Traceback (most recent call last):
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 442, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 420, in main
+    pipeline.train_models(X, y)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 204, in train_models
+    model.fit(X_train_scaled, y_train['direction_correct'])
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dooksky/.pyenv/versions/3.13.4/lib/python3.13/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/home/dooksky/.pyenv/versions/3.13.4/lib/python3.13/site-packages/sklearn/linear_model/_logistic.py", line 1301, in fit
+    raise ValueError(
+    ...<3 lines>...
+    )
+ValueError: This solver needs samples of at least 2 classes in the data, but the data contains only one class: np.int64(1)
+Sat Jun 14 15:20:53 CEST 2025: ❌ ML training failed with exit code 1
+Sat Jun 14 15:20:56 CEST 2025: 🏁 Smart ML training finished
+  - Uptime: 2h since boot
+  - New predictions: 0
+  - Training executed: true
+Sat Jun 14 15:21:59 CEST 2025: 🤖 Smart ML Training Starting...
+Sat Jun 14 15:22:02 CEST 2025: ✅ Starting ML training - First time training
+2025-06-14 15:22:06.425 | INFO     | __main__:main:426 - 🚀 Starting ML Training Pipeline
+2025-06-14 15:22:06.425 | INFO     | __main__:fetch_cloud_data:56 - 📊 Using local bootstrap data (historic training)
+2025-06-14 15:22:06.429 | SUCCESS  | __main__:fetch_cloud_data:68 - ✅ Using 4146 historical predictions from bootstrap
+2025-06-14 15:22:06.430 | INFO     | __main__:load_training_data:94 - 📊 Loading training data...
+2025-06-14 15:22:06.458 | SUCCESS  | __main__:load_training_data:126 - ✅ Loaded 4146 predictions with outcomes
+2025-06-14 15:22:06.459 | INFO     | __main__:engineer_features:131 - 🔧 Engineering features...
+2025-06-14 15:22:10.875 | SUCCESS  | __main__:engineer_features:183 - ✅ Created 20 features
+2025-06-14 15:22:10.878 | INFO     | __main__:train_models:188 - 🤖 Training ML models...
+2025-06-14 15:22:10.879 | INFO     | __main__:train_models:205 - 📊 Using 3 validation splits for 4146 samples
+2025-06-14 15:22:10.879 | INFO     | __main__:train_models:218 - Training logistic...
+2025-06-14 15:22:10.931 | INFO     | __main__:train_models:245 - logistic average accuracy: 0.900
+2025-06-14 15:22:10.931 | INFO     | __main__:train_models:218 - Training random_forest...
+2025-06-14 15:22:11.499 | INFO     | __main__:train_models:245 - random_forest average accuracy: 0.894
+2025-06-14 15:22:11.499 | INFO     | __main__:train_models:218 - Training xgboost...
+2025-06-14 15:22:13.224 | INFO     | __main__:train_models:245 - xgboost average accuracy: 0.900
+2025-06-14 15:22:13.224 | INFO     | __main__:train_models:218 - Training gradient_boost...
+2025-06-14 15:22:13.707 | INFO     | __main__:train_models:245 - gradient_boost average accuracy: 0.896
+2025-06-14 15:22:13.707 | INFO     | __main__:train_models:218 - Training neural_net...
+2025-06-14 15:22:18.978 | INFO     | __main__:train_models:245 - neural_net average accuracy: 0.896
+2025-06-14 15:22:18.978 | SUCCESS  | __main__:train_models:250 - ✅ Best model: logistic (0.900 accuracy)
+2025-06-14 15:22:18.978 | INFO     | __main__:analyze_feature_importance:254 - 📊 Analyzing feature importance...
+2025-06-14 15:22:18.995 | INFO     | __main__:analyze_feature_importance:280 - Top 10 most important features:
+2025-06-14 15:22:18.995 | INFO     | __main__:analyze_feature_importance:282 -   day_of_week: 0.6134
+2025-06-14 15:22:18.995 | INFO     | __main__:analyze_feature_importance:282 -   expected_move: 0.0748
+2025-06-14 15:22:18.995 | INFO     | __main__:analyze_feature_importance:282 -   technical_analysis_sell: 0.0600
+2025-06-14 15:22:18.995 | INFO     | __main__:analyze_feature_importance:282 -   momentum_sell: 0.0330
+2025-06-14 15:22:18.996 | INFO     | __main__:analyze_feature_importance:282 -   technical_analysis_buy: 0.0314
+2025-06-14 15:22:18.996 | INFO     | __main__:analyze_feature_importance:282 -   momentum_strength: 0.0288
+2025-06-14 15:22:18.996 | INFO     | __main__:analyze_feature_importance:282 -   momentum_confidence: 0.0276
+2025-06-14 15:22:18.996 | INFO     | __main__:analyze_feature_importance:282 -   technical_analysis_confidence: 0.0257
+2025-06-14 15:22:18.996 | INFO     | __main__:analyze_feature_importance:282 -   mean_reversion_strength: 0.0199
+2025-06-14 15:22:18.997 | INFO     | __main__:analyze_feature_importance:282 -   technical_analysis_strength: 0.0196
+2025-06-14 15:22:18.997 | INFO     | __main__:save_models_locally:309 - 💾 Saving models locally...
+2025-06-14 15:22:18.997 | INFO     | __main__:generate_signal_weights:286 - ⚖️ Generating adaptive signal weights...
+2025-06-14 15:22:18.997 | INFO     | __main__:generate_signal_weights:301 - New signal weights:
+2025-06-14 15:22:18.997 | INFO     | __main__:generate_signal_weights:303 -   technical_analysis: 13.8%
+2025-06-14 15:22:18.997 | INFO     | __main__:generate_signal_weights:303 -   momentum: 11.8%
+2025-06-14 15:22:18.997 | INFO     | __main__:generate_signal_weights:303 -   mean_reversion: 9.4%
+2025-06-14 15:22:18.998 | INFO     | __main__:generate_signal_weights:303 -   volatility_analysis: 5.0%
+2025-06-14 15:22:18.998 | SUCCESS  | __main__:save_models_locally:334 - ✅ Models saved to trained_models
+2025-06-14 15:22:18.998 | INFO     | __main__:generate_training_report:375 - 📝 Generating training report...
+2025-06-14 15:22:18.998 | INFO     | __main__:generate_training_report:417 - Report saved to trained_models/training_report.md
+2025-06-14 15:22:18.998 | INFO     | __main__:upload_to_cloud:339 - ☁️ Uploading models to cloud...
+scp: dest open "/opt/rtx-trading/data/models/current_model.pkl": No such file or directory
+scp: failed to upload file trained_models/rtx_model_20250614_152218.pkl to /opt/rtx-trading/data/models/current_model.pkl
+2025-06-14 15:22:20.635 | ERROR    | __main__:upload_to_cloud:349 - ❌ Failed to upload model: Command 'scp -o StrictHostKeyChecking=no trained_models/rtx_model_20250614_152218.pkl root@64.226.96.90:/opt/rtx-trading/data/models/current_model.pkl' returned non-zero exit status 1.
+2025-06-14 15:22:20.636 | WARNING  | __main__:main:464 - ⚠️ Models trained but upload failed
+
+==================================================
+# ML Training Report
+Generated: 2025-06-14 15:22:18
+
+## Training Data Summary
+- Total predictions: 4146
+- Date range: 0 to 4145
+- Features: 20
+
+## Model Performance
+- logistic: 0.900 accuracy
+- xgboost: 0.900 accuracy
+- gradient_boost: 0.896 accuracy
+- neural_net: 0.896 accuracy
+- random_forest: 0.894 accuracy
+
+## Signal Importance
+- technical_analysis: 0.1367
+- momentum: 0.1067
+- mean_reversion: 0.0685
+- volatility_analysis: 0.0000
+
+## Recommendations
+✅ Model performance is good - consider increasing position sizes
+==================================================
+
+Sat Jun 14 15:22:20 CEST 2025: ✅ ML training completed successfully
+Sat Jun 14 15:22:25 CEST 2025: 🏁 Smart ML training finished
+  - Uptime: 2h since boot
+  - New predictions: 0
+  - Training executed: true

@@ -10,6 +10,7 @@ import json
 import pickle
 import sqlite3
 import subprocess
+import shutil
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -47,7 +48,33 @@ class MLTrainingPipeline:
         self.performance_metrics = {}
         
     def fetch_cloud_data(self):
-        """Fetch prediction and performance data from cloud server"""
+        """Fetch prediction and performance data from cloud server or use local bootstrap data"""
+        
+        # Check if we have local bootstrap data (from historic training)
+        local_bootstrap_path = "data/signal_performance.db"
+        if os.path.exists(local_bootstrap_path):
+            logger.info("📊 Using local bootstrap data (historic training)")
+            
+            # Check how much data we have
+            import sqlite3
+            try:
+                conn = sqlite3.connect(local_bootstrap_path)
+                cursor = conn.cursor()
+                cursor.execute('SELECT COUNT(*) FROM predictions')
+                count = cursor.fetchone()[0]
+                conn.close()
+                
+                if count > 100:  # If we have substantial historical data
+                    logger.success(f"✅ Using {count} historical predictions from bootstrap")
+                    
+                    # Copy to ML training directory
+                    training_db_path = os.path.join(LOCAL_DATA_DIR, "signal_performance.db")
+                    shutil.copy2(local_bootstrap_path, training_db_path)
+                    return training_db_path
+            except Exception as e:
+                logger.warning(f"⚠️ Could not check local bootstrap data: {e}")
+        
+        # Fallback to cloud data
         logger.info("📥 Fetching data from cloud server...")
         
         # Download SQLite database
@@ -160,8 +187,22 @@ class MLTrainingPipeline:
         """Train multiple ML models"""
         logger.info("🤖 Training ML models...")
         
-        # Split data (time series aware)
-        tscv = TimeSeriesSplit(n_splits=5)
+        # Split data (time series aware) - adapt to data size
+        n_samples = len(X)
+        n_splits = min(3, max(2, n_samples - 2))  # 2-3 splits depending on data size
+        
+        if n_samples < 5:
+            logger.warning(f"⚠️ Only {n_samples} samples available - using simple train/test split")
+            # For very small datasets, just use simple validation
+            split_idx = int(n_samples * 0.7)
+            train_indices = list(range(split_idx))
+            test_indices = list(range(split_idx, n_samples))
+            splits = [(train_indices, test_indices)] if test_indices else [(train_indices, train_indices)]
+        else:
+            tscv = TimeSeriesSplit(n_splits=n_splits)
+            splits = list(tscv.split(X))
+        
+        logger.info(f"📊 Using {len(splits)} validation splits for {n_samples} samples")
         
         # Models to train
         models = {
@@ -177,7 +218,7 @@ class MLTrainingPipeline:
             logger.info(f"Training {name}...")
             
             scores = []
-            for train_idx, test_idx in tscv.split(X):
+            for train_idx, test_idx in splits:
                 X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
                 y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
                 

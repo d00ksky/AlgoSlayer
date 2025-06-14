@@ -30,7 +30,11 @@
       "Bash(./run_smart_ml_training.sh:*)",
       "Bash(./start_telegram_bot.sh:*)",
       "Bash(./check_ml_status.sh:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(./sync_git_safe.sh status:*)",
+      "Bash(./sync_git_safe.sh:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
