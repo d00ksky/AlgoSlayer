@@ -377,7 +377,7 @@ Iron condors: Sideways strategy
     async def send_status_message(self) -> bool:
         """Send current system status"""
         # This will be enhanced when we integrate with the scheduler
-        status_text = """
+        status_text = f"""
 📊 <b>RTX TRADING SYSTEM STATUS</b>
 
 ✅ <b>System:</b> Online and operational
@@ -391,7 +391,7 @@ Iron condors: Sideways strategy
 • Watch for high-confidence alerts (75%+)
 • Review options strategies in notifications
 
-⏰ <b>Last Updated:</b> """ + datetime.now().strftime('%H:%M:%S')
+⏰ <b>Last Updated:</b> {datetime.now().strftime('%H:%M:%S')}"""
         
         return await self.send_message(status_text.strip())
 
