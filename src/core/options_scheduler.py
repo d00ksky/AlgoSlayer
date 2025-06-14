@@ -14,6 +14,7 @@ from src.core.telegram_bot import telegram_bot
 from src.core.options_data_engine import options_data_engine
 from src.core.options_prediction_engine import options_prediction_engine
 from src.core.options_paper_trader import options_paper_trader
+from src.core.prediction_outcome_tracker import outcome_tracker
 
 # Import all AI signals
 from src.signals.news_sentiment_signal import NewsSentimentSignal
@@ -118,7 +119,11 @@ class OptionsScheduler:
             # Step 1: Check existing positions
             await self._check_existing_positions()
             
-            # Step 2: Generate new signals
+            # Step 2: Track prediction outcomes (every 5th cycle)
+            if self.cycle_count % 5 == 0:
+                asyncio.create_task(outcome_tracker.track_all_outcomes())
+            
+            # Step 3: Generate new signals
             signals_data = await self._generate_signals()
             
             if not signals_data:

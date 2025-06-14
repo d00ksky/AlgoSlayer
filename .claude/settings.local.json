@@ -23,7 +23,14 @@
       "Bash(./fetch_data.sh:*)",
       "Bash(mv:*)",
       "Bash(./train_now.sh:*)",
-      "Bash(ssh:*)"
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(crontab:*)",
+      "Bash(./setup_travel_automation.sh:*)",
+      "Bash(./run_smart_ml_training.sh:*)",
+      "Bash(./start_telegram_bot.sh:*)",
+      "Bash(./check_ml_status.sh:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

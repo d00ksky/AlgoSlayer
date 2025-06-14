@@ -1,0 +1,35 @@
+Sat Jun 14 11:53:54 CEST 2025: Starting ML training...
+timeout: failed to run command ‘python’: No such file or directory
+Sat Jun 14 11:53:54 CEST 2025: ML training failed with exit code 127
+Sat Jun 14 11:53:54 CEST 2025: ML training wrapper finished
+Sat Jun 14 13:59:53 CEST 2025: 🤖 Smart ML Training Starting...
+Sat Jun 14 13:59:55 CEST 2025: ✅ Starting ML training - First time training
+2025-06-14 13:59:56.447 | INFO     | __main__:main:385 - 🚀 Starting ML Training Pipeline
+2025-06-14 13:59:56.447 | INFO     | __main__:fetch_cloud_data:51 - 📥 Fetching data from cloud server...
+2025-06-14 13:59:58.238 | SUCCESS  | __main__:fetch_cloud_data:59 - ✅ Downloaded database to ml_training_data/signal_performance.db
+2025-06-14 13:59:58.239 | INFO     | __main__:load_training_data:67 - 📊 Loading training data...
+2025-06-14 13:59:58.241 | SUCCESS  | __main__:load_training_data:99 - ✅ Loaded 4 predictions with outcomes
+2025-06-14 13:59:58.242 | INFO     | __main__:engineer_features:104 - 🔧 Engineering features...
+2025-06-14 13:59:58.250 | SUCCESS  | __main__:engineer_features:156 - ✅ Created 36 features
+2025-06-14 13:59:58.250 | INFO     | __main__:train_models:161 - 🤖 Training ML models...
+2025-06-14 13:59:58.258 | INFO     | __main__:train_models:177 - Training logistic...
+Traceback (most recent call last):
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 428, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 406, in main
+    pipeline.train_models(X, y)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/dooksky/repo/AlgoSlayer/sync_and_train_ml.py", line 180, in train_models
+    for train_idx, test_idx in tscv.split(X):
+                               ~~~~~~~~~~^^^
+  File "/home/dooksky/.pyenv/versions/3.13.4/lib/python3.13/site-packages/sklearn/model_selection/_split.py", line 1276, in _split
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Cannot have number of folds=6 greater than the number of samples=4.
+Sat Jun 14 13:59:58 CEST 2025: ❌ ML training failed with exit code 1
+Sat Jun 14 13:59:58 CEST 2025: 🏁 Smart ML training finished
+  - Uptime: 1h since boot
+  - New predictions: 0
+  - Training executed: true

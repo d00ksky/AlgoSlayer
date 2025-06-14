@@ -131,11 +131,17 @@ class MLTrainingPipeline:
             
             # Create labels for different objectives
             # 1. Direction accuracy (primary)
-            direction_correct = 1 if row['direction'] == row['actual_direction'] else 0
+            direction_correct = 1 if row['direction'] == row.get('actual_direction', 'HOLD') else 0
             # 2. Profitable move (3%+ for options)
-            profitable_move = 1 if row['actual_move_24h'] >= 0.03 else 0
+            actual_move = row.get('actual_move_24h', 0)
+            if pd.isna(actual_move) or actual_move is None:
+                actual_move = 0
+            profitable_move = 1 if actual_move >= 0.03 else 0
             # 3. High profit potential
-            high_profit = 1 if row['options_profit_potential'] >= 1.0 else 0  # 100%+ profit
+            profit_potential = row.get('options_profit_potential', 0)
+            if pd.isna(profit_potential) or profit_potential is None:
+                profit_potential = 0
+            high_profit = 1 if profit_potential >= 1.0 else 0  # 100%+ profit
             
             labels.append({
                 'direction_correct': direction_correct,

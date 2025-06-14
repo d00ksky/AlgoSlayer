@@ -592,12 +592,16 @@ ML_MIN_DATA_POINTS=100
 #### Cloud Server (2GB RAM) - Lightweight Operations
 ```bash
 # Runs continuously on cloud
-- Collect all predictions with timestamp, confidence, signals used
-- Track actual RTX price movements 1hr, 4hr, 24hr after prediction
-- Calculate simple performance metrics (accuracy, profit/loss)
-- Run lightweight models (LogisticRegression, basic RandomForest)
-- Store everything in SQLite for later training
-- Make real-time predictions with current best model
+- Make OPTIONS predictions (e.g., "BUY RTX240620C147 @ $1.81")
+- Execute PAPER TRADES with virtual money when trading is disabled
+- Track ACTUAL OPTIONS P&L:
+  - Entry price, strike, expiry, IV, Greeks
+  - Monitor bid/ask prices throughout the day
+  - Auto-close when profit target (+100%) or stop loss (-50%) hit
+  - Track time decay and early exit conditions
+  - Calculate REAL P&L including commissions
+- Store all options trades and outcomes in SQLite
+- Learn which signals lead to PROFITABLE OPTIONS TRADES
 ```
 
 #### Local Machine - Heavy ML Training
@@ -606,22 +610,25 @@ ML_MIN_DATA_POINTS=100
 python sync_and_train_ml.py
 
 # This script will:
-1. SSH to cloud server and fetch all accumulated data
-2. Train advanced models (XGBoost, Neural Networks, LSTM)
-3. Backtest with walk-forward validation
-4. Calculate which signal combinations work best
-5. Generate new model weights and configurations
-6. Upload optimized models back to cloud
-7. Cloud automatically uses new models for predictions
+1. SSH to cloud server and fetch all OPTIONS TRADES data
+2. Analyze which option predictions were profitable:
+   - Which signals led to winning trades
+   - Optimal entry conditions (IV, Greeks, DTE)
+   - Best exit timing (profit target vs time decay)
+3. Train models to predict OPTIONS PROFITABILITY (not just direction)
+4. Generate new signal weights based on OPTIONS P&L
+5. Upload optimized models back to cloud
+6. Cloud uses new models for better OPTIONS selection
 ```
 
 #### Daily Learning Cycle
-- **5 PM ET**: Generate comprehensive report
-- **Track**: Yesterday's predictions vs actual outcomes
-- **Calculate**: Options P&L if we had traded
-- **Identify**: Which signals performed best
-- **Adjust**: Signal weights based on 30-day performance
-- **Report**: Send to Telegram with insights
+- **Throughout Day**: Monitor open paper positions, auto-close at targets
+- **5 PM ET**: Generate comprehensive OPTIONS TRADING report
+- **Track**: All options trades executed and their P&L
+- **Calculate**: Win rate, profit factor, average winner/loser
+- **Identify**: Which signals led to profitable OPTIONS trades
+- **Adjust**: Signal weights based on actual OPTIONS performance
+- **Report**: Send detailed P&L report to Telegram
 
 ### Options-Specific Learning Features
 1. **IV Percentile Tracking** - Where is RTX IV vs historical range

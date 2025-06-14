@@ -62,18 +62,22 @@ class OptionsDataEngine:
                     for _, option in chain.calls.iterrows():
                         if self._validate_option_data(option, "call"):
                             contract_symbol = self._generate_contract_symbol(option, exp_date, "C")
-                            validated_chain[contract_symbol] = self._format_option_data(option, exp_date, "call")
-                            total_contracts += 1
+                            if contract_symbol:  # Only add if symbol generation succeeded
+                                validated_chain[contract_symbol] = self._format_option_data(option, exp_date, "call")
+                                total_contracts += 1
                     
                     # Process puts
                     for _, option in chain.puts.iterrows():
                         if self._validate_option_data(option, "put"):
                             contract_symbol = self._generate_contract_symbol(option, exp_date, "P")
-                            validated_chain[contract_symbol] = self._format_option_data(option, exp_date, "put")
-                            total_contracts += 1
+                            if contract_symbol:  # Only add if symbol generation succeeded
+                                validated_chain[contract_symbol] = self._format_option_data(option, exp_date, "put")
+                                total_contracts += 1
                             
                 except Exception as e:
                     logger.warning(f"⚠️ Error processing {exp_date}: {e}")
+                    import traceback
+                    logger.debug(f"Traceback: {traceback.format_exc()}")
                     continue
             
             self.cached_chain = validated_chain
@@ -93,19 +97,19 @@ class OptionsDataEngine:
             days_to_expiry = (exp_datetime - datetime.now()).days
             
             # Check DTE limits
-            if days_to_expiry < options_config.MIN_DAYS_TO_EXPIRY:
+            if days_to_expiry < 3:  # Too close to expiry (less than 3 days)
                 return False
             if days_to_expiry > options_config.MAX_DAYS_TO_EXPIRY:
                 return False
             
             # Check expiration preference
             if options_config.EXPIRATION_PREFERENCE == "weekly":
-                # Weekly options typically expire on Fridays
-                return days_to_expiry <= 7
+                # Weekly options typically expire on Fridays (up to 10 days out)
+                return days_to_expiry <= 10
             elif options_config.EXPIRATION_PREFERENCE == "monthly":
                 # Monthly options typically expire on 3rd Friday
-                return days_to_expiry > 7
-            # "both" allows all valid DTEs
+                return days_to_expiry > 10
+            # "both" allows all valid DTEs within our range
             
             return True
             
@@ -116,6 +120,14 @@ class OptionsDataEngine:
         """Rigorous validation to ensure option data is real and tradeable"""
         
         try:
+            # First validate strike price
+            try:
+                strike = float(option['strike'])
+                if pd.isna(strike) or np.isnan(strike) or strike <= 0:
+                    return False
+            except (ValueError, TypeError):
+                return False
+            
             # Basic price validation
             if pd.isna(option['bid']) or option['bid'] <= 0:
                 return False
@@ -163,35 +175,67 @@ class OptionsDataEngine:
         """Generate standard option contract symbol"""
         # Format: RTX240615C125000 (RTX Jun 15 2024 $125 Call)
         try:
+            # Check for NaN or invalid strike
+            try:
+                strike_value = float(option['strike'])
+                if pd.isna(strike_value) or np.isnan(strike_value) or strike_value <= 0:
+                    return None
+            except (ValueError, TypeError):
+                return None
+                
             exp_datetime = datetime.strptime(exp_date, "%Y-%m-%d")
             exp_str = exp_datetime.strftime("%y%m%d")
-            strike_str = f"{int(option['strike'] * 1000):08d}"
+            strike_str = f"{int(float(option['strike']) * 1000):08d}"
             
             return f"{self.symbol}{exp_str}{call_put}{strike_str}"
-        except:
-            return f"{self.symbol}_{exp_date}_{call_put}_{option['strike']}"
+        except Exception as e:
+            logger.warning(f"Error generating symbol: {e}")
+            return None
     
     def _format_option_data(self, option: pd.Series, exp_date: str, option_type: str) -> Dict:
         """Format option data for our system"""
-        return {
-            'type': option_type,
-            'strike': float(option['strike']),
-            'expiry': exp_date,
-            'bid': float(option['bid']),
-            'ask': float(option['ask']),
-            'last': float(option['lastPrice']),
-            'volume': int(option.get('volume', 0) or 0),
-            'openInterest': int(option.get('openInterest', 0) or 0),
-            'impliedVolatility': float(option['impliedVolatility']),
-            'delta': float(option.get('delta', 0) or 0),
-            'gamma': float(option.get('gamma', 0) or 0),
-            'theta': float(option.get('theta', 0) or 0),
-            'vega': float(option.get('vega', 0) or 0),
-            'timestamp': datetime.now().isoformat(),
-            'mid_price': (float(option['bid']) + float(option['ask'])) / 2,
-            'spread_pct': ((float(option['ask']) - float(option['bid'])) / 
-                          ((float(option['ask']) + float(option['bid'])) / 2)) if option['bid'] > 0 else 0
-        }
+        try:
+            # Safely convert values with NaN handling
+            def safe_float(val, default=0.0):
+                try:
+                    f = float(val)
+                    return default if pd.isna(f) or np.isnan(f) else f
+                except (ValueError, TypeError):
+                    return default
+            
+            def safe_int(val, default=0):
+                try:
+                    f = float(val)
+                    if pd.isna(f) or np.isnan(f):
+                        return default
+                    return int(f)
+                except (ValueError, TypeError):
+                    return default
+            
+            bid = safe_float(option['bid'])
+            ask = safe_float(option['ask'])
+            
+            return {
+                'type': option_type,
+                'strike': safe_float(option['strike']),
+                'expiry': exp_date,
+                'bid': bid,
+                'ask': ask,
+                'last': safe_float(option['lastPrice']),
+                'volume': safe_int(option.get('volume', 0)),
+                'openInterest': safe_int(option.get('openInterest', 0)),
+                'impliedVolatility': safe_float(option['impliedVolatility']),
+                'delta': safe_float(option.get('delta', 0)),
+                'gamma': safe_float(option.get('gamma', 0)),
+                'theta': safe_float(option.get('theta', 0)),
+                'vega': safe_float(option.get('vega', 0)),
+                'timestamp': datetime.now().isoformat(),
+                'mid_price': (bid + ask) / 2 if bid > 0 and ask > 0 else 0,
+                'spread_pct': ((ask - bid) / ((ask + bid) / 2)) if bid > 0 else 0
+            }
+        except Exception as e:
+            logger.error(f"Error formatting option data: {e}")
+            raise
     
     def get_best_options_for_direction(self, direction: str, confidence: float, account_balance: float) -> List[Dict]:
         """Find the best options for predicted direction"""
@@ -228,10 +272,28 @@ class OptionsDataEngine:
             if option_cost > max_investment:
                 continue
             
-            # Add to candidates
+            # Add to candidates with additional fields
             option_data['contract_symbol'] = contract_symbol
             option_data['cost_per_contract'] = option_cost
             option_data['max_contracts'] = options_config.get_contracts_for_trade(option_data['ask'], account_balance)
+            
+            # Calculate days to expiry
+            from datetime import datetime
+            exp_date = datetime.strptime(option_data['expiry'], "%Y-%m-%d")
+            option_data['dte'] = (exp_date - datetime.now()).days
+            option_data['days_to_expiry'] = option_data['dte']
+            
+            # Add pricing info
+            option_data['ask_price'] = option_data['ask']
+            option_data['contracts'] = min(1, option_data['max_contracts'])  # Start with 1 contract
+            option_data['total_cost'] = option_cost + options_config.calculate_commission("BUY", 1)
+            
+            # Add volume and OI with better names
+            option_data['open_interest'] = option_data.get('openInterest', 0)
+            option_data['iv'] = option_data.get('impliedVolatility', 0)
+            
+            # Calculate and add score
+            option_data['score'] = self._calculate_option_score(option_data)
             
             filtered_options.append(option_data)
         

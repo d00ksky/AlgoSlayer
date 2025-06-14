@@ -4,6 +4,10 @@ Configurable settings for RTX options trading strategy
 """
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class OptionsConfig:
     """Configurable options trading parameters"""
