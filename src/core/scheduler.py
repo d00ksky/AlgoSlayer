@@ -20,6 +20,11 @@ from src.signals.momentum_signal import MomentumSignal
 from src.signals.sector_correlation_signal import SectorCorrelationSignal
 from src.signals.mean_reversion_signal import MeanReversionSignal
 from src.signals.market_regime_signal import MarketRegimeSignal
+# NEW HIGH-VALUE OPTIONS SIGNALS
+from src.signals.rtx_earnings_signal import RTXEarningsSignal
+from src.signals.options_iv_percentile_signal import OptionsIVPercentileSignal
+from src.signals.defense_contract_signal import DefenseContractSignal
+from src.signals.trump_geopolitical_signal import TrumpGeopoliticalSignal
 
 class RTXTradingScheduler:
     """Main scheduler for autonomous RTX trading"""
@@ -31,6 +36,7 @@ class RTXTradingScheduler:
         
         # Initialize AI signals
         self.signals = {
+            # Core signals
             "news_sentiment": NewsSentimentSignal(),
             "technical_analysis": TechnicalAnalysisSignal(),
             "options_flow": OptionsFlowSignal(),
@@ -38,7 +44,13 @@ class RTXTradingScheduler:
             "momentum": MomentumSignal(),
             "sector_correlation": SectorCorrelationSignal(),
             "mean_reversion": MeanReversionSignal(),
-            "market_regime": MarketRegimeSignal()
+            "market_regime": MarketRegimeSignal(),
+            
+            # NEW HIGH-VALUE OPTIONS SIGNALS
+            "rtx_earnings": RTXEarningsSignal(),
+            "options_iv_percentile": OptionsIVPercentileSignal(),
+            "defense_contract": DefenseContractSignal(),
+            "trump_geopolitical": TrumpGeopoliticalSignal()
         }
         
         # Trading state
