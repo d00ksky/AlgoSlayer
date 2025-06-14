@@ -297,14 +297,34 @@ class OptionsFlowSignal:
             direction = "HOLD"
             signal_strength = 0.1
         
-        # Create reasoning
-        reasoning = f"Options flow: {sentiment} sentiment"
-        if call_put_ratio != 1.0:
-            reasoning += f", C/P ratio: {call_put_ratio:.1f}"
+        # Create enhanced options-specific reasoning
+        current_price = flow_analysis.get("current_price", 0)
+        
+        reasoning = f"📊 OPTIONS FLOW SIGNAL: {direction}\n"
+        reasoning += f"🎯 RTX @ ${current_price:.2f} | C/P Ratio: {call_put_ratio:.1f}\n"
+        
+        # Add specific options insights
         if unusual_activity:
-            reasoning += f", {len(unusual_activity)} unusual activities"
+            top_strikes = []
+            for activity in unusual_activity[:3]:
+                strike_type = "C" if activity["type"] == "CALL" else "P"
+                top_strikes.append(f"${activity['strike']:.0f}{strike_type}")
+            reasoning += f"🔥 Heavy activity: {', '.join(top_strikes)}\n"
+        
+        # Options strategy recommendations
+        if direction == "BUY" and call_put_ratio > 1.5:
+            reasoning += "💡 Strategy: Consider ATM/OTM calls, high call flow suggests upside\n"
+            reasoning += f"🎯 Target strikes: ${current_price:.0f}-${current_price*1.05:.0f} calls"
+        elif direction == "SELL" and call_put_ratio < 0.7:
+            reasoning += "💡 Strategy: Put protection active, consider bearish spreads\n"
+            reasoning += f"🎯 Target strikes: ${current_price*0.95:.0f}-${current_price:.0f} puts"
+        elif len(unusual_activity) > 5:
+            reasoning += "💡 High volatility expected - consider straddles/strangles"
+        else:
+            reasoning += "💡 Moderate activity - wait for clearer directional signals"
+        
         if smart_money_signals:
-            reasoning += f", smart money: {smart_money_signals[0][:30]}..."
+            reasoning += f"\n🏦 Institutional: {smart_money_signals[0]}"
         
         return {
             "signal_name": self.signal_name,

@@ -240,10 +240,47 @@ class TechnicalAnalysisSignal:
         
         signal_strength = confidence * self.weight
         
-        # Create reasoning
-        reasoning = f"Technical analysis: {bullish_signals} bullish, {bearish_signals} bearish signals"
+        # Create enhanced options-specific reasoning
+        current_price = indicators['current_price']
+        rsi = indicators['rsi']
+        
+        reasoning = f"📈 TECHNICAL ANALYSIS: {direction} Signal\n"
+        reasoning += f"🎯 RTX @ ${current_price:.2f} | RSI: {rsi:.1f}\n"
+        reasoning += f"📊 Signals: {bullish_signals} bullish, {bearish_signals} bearish\n"
+        
+        # Price targets and options strategy
+        if direction == "BUY":
+            target_price = current_price * 1.03  # 3% target
+            support_level = current_price * 0.97  # 3% support
+            reasoning += f"🎯 Upside target: ${target_price:.2f} (+3%)\n"
+            reasoning += f"🛡️ Support level: ${support_level:.2f}\n"
+            
+            if rsi < 40:
+                reasoning += "💡 Options Strategy: Strong oversold bounce setup - consider ATM calls\n"
+                reasoning += f"🚀 Best strikes: ${current_price:.0f}C, ${target_price:.0f}C (2-3 weeks DTE)"
+            else:
+                reasoning += "💡 Options Strategy: Momentum continuation - consider ITM calls\n"
+                reasoning += f"🚀 Best strikes: ${current_price*0.98:.0f}C, ${current_price:.0f}C"
+                
+        elif direction == "SELL":
+            target_price = current_price * 0.97  # 3% decline
+            resistance_level = current_price * 1.03  # 3% resistance
+            reasoning += f"🎯 Downside target: ${target_price:.2f} (-3%)\n"
+            reasoning += f"⚡ Resistance: ${resistance_level:.2f}\n"
+            
+            if rsi > 70:
+                reasoning += "💡 Options Strategy: Overbought correction - consider OTM puts\n"
+                reasoning += f"🔻 Best strikes: ${target_price:.0f}P, ${current_price*0.95:.0f}P"
+            else:
+                reasoning += "💡 Options Strategy: Bearish momentum - consider put spreads\n"
+                reasoning += f"🔻 Best strikes: ${current_price:.0f}P, ${target_price:.0f}P"
+        else:
+            reasoning += "💡 Options Strategy: Sideways action - consider iron condors\n"
+            reasoning += f"📊 Range: ${current_price*0.97:.0f} - ${current_price*1.03:.0f}"
+        
+        # Add key technical factors
         if confidence_factors:
-            reasoning += f". Key factors: {', '.join(confidence_factors[:3])}"
+            reasoning += f"\n🔧 Key factors: {', '.join(confidence_factors[:2])}"
         
         return {
             "signal_name": self.signal_name,

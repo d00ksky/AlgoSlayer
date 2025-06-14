@@ -99,7 +99,7 @@ class RTXTradingServer:
         logger.info(f"🎯 Target: RTX Corporation")
         logger.info(f"💰 Capital: ${config.STARTING_CAPITAL:,}")
         logger.info(f"🔍 Analysis: Every {config.PREDICTION_INTERVAL_MINUTES} minutes")
-        logger.info(f"🤖 AI Signals: 8 signals active")
+        logger.info(f"🤖 AI Signals: 12 signals active")
         logger.info(f"⚡ Learning: {config.learning.LEARNING_SPEED_MULTIPLIER}x speed")
         logger.info("=" * 60)
         
@@ -195,7 +195,7 @@ async def main():
     
     🤖 AUTONOMOUS AI TRADING SYSTEM 🤖
     🎯 TARGET: RTX CORPORATION
-    ⚡ POWERED BY 8 AI SIGNALS
+    ⚡ POWERED BY 12 AI SIGNALS
     """)
     
     # Create and start server
