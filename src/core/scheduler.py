@@ -12,19 +12,8 @@ from src.core.ibkr_manager import ibkr_manager
 from src.core.telegram_bot import telegram_bot
 from src.core.accelerated_learning import learning_engine
 from src.core.performance_tracker import performance_tracker
-from src.signals.news_sentiment_signal import NewsSentimentSignal
-from src.signals.technical_analysis_signal import TechnicalAnalysisSignal
-from src.signals.options_flow_signal import OptionsFlowSignal
-from src.signals.volatility_analysis_signal import VolatilityAnalysisSignal
-from src.signals.momentum_signal import MomentumSignal
-from src.signals.sector_correlation_signal import SectorCorrelationSignal
-from src.signals.mean_reversion_signal import MeanReversionSignal
-from src.signals.market_regime_signal import MarketRegimeSignal
-# NEW HIGH-VALUE OPTIONS SIGNALS
-from src.signals.rtx_earnings_signal import RTXEarningsSignal
-from src.signals.options_iv_percentile_signal import OptionsIVPercentileSignal
-from src.signals.defense_contract_signal import DefenseContractSignal
-from src.signals.trump_geopolitical_signal import TrumpGeopoliticalSignal
+# Use Signal Fusion Engine for centralized signal management
+from src.core.signal_fusion import SignalFusionEngine
 
 class RTXTradingScheduler:
     """Main scheduler for autonomous RTX trading"""
@@ -34,24 +23,18 @@ class RTXTradingScheduler:
         self.start_time = None
         self.trading_mode = TradingModeConfig.load_from_env()
         
-        # Initialize AI signals
-        self.signals = {
-            # Core signals
-            "news_sentiment": NewsSentimentSignal(),
-            "technical_analysis": TechnicalAnalysisSignal(),
-            "options_flow": OptionsFlowSignal(),
-            "volatility_analysis": VolatilityAnalysisSignal(),
-            "momentum": MomentumSignal(),
-            "sector_correlation": SectorCorrelationSignal(),
-            "mean_reversion": MeanReversionSignal(),
-            "market_regime": MarketRegimeSignal(),
-            
-            # NEW HIGH-VALUE OPTIONS SIGNALS
-            "rtx_earnings": RTXEarningsSignal(),
-            "options_iv_percentile": OptionsIVPercentileSignal(),
-            "defense_contract": DefenseContractSignal(),
-            "trump_geopolitical": TrumpGeopoliticalSignal()
-        }
+        # Initialize AI signals using centralized Signal Fusion Engine
+        # This ensures future signal additions automatically work everywhere
+        self.signal_fusion = SignalFusionEngine()
+        
+        # Convert to scheduler format for backward compatibility
+        self.signals = {}
+        for signal in self.signal_fusion.signals:
+            # Use signal's name attribute, fallback to signal_name, or class name
+            name = getattr(signal, 'name', None) or getattr(signal, 'signal_name', signal.__class__.__name__)
+            self.signals[name] = signal
+        
+        logger.success(f"✅ Loaded {len(self.signals)} AI signals from Signal Fusion Engine")
         
         # Trading state
         self.last_prediction = None
