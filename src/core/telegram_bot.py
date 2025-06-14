@@ -382,7 +382,7 @@ Iron condors: Sideways strategy
 
 ✅ <b>System:</b> Online and operational
 🤖 <b>AI Signals:</b> 12 signals active
-📊 <b>Trading Mode:</b> Paper trading ($1,000)
+📊 <b>Trading Mode:</b> Paper trading (${config.STARTING_CAPITAL:,})
 ⚡ <b>Confidence:</b> 75% threshold for trades
 📱 <b>Notifications:</b> Enabled
 
