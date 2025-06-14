@@ -180,27 +180,27 @@ class OptionsIVPercentileSignal(BaseSignal):
         
         # Very low IV - cheap options
         if iv_percentile < 20:
-            confidence = 85
+            confidence = 0.85
             return "BUY", confidence, f"IV very low ({iv_percentile:.0f}th percentile) - cheap options"
         
         # Low IV - below average
         elif iv_percentile < 40:
-            confidence = 70
+            confidence = 0.70
             return "BUY", confidence, f"IV below average ({iv_percentile:.0f}th percentile) - attractive entry"
         
         # Average IV - neutral
         elif iv_percentile < 60:
-            confidence = 55
+            confidence = 0.55
             return "HOLD", confidence, f"IV average ({iv_percentile:.0f}th percentile) - neutral"
         
         # High IV - above average
         elif iv_percentile < 80:
-            confidence = 70
+            confidence = 0.70
             return "SELL", confidence, f"IV above average ({iv_percentile:.0f}th percentile) - expensive options"
         
         # Very high IV - expensive options
         else:
-            confidence = 85
+            confidence = 0.85
             return "SELL", confidence, f"IV very high ({iv_percentile:.0f}th percentile) - overpriced options"
     
     def _classify_iv_level(self, iv_percentile: float) -> str:
@@ -221,7 +221,7 @@ class OptionsIVPercentileSignal(BaseSignal):
         return {
             'signal': self.signal_name,
             'direction': 'HOLD',
-            'confidence': 50,
+            'confidence': 0.50,
             'strength': 0.5,
             'reasoning': reason,
             'metadata': {
@@ -236,7 +236,7 @@ class OptionsIVPercentileSignal(BaseSignal):
         return {
             'signal': self.signal_name,
             'direction': 'HOLD',
-            'confidence': 50,
+            'confidence': 0.50,
             'strength': 0.5,
             'reasoning': f"Error: {error_msg}",
             'metadata': {
