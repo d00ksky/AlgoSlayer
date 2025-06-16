@@ -215,3 +215,15 @@ Sat Jun 14 15:22:25 CEST 2025: 🏁 Smart ML training finished
   - Uptime: 2h since boot
   - New predictions: 0
   - Training executed: true
+Sat Jun 14 18:00:01 CEST 2025: 🤖 Smart ML Training Starting...
+Sat Jun 14 18:00:01 CEST 2025: 🤖 Smart ML Training Starting...
+Sat Jun 14 18:00:08 CEST 2025: ⏭️ Skipping ML training - no new data or recent training completed
+Sat Jun 14 18:00:08 CEST 2025: ⏭️ Skipping ML training - no new data or recent training completed
+Sat Jun 14 18:00:08 CEST 2025: 🏁 Smart ML training finished
+Sat Jun 14 18:00:08 CEST 2025: 🏁 Smart ML training finished
+  - Uptime: 5h since boot
+  - Uptime: 5h since boot
+  - New predictions: 0
+  - New predictions: 0
+  - Training executed: false
+  - Training executed: false

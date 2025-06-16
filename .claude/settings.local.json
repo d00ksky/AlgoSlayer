@@ -34,7 +34,13 @@
       "Bash(git push:*)",
       "Bash(./sync_git_safe.sh status:*)",
       "Bash(./sync_git_safe.sh:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(echo:*)",
+      "Bash(nslookup:*)",
+      "Bash(dig:*)",
+      "Bash(./deploy_to_cloud.sh:*)",
+      "Bash(sudo:*)",
+      "Bash(./setup_auto_deploy.sh:*)"
     ],
     "deny": []
   }

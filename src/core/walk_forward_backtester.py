@@ -383,7 +383,7 @@ class WalkForwardBacktester:
                 if trade:
                     trades.append(trade)
                     logger.debug(f"Simulated trade: {trade.entry_date} -> {trade.exit_date}, "
-                               f"P&L: {trade.profit_loss:.2f} ({trade.profit_loss_pct:.2%})")
+                               f"P&L: {trade.profit_loss:.2f} ({trade.profit_loss_pct:.2f}%)")
                 
                 # Skip ahead to avoid overlapping trades
                 i = exit_idx + 1
@@ -551,7 +551,7 @@ class WalkForwardBacktester:
             
             logger.info(f"Backtest complete: {len(periods)} periods, "
                        f"{len(all_trades)} total trades, "
-                       f"{overall_metrics['win_rate']:.2%} win rate, "
+                       f"{overall_metrics['win_rate']:.2f}% win rate, "
                        f"${overall_metrics['total_return']:.2f} total return")
             
             return results
@@ -610,7 +610,7 @@ async def main():
         print(f"Strategy: {results.strategy_name}")
         print(f"Period: {results.backtest_start} to {results.backtest_end}")
         print(f"Total Periods: {results.total_periods}")
-        print(f"Overall Win Rate: {results.overall_win_rate:.2%}")
+        print(f"Overall Win Rate: {results.overall_win_rate:.2f}%")
         print(f"Overall Return: ${results.overall_return:.2f}")
         print(f"Overall Sharpe: {results.overall_sharpe:.2f}")
         print(f"Max Drawdown: ${results.overall_max_drawdown:.2f}")

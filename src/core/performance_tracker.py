@@ -228,7 +228,7 @@ class PerformanceTracker:
             logger.info(f"📊 Prediction #{prediction_id} {timeframe} outcome: "
                        f"{'✅' if correct else '❌'} "
                        f"Predicted {pred_direction}, Actual {actual_direction} "
-                       f"({actual_move:.2%} move)")
+                       f"({actual_move:.2f}% move)")
             
         except Exception as e:
             logger.error(f"Error checking outcome: {e}")

@@ -190,7 +190,7 @@ class LightweightML:
             
             self.last_training = datetime.now()
             print(f"✅ Models trained successfully")
-            print(f"   Direction accuracy: {self.model_performance.get('direction_classifier', ModelPerformance('', 0, 0, 0, 0, datetime.now())).accuracy:.2%}")
+            print(f"   Direction accuracy: {self.model_performance.get('direction_classifier', ModelPerformance('', 0, 0, 0, 0, datetime.now())).accuracy:.2f}%")
             
             return True
             
@@ -381,8 +381,8 @@ async def test_ml_system():
             
             # Make prediction
             prediction = await ml_system.predict(features)
-            print(f"🎯 Prediction: {prediction.direction} ({prediction.confidence:.2%} confidence)")
-            print(f"   Expected move: {prediction.expected_move:+.2%}")
+            print(f"🎯 Prediction: {prediction.direction} ({prediction.confidence:.2f}% confidence)")
+            print(f"   Expected move: {prediction.expected_move:+.2f}%")
         else:
             print("❌ Model training failed")
     else:
