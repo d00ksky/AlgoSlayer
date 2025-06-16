@@ -1,49 +1,15 @@
 #!/bin/bash
-# Automated Cloud Deployment Script
-# Ensures cloud server always has latest configurations and code
+# Git-Based Cloud Deployment Script
+# Ensures cloud server stays synchronized with main branch
 
 set -e
 
 CLOUD_SERVER="root@64.226.96.90"
-CLOUD_PATH="/opt/rtx-trading"
+CLOUD_REPO_PATH="/root/AlgoSlayer"
 LOCAL_REPO="/home/dooksky/repo/AlgoSlayer"
 
-echo "🚀 Starting automated deployment to cloud server..."
+echo "🚀 Starting git-based deployment to cloud server..."
 echo "=================================="
-
-# Function to check if file changed
-file_changed() {
-    local file=$1
-    local local_file="${LOCAL_REPO}/${file}"
-    local cloud_file="${CLOUD_PATH}/${file}"
-    
-    if [ ! -f "$local_file" ]; then
-        echo "❌ Local file not found: $local_file"
-        return 1
-    fi
-    
-    # Get file hashes
-    local_hash=$(md5sum "$local_file" | cut -d' ' -f1)
-    cloud_hash=$(ssh "$CLOUD_SERVER" "md5sum '$cloud_file' 2>/dev/null | cut -d' ' -f1" || echo "missing")
-    
-    if [ "$local_hash" != "$cloud_hash" ]; then
-        echo "📝 File changed: $file"
-        return 0
-    else
-        echo "✅ File up to date: $file"
-        return 1
-    fi
-}
-
-# Function to deploy file
-deploy_file() {
-    local file=$1
-    local local_file="${LOCAL_REPO}/${file}"
-    local cloud_file="${CLOUD_PATH}/${file}"
-    
-    echo "📤 Deploying: $file"
-    scp "$local_file" "${CLOUD_SERVER}:${cloud_file}"
-}
 
 # Check connectivity
 echo "🔍 Checking cloud server connectivity..."
@@ -53,47 +19,37 @@ if ! ssh "$CLOUD_SERVER" "echo 'Connected'" >/dev/null 2>&1; then
 fi
 echo "✅ Cloud server reachable"
 
-# Files to sync
-FILES_TO_SYNC=(
-    "run_server.py"
-    "src/core/telegram_bot.py"
-    "src/core/scheduler.py"
-    "src/core/options_scheduler.py"
-    "src/core/options_prediction_engine.py"
-    "src/core/options_paper_trader.py"
-    "src/core/options_data_engine.py"
-    "src/core/options_ml_integration.py"
-    "src/core/learning_system.py"
-    "src/signals/mean_reversion_signal.py"
-    "config/options_config.py"
-    "config/trading_config.py"
-    ".env"
-)
+# Get current commit hashes
+echo "🔍 Checking git commit status..."
+LOCAL_COMMIT=$(git rev-parse HEAD)
+CLOUD_COMMIT=$(ssh "$CLOUD_SERVER" "cd '$CLOUD_REPO_PATH' && git rev-parse HEAD")
 
-# Check which files need updating
-NEEDS_UPDATE=false
-echo "🔍 Checking for file changes..."
+echo "📍 Local commit:  $LOCAL_COMMIT"
+echo "📍 Cloud commit:  $CLOUD_COMMIT"
 
-for file in "${FILES_TO_SYNC[@]}"; do
-    if file_changed "$file"; then
-        NEEDS_UPDATE=true
-    fi
-done
-
-if [ "$NEEDS_UPDATE" = false ]; then
-    echo "✅ All files are up to date - no deployment needed"
+if [ "$LOCAL_COMMIT" = "$CLOUD_COMMIT" ]; then
+    echo "✅ Cloud server is already up to date"
     exit 0
 fi
 
 echo ""
-echo "📦 Deploying updated files..."
+echo "📦 Updating cloud server repository..."
 
-# Deploy changed files
-for file in "${FILES_TO_SYNC[@]}"; do
-    if file_changed "$file"; then
-        deploy_file "$file"
-    fi
-done
+# Update cloud server repository
+ssh "$CLOUD_SERVER" "
+    cd '$CLOUD_REPO_PATH'
+    echo '🔄 Fetching latest changes...'
+    git fetch origin main
+    
+    echo '🏠 Stashing any local changes...'
+    git stash push -m 'Auto-stash before deployment $(date)'
+    
+    echo '🔄 Pulling latest changes...'
+    git pull origin main
+    
+    echo '✅ Repository updated to:'
+    git log --oneline -1
+"
 
 # Restart service if needed
 echo ""
