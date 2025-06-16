@@ -247,6 +247,8 @@ ExecStart=$APP_DIR/rtx-env/bin/python run_server.py
 Restart=always
 RestartSec=30
 StartLimitBurst=5
+TimeoutStartSec=120
+TimeoutStopSec=30
 
 # Memory and resource limits for 1GB droplet
 MemoryLimit=800M

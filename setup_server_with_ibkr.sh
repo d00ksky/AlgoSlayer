@@ -481,8 +481,13 @@ Restart=always
 RestartSec=30
 StartLimitBurst=5
 
+# Timeout settings - CRITICAL FOR STABILITY
+TimeoutStartSec=300
+TimeoutStopSec=60
+TimeoutSec=0
+
 # Resource limits
-MemoryLimit=1500M
+MemoryMax=1500M
 MemoryAccounting=true
 CPUQuota=80%
 
