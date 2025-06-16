@@ -674,6 +674,54 @@ python sync_and_train_ml.py
 - **System Updates**: `git pull && systemctl restart rtx-trading`
 - **Performance Tuning**: Real-time optimization via SSH access
 
+### 📱 Phone-Only Control & Management
+- **Telegram Commands**: Full system control via mobile device
+  - `/help` - Show all available commands
+  - `/status` - System status and health check
+  - `/logs` - Recent system logs (formatted for phone reading)
+  - `/restart` - Restart trading service remotely
+  - `/memory` - Memory and resource usage
+  - `/explain` - Quick options trading guide
+  - `/terms` - Options terminology reference
+  - `/signals` - AI signals explanation
+- **24/7 Accessibility**: Monitor and control system from anywhere with internet
+- **Emergency Controls**: Restart system, check logs, monitor health without computer access
+- **Real-time Alerts**: Instant notifications for trades, errors, and system status
+
+### 🔮 Future Development Plans
+
+#### Claude Code Server Integration (Planned)
+**Status**: Architecture designed, implementation planned for next session
+
+**Concept**: Deploy Claude Code directly on the trading server for revolutionary remote development capabilities:
+
+```bash
+# Future Telegram commands for remote coding:
+/code "fix the confidence threshold bug in options_scheduler.py"
+/deploy "add new earnings signal that triggers 24h before RTX earnings"
+/test "run the full options test suite and show results"
+/git "commit and push all changes with proper message"
+/debug "analyze why the last trade had low confidence"
+```
+
+**Benefits**:
+- **Zero Downtime Development**: Modify trading system while it runs live
+- **Phone-Only Coding**: Full development capabilities from mobile device  
+- **Instant Deployment**: Changes go live immediately after testing
+- **Safe Sandbox**: Test modifications without affecting live trading
+- **Version Control**: Automatic git integration with proper commit messages
+- **AI-Assisted Debugging**: Let Claude analyze logs and suggest fixes
+
+**Architecture Overview**:
+- Telegram Bot → Claude Code API → Server Execution → Results via Telegram
+- Isolated development environment alongside live trading system
+- Automatic backup and rollback capabilities
+- Real-time code review and testing integration
+
+**Implementation Complexity**: 2-3 hours (leveraging existing Telegram infrastructure)
+
+This would enable **revolutionary mobile-first development** where the entire trading system can be maintained, debugged, and enhanced using only a phone from anywhere in the world.
+
 ## 🛠️ Troubleshooting & Common Issues
 
 ### Systemd Service Restart Issues
@@ -726,6 +774,37 @@ MemoryLimit=1500M
 MemoryMax=1500M
 ```
 
+### Telegram /restart Command Issues
+**Problem**: `/restart` command gets stuck in "deactivating" state
+**Root Cause**: Systemd timeout issues during graceful shutdown process
+
+**Current Status**: ✅ **FIXED** - Enhanced restart script handles timeouts automatically
+
+**How it works**:
+1. External restart script (`/opt/rtx-trading/restart_rtx.sh`) runs detached from main process
+2. Uses aggressive timeout handling with force-kill fallback
+3. Avoids systemctl deadlock issues by running independently
+
+**What to expect**:
+- `/restart` command should complete automatically in ~15 seconds
+- If stuck, wait 30 seconds and try `/restart` again
+- System will always recover and restart successfully
+
+### Enhanced Systemd Configuration
+**Applied**: Service now includes enhanced kill settings for better restart reliability:
+```bash
+[Service]
+# Enhanced timeout and kill settings
+TimeoutStartSec=300
+TimeoutStopSec=30
+TimeoutSec=0
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopFailureMode=terminate
+FinalKillSignal=SIGKILL
+MemoryMax=1500M  # Updated from deprecated MemoryLimit
+```
+
 ### Health Check Commands
 ```bash
 # Check service status
@@ -742,4 +821,11 @@ ps -p $(pgrep -f run_server.py) -o pid,etime,cmd
 
 # Check system resources
 free -h && df -h
+
+# Test Telegram restart (from phone)
+# Send: /restart
+# Expected: Service restarts within 15 seconds
+
+# Monitor restart process
+journalctl -u rtx-trading --since='2 minutes ago' --no-pager
 ```
