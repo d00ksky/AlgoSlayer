@@ -673,3 +673,73 @@ python sync_and_train_ml.py
 - **Log Analysis**: `journalctl -u rtx-trading -f` for live logs
 - **System Updates**: `git pull && systemctl restart rtx-trading`
 - **Performance Tuning**: Real-time optimization via SSH access
+
+## 🛠️ Troubleshooting & Common Issues
+
+### Systemd Service Restart Issues
+**Problem**: Application keeps restarting every ~5 minutes with `timeout` errors
+**Symptoms**: 
+```bash
+systemd[1]: rtx-trading.service: Main process exited, code=killed, status=9/KILL
+systemd[1]: rtx-trading.service: Failed with result 'timeout'.
+```
+
+**Root Cause**: Missing systemd timeout configurations cause the service to be killed
+
+**Fix**: Update `/etc/systemd/system/rtx-trading.service` to include proper timeout settings:
+```bash
+[Service]
+# ... existing config ...
+
+# Timeout settings - CRITICAL FOR STABILITY
+TimeoutStartSec=300    # 5 minutes for startup
+TimeoutStopSec=60      # 1 minute for graceful shutdown  
+TimeoutSec=0           # Disable runtime timeout killing
+
+# ... rest of config ...
+```
+
+**Apply Fix**:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart rtx-trading
+sudo systemctl status rtx-trading  # Verify running
+```
+
+### Configuration Warnings (Non-Critical)
+**Symptoms**: Missing environment variables warnings in logs
+**Fix**: Add to `/opt/rtx-trading/.env`:
+```bash
+# Recommended configuration
+MAX_POSITION_SIZE=200
+CONFIDENCE_THRESHOLD=0.35
+PREDICTION_INTERVAL_MINUTES=15
+```
+
+### Memory Limit Deprecation Warning
+**Warning**: `Unit uses MemoryLimit=; please use MemoryMax= instead`
+**Fix**: Update systemd service file:
+```bash
+# Change from:
+MemoryLimit=1500M
+# To:
+MemoryMax=1500M
+```
+
+### Health Check Commands
+```bash
+# Check service status
+systemctl status rtx-trading
+
+# Monitor live logs
+journalctl -u rtx-trading -f
+
+# Check for restart patterns
+journalctl -u rtx-trading --since='1 hour ago' | grep -E '(restart|exit|killed|failed|error)' -i
+
+# Verify process uptime
+ps -p $(pgrep -f run_server.py) -o pid,etime,cmd
+
+# Check system resources
+free -h && df -h
+```
