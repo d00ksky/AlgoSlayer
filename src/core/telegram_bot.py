@@ -351,6 +351,8 @@ Iron condors: Sideways strategy
             return await self.send_logs_message()
         elif command == "/restart" or command == "restart":
             return await self.send_restart_message()
+        elif command == "/memory" or command == "memory":
+            return await self.send_memory_message()
         else:
             return await self.send_message(f"❓ Unknown command: {command}\n\nType /help for available commands")
     
@@ -365,6 +367,7 @@ Iron condors: Sideways strategy
 📊 <b>/status</b> - System status
 📋 <b>/logs</b> - Recent system logs
 🔄 <b>/restart</b> - Restart service
+💾 <b>/memory</b> - Memory usage stats
 📱 <b>/help</b> - This help message
 
 🎯 <b>AUTO NOTIFICATIONS:</b>
@@ -492,6 +495,41 @@ Iron condors: Sideways strategy
         except Exception as e:
             return await self.send_message(f"❌ <b>Error during restart:</b> {str(e)}")
     
+    async def send_memory_message(self) -> bool:
+        """Send memory usage information"""
+        try:
+            import subprocess
+            result = subprocess.run(['free', '-h'], capture_output=True, text=True)
+            lines = result.stdout.split('\n')
+            mem_line = lines[1].split()
+            swap_line = lines[2].split()
+            
+            # Get disk usage
+            df_result = subprocess.run(['df', '-h', '/'], capture_output=True, text=True)
+            disk_line = df_result.stdout.split('\n')[1].split()
+            
+            memory_text = f"""
+💾 <b>SYSTEM MEMORY STATUS</b>
+
+<b>🔹 RAM Usage:</b>
+• Used: {mem_line[2]} / {mem_line[1]} total
+• Available: {mem_line[6]}
+• Usage: {round((float(mem_line[2].replace('Mi','').replace('Gi','')) / float(mem_line[1].replace('Mi','').replace('Gi',''))) * 100, 1)}%
+
+<b>🔹 Swap:</b>
+• Used: {swap_line[2]} / {swap_line[1]} total
+
+<b>🔹 Disk Space:</b>
+• Used: {disk_line[2]} / {disk_line[1]} total
+• Available: {disk_line[3]}
+• Usage: {disk_line[4]}
+
+⏰ <b>Updated:</b> {datetime.now().strftime('%H:%M:%S')}"""
+            
+            return await self.send_message(memory_text.strip())
+        except Exception as e:
+            return await self.send_message(f"❌ <b>Error getting memory info:</b> {str(e)}")
+    
     async def get_updates(self, offset: int = 0) -> List[Dict]:
         """Get updates from Telegram"""
         if not self.bot_token:
@@ -537,7 +575,7 @@ Iron condors: Sideways strategy
                         # Only respond to authorized chat
                         if chat_id == self.chat_id and text:
                             logger.info(f"Processing Telegram command: {text}")
-                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart']:
+                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart', 'memory']:
                                 await self.handle_command(text)
                             
             except Exception as e:
