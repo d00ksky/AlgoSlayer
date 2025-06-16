@@ -92,3 +92,5 @@ SESSION_STATUS_*.md
 
 # Cloud settings (may contain server IPs)
 .claude/
+logs/
+*.log
