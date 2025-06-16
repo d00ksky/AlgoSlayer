@@ -347,6 +347,10 @@ Iron condors: Sideways strategy
             return await self.send_help_message()
         elif command == "/status" or command == "status":
             return await self.send_status_message()
+        elif command == "/logs" or command == "logs":
+            return await self.send_logs_message()
+        elif command == "/restart" or command == "restart":
+            return await self.send_restart_message()
         else:
             return await self.send_message(f"❓ Unknown command: {command}\n\nType /help for available commands")
     
@@ -359,6 +363,8 @@ Iron condors: Sideways strategy
 📝 <b>/terms</b> - Options terminology
 🤖 <b>/signals</b> - AI signals explained
 📊 <b>/status</b> - System status
+📋 <b>/logs</b> - Recent system logs
+🔄 <b>/restart</b> - Restart service
 📱 <b>/help</b> - This help message
 
 🎯 <b>AUTO NOTIFICATIONS:</b>
@@ -394,6 +400,117 @@ Iron condors: Sideways strategy
 ⏰ <b>Last Updated:</b> {datetime.now().strftime('%H:%M:%S')}"""
         
         return await self.send_message(status_text.strip())
+    
+    async def send_logs_message(self) -> bool:
+        """Send recent system logs"""
+        try:
+            import subprocess
+            result = subprocess.run([
+                'journalctl', '-u', 'rtx-trading', '--no-pager', '-n', '10'
+            ], capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                logs = result.stdout.strip()
+                if logs:
+                    # Format logs for phone reading
+                    lines = logs.split('\n')[-8:]  # Last 8 lines for phone
+                    formatted = []
+                    for line in lines:
+                        if 'rtx-trading' in line:
+                            # Extract timestamp and message
+                            parts = line.split('rtx-trading[')
+                            if len(parts) > 1:
+                                msg_part = parts[1].split(']: ', 1)
+                                if len(msg_part) > 1:
+                                    timestamp = parts[0].split()[-1]  # Get time part
+                                    message = msg_part[1]
+                                    formatted.append(f"<code>{timestamp}</code>\n{message}")
+                    
+                    if formatted:
+                        logs_text = f"""
+📋 <b>RECENT SYSTEM LOGS</b>
+
+{chr(10).join(formatted[-6:])}
+
+⏰ <b>Updated:</b> {datetime.now().strftime('%H:%M:%S')}"""
+                        return await self.send_message(logs_text.strip())
+                    else:
+                        return await self.send_message("📋 <b>Logs:</b> No recent entries found")
+                else:
+                    return await self.send_message("📋 <b>Logs:</b> No entries found")
+            else:
+                return await self.send_message(f"❌ <b>Error getting logs:</b> {result.stderr}")
+        except Exception as e:
+            return await self.send_message(f"❌ <b>Error:</b> {str(e)}")
+    
+    async def send_restart_message(self) -> bool:
+        """Restart the trading service"""
+        try:
+            import subprocess
+            result = subprocess.run(['systemctl', 'restart', 'rtx-trading'], 
+                                  capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                await asyncio.sleep(3)  # Wait for restart
+                return await self.send_message("🔄 <b>Service restarted successfully!</b> ✅")
+            else:
+                return await self.send_message(f"❌ <b>Restart failed:</b> {result.stderr}")
+        except Exception as e:
+            return await self.send_message(f"❌ <b>Error restarting:</b> {str(e)}")
+    
+    async def get_updates(self, offset: int = 0) -> List[Dict]:
+        """Get updates from Telegram"""
+        if not self.bot_token:
+            return []
+            
+        url = f"https://api.telegram.org/bot{self.bot_token}/getUpdates"
+        params = {'offset': offset, 'timeout': 5}
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        return data.get('result', [])
+                    else:
+                        logger.warning(f"Failed to get Telegram updates: {response.status}")
+                        return []
+        except Exception as e:
+            logger.error(f"Error getting Telegram updates: {e}")
+            return []
+    
+    async def process_incoming_messages(self):
+        """Process incoming messages from Telegram"""
+        if not self.bot_token or not self.chat_id:
+            return
+            
+        last_update_id = 0
+        logger.info("📱 Starting Telegram message listener...")
+        
+        while True:
+            try:
+                updates = await self.get_updates(last_update_id + 1)
+                
+                for update in updates:
+                    last_update_id = update.get('update_id', 0)
+                    
+                    # Process message
+                    if 'message' in update:
+                        message = update['message']
+                        text = message.get('text', '').strip()
+                        chat_id = str(message.get('chat', {}).get('id', ''))
+                        
+                        # Only respond to authorized chat
+                        if chat_id == self.chat_id and text:
+                            logger.info(f"Processing Telegram command: {text}")
+                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart']:
+                                await self.handle_command(text)
+                            
+            except Exception as e:
+                logger.error(f"Error in Telegram message listener: {e}")
+                await asyncio.sleep(5)
+            
+            await asyncio.sleep(1)
 
 # Global telegram bot instance
 telegram_bot = TelegramBot() 

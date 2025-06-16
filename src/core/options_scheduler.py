@@ -85,6 +85,10 @@ class OptionsScheduler:
         )
         
         try:
+            # Start Telegram listener as background task
+            telegram_task = asyncio.create_task(telegram_bot.process_incoming_messages())
+            logger.info("📱 Started Telegram command listener")
+            
             while self.running:
                 # Check if market is open
                 if not options_config.is_market_hours():
@@ -105,6 +109,13 @@ class OptionsScheduler:
             await telegram_bot.send_message(f"🚨 **Scheduler Error:** {e}")
         finally:
             self.running = False
+            # Cancel Telegram listener task
+            if 'telegram_task' in locals():
+                telegram_task.cancel()
+                try:
+                    await telegram_task
+                except asyncio.CancelledError:
+                    pass
             logger.info("⏹️ Autonomous trading stopped")
     
     async def _run_trading_cycle(self):
