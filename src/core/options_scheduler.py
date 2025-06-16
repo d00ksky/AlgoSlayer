@@ -333,14 +333,27 @@ class OptionsScheduler:
         
         if success:
             await telegram_bot.send_message(
-                f"📈 **Options Trade Executed**\n\n"
-                f"Action: {prediction['action']}\n"
-                f"Contract: {prediction['contract_symbol']}\n"
-                f"Contracts: {prediction['contracts']}\n"
-                f"Entry: ${prediction['entry_price']:.2f}\n"
-                f"Total Cost: ${prediction['total_cost']:.2f}\n"
-                f"Confidence: {prediction['confidence']:.1%}\n"
-                f"Expected Profit: {prediction['expected_profit_pct']:.1%}"
+                f"🎯 **OPTIONS TRADE EXECUTED**\n\n"
+                f"📊 **Contract Details:**\n"
+                f"• Action: {prediction['action']}\n"
+                f"• Contract: {prediction['contract_symbol']}\n"
+                f"• Type: {prediction['option_type'].upper()}\n"
+                f"• Strike: ${prediction['strike']}\n"
+                f"• Expiry: {prediction['expiry']} ({prediction['days_to_expiry']}d)\n\n"
+                f"💰 **Trade Details:**\n"
+                f"• Contracts: {prediction['contracts']}x\n"
+                f"• Entry Price: ${prediction['entry_price']:.2f} (Ask)\n"
+                f"• Total Cost: ${prediction['total_cost']:.2f}\n"
+                f"• Commission: ${prediction['commission']:.2f}\n\n"
+                f"📈 **Greeks & Analytics:**\n"
+                f"• Delta: {prediction['delta']:.3f}\n"
+                f"• IV: {prediction['implied_volatility']*100:.1f}%\n"
+                f"• Confidence: {prediction['confidence']:.1f}%\n"
+                f"• Expected Profit: {prediction['expected_profit_pct']:.1f}%\n\n"
+                f"🎯 **Exit Strategy:**\n"
+                f"• Target: ${prediction['profit_target_price']:.2f} (+100%)\n"
+                f"• Stop Loss: ${prediction['stop_loss_price']:.2f} (-50%)\n"
+                f"• Time Exit: {prediction['exit_before_expiry_days']}d before expiry"
             )
         else:
             await telegram_bot.send_message(
@@ -368,22 +381,22 @@ class OptionsScheduler:
         # Current prediction
         if prediction:
             message += f"🎯 **Latest Signal**: {prediction['action']} "
-            message += f"{prediction['contract_symbol']} ({prediction['confidence']:.1%})\n\n"
+            message += f"{prediction['contract_symbol']} ({prediction['confidence']:.1f}%)\n\n"
         else:
             message += f"🎯 **Latest Signal**: {signals_data['direction']} "
-            message += f"({signals_data['confidence']:.1%}) - No options trade\n\n"
+            message += f"({signals_data['confidence']:.1f}%) - No options trade\n\n"
         
         # Open positions
         if open_positions:
             message += f"📈 **Open Positions** ({len(open_positions)}):  \n"
             for pos in open_positions[:3]:  # Show up to 3
                 pnl_emoji = "💰" if pos['unrealized_pnl'] > 0 else "💸"
-                message += f"{pnl_emoji} {pos['contract_symbol']}: {pos['unrealized_pnl']:+.0f} ({pos['unrealized_pnl_pct']:+.1%})\n"
+                message += f"{pnl_emoji} {pos['contract_symbol']}: {pos['unrealized_pnl']:+.0f} ({pos['unrealized_pnl_pct']:+.1f}%)\n"
             message += "\n"
         
         # Performance stats
         if performance['total_trades'] > 0:
-            message += f"📊 **Performance**: {performance['win_rate']:.1%} win rate, "
+            message += f"📊 **Performance**: {performance['win_rate']:.1f}% win rate, "
             message += f"{performance['total_trades']} trades, "
             message += f"PF: {performance['profit_factor']:.1f}"
         

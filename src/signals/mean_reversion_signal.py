@@ -246,7 +246,7 @@ class MeanReversionSignal:
             
             if extreme_touches > 0:
                 reversion_rate = successful_reversions / extreme_touches
-                patterns.append(f"Recent reversion success rate: {reversion_rate:.1%}")
+                patterns.append(f"Recent reversion success rate: {reversion_rate:.1f}%")
             
             # Check for recent failed reversions (trend continuation)
             recent_failures = self._check_recent_failures(recent_data)

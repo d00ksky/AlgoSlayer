@@ -237,7 +237,7 @@ class OptionsMLIntegration:
         
         logger.info("📊 Signal Performance Ranking:")
         for i, (signal_name, perf) in enumerate(sorted_signals[:5]):
-            logger.info(f"{i+1}. {signal_name}: {perf['overall_performance']:.1%} avg P&L, {perf['total_trades']} trades")
+            logger.info(f"{i+1}. {signal_name}: {perf['overall_performance']:.1f}% avg P&L, {perf['total_trades']} trades")
         
         self.signal_performance = dict(sorted_signals)
         return self.signal_performance
@@ -280,7 +280,7 @@ class OptionsMLIntegration:
         
         logger.info("🎯 New adaptive weights:")
         for signal_name, weight in sorted(adaptive_weights.items(), key=lambda x: x[1], reverse=True):
-            logger.info(f"  {signal_name}: {weight:.1%}")
+            logger.info(f"  {signal_name}: {weight:.1f}%")
         
         return adaptive_weights
     
@@ -335,9 +335,9 @@ class OptionsMLIntegration:
             
             logger.info("📊 Options Trading Patterns:")
             logger.info(f"  Optimal DTE: {profitable_dte:.1f} days")
-            logger.info(f"  Optimal IV: {profitable_iv:.1%}")
+            logger.info(f"  Optimal IV: {profitable_iv:.1f}%")
             logger.info(f"  Optimal Delta: {profitable_delta:.2f}")
-            logger.info(f"  Optimal Confidence: {profitable_confidence:.1%}")
+            logger.info(f"  Optimal Confidence: {profitable_confidence:.1f}%")
         
         return patterns
     
@@ -377,7 +377,7 @@ class OptionsMLIntegration:
             'generated_at': datetime.now().isoformat()
         }
         
-        logger.success(f"✅ Generated insights from {total_trades} trades ({win_rate:.1%} win rate)")
+        logger.success(f"✅ Generated insights from {total_trades} trades ({win_rate:.1f}% win rate)")
         
         return insights
 
@@ -397,10 +397,10 @@ if __name__ == "__main__":
         print(f"❌ {insights['error']}")
     else:
         print(f"✅ Analyzed {insights['total_trades']} trades")
-        print(f"Win Rate: {insights['win_rate']:.1%}")
-        print(f"Avg P&L: {insights['avg_pnl_percentage']:.1%}")
+        print(f"Win Rate: {insights['win_rate']:.1f}%")
+        print(f"Avg P&L: {insights['avg_pnl_percentage']:.1f}%")
         
         if insights['adaptive_weights']:
             print("\\nTop performing signals:")
             for signal, weight in list(insights['adaptive_weights'].items())[:3]:
-                print(f"  {signal}: {weight:.1%}")
+                print(f"  {signal}: {weight:.1f}%")

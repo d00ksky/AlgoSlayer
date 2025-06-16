@@ -95,7 +95,7 @@ class TelegramBot:
 🎯 <b>Symbol:</b> {symbol}
 💰 <b>Price:</b> ${price:.2f}
 🤖 <b>AI Signal:</b> {direction}
-📊 <b>Confidence:</b> {confidence:.1%} ({confidence_text})
+📊 <b>Confidence:</b> {confidence:.1f}% ({confidence_text})
 
 💭 <b>Analysis:</b> {reasoning}
 
@@ -119,7 +119,7 @@ class TelegramBot:
 🚨 <b>HIGH CONFIDENCE TRADE ALERT</b>
 
 🎯 <b>{symbol} - STRONG {action}</b>
-📊 <b>Confidence:</b> {confidence:.1%}
+📊 <b>Confidence:</b> {confidence:.1f}%
 💰 <b>Current:</b> ${price:.2f}
 📈 <b>Target:</b> ${target_price:.2f} (+{return_pct:.1f}%)
 🛡️ <b>Stop Loss:</b> ${stop_loss:.2f}
@@ -185,7 +185,7 @@ class TelegramBot:
 
 🤖 <b>AI PERFORMANCE:</b>
    • Predictions: {predictions_made}
-   • Accuracy: {accuracy_rate:.1%}
+   • Accuracy: {accuracy_rate:.1f}%
    
 💰 <b>TRADING ACTIVITY:</b>
    • Trades: {trades_executed}
@@ -193,7 +193,7 @@ class TelegramBot:
    
 📈 <b>RTX PERFORMANCE:</b>
    • Price: ${rtx_price:.2f}
-   • Change: {price_emoji} {price_change:+.1%}
+   • Change: {price_emoji} {price_change:+.1f}%
 
 🎯 <b>TOMORROW'S FOCUS:</b>
    • Continue monitoring RTX patterns

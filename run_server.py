@@ -12,7 +12,16 @@ from loguru import logger
 # Add src to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from src.core.scheduler import scheduler
+# Auto-detect which system to use
+USE_OPTIONS_SYSTEM = os.getenv('USE_OPTIONS_SYSTEM', 'true').lower() == 'true'
+
+if USE_OPTIONS_SYSTEM:
+    logger.info("🎯 USING OPTIONS TRADING SYSTEM")
+    from src.core.options_scheduler import options_scheduler as scheduler
+else:
+    logger.info("📈 Using legacy stock trading system")
+    from src.core.scheduler import scheduler
+
 from src.core.config_validator import ConfigValidator
 from config.trading_config import config, TradingModeConfig
 
@@ -118,7 +127,10 @@ class RTXTradingServer:
         try:
             # Start the trading scheduler
             logger.info("🔄 Starting trading scheduler...")
-            await self.scheduler.start()
+            if USE_OPTIONS_SYSTEM:
+                await self.scheduler.start_autonomous_trading()
+            else:
+                await self.scheduler.start()
             
         except KeyboardInterrupt:
             logger.info("⌨️ Keyboard interrupt received")
@@ -157,7 +169,10 @@ class RTXTradingServer:
         
         # Stop the scheduler
         try:
-            await self.scheduler.stop()
+            if USE_OPTIONS_SYSTEM:
+                self.scheduler.stop()  # Options scheduler stop is not async
+            else:
+                await self.scheduler.stop()
         except Exception as e:
             logger.error(f"❌ Error stopping scheduler: {e}")
         

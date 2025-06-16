@@ -187,8 +187,14 @@ class MLTrainingPipeline:
         """Train multiple ML models"""
         logger.info("🤖 Training ML models...")
         
-        # Split data (time series aware) - adapt to data size
+        # Check minimum data requirements
         n_samples = len(X)
+        if n_samples < 10:
+            logger.warning(f"⚠️ Only {n_samples} samples - need at least 10 for reliable training")
+            logger.info("💡 Gathering more data through paper trading...")
+            return False
+        
+        # Split data (time series aware) - adapt to data size
         n_splits = min(3, max(2, n_samples - 2))  # 2-3 splits depending on data size
         
         if n_samples < 5:
@@ -227,6 +233,16 @@ class MLTrainingPipeline:
                 X_train_scaled = scaler.fit_transform(X_train)
                 X_test_scaled = scaler.transform(X_test)
                 
+                # Check if we have at least 2 classes in training data
+                unique_classes = y_train['direction_correct'].unique()
+                if len(unique_classes) < 2:
+                    logger.warning(f"⚠️ Only {len(unique_classes)} class(es) in training data for {name}")
+                    if name == 'logistic':
+                        # Skip logistic regression for single class
+                        logger.warning(f"⏭️ Skipping {name} - requires at least 2 classes")
+                        scores.append(0.5)  # Default score
+                        continue
+                
                 # Train model
                 model.fit(X_train_scaled, y_train['direction_correct'])
                 
@@ -248,6 +264,7 @@ class MLTrainingPipeline:
         best_model_name = max(self.models.keys(), key=lambda k: self.models[k]['score'])
         self.best_model = self.models[best_model_name]
         logger.success(f"✅ Best model: {best_model_name} ({self.best_model['score']:.3f} accuracy)")
+        return True
     
     def analyze_feature_importance(self, X):
         """Analyze which features/signals are most important"""
@@ -337,6 +354,13 @@ class MLTrainingPipeline:
     def upload_to_cloud(self, model_path, weights_path):
         """Upload trained models back to cloud server"""
         logger.info("☁️ Uploading models to cloud...")
+        
+        # Create remote directory first
+        mkdir_cmd = f"ssh -o StrictHostKeyChecking=no {CLOUD_SERVER} 'mkdir -p {CLOUD_MODEL_PATH}'"
+        try:
+            subprocess.run(mkdir_cmd, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"❌ Failed to create remote directory: {e}")
         
         # Upload model
         remote_model_path = f"{CLOUD_MODEL_PATH}/current_model.pkl"
@@ -444,7 +468,10 @@ def main():
     X, y = pipeline.engineer_features(df)
     
     # Step 4: Train models
-    pipeline.train_models(X, y)
+    success = pipeline.train_models(X, y)
+    if not success:
+        logger.info("📊 Need more data for reliable training - continue paper trading")
+        return 0
     
     # Step 5: Analyze feature importance
     pipeline.analyze_feature_importance(X)

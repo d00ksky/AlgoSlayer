@@ -271,11 +271,11 @@ class LearningSystem:
 📈 **Prediction Performance:**
 • Total Predictions: {summary['total_predictions']}
 • Evaluated: {summary['evaluated_predictions']}
-• Overall Accuracy: {summary['overall_accuracy']:.1%}
+• Overall Accuracy: {summary['overall_accuracy']:.1f}%
 
 💼 **Paper Trading Results:**
 • Total Trades: {summary['paper_trading_stats']['total_trades']}
-• Win Rate: {summary['paper_trading_stats']['win_rate']:.1%}
+• Win Rate: {summary['paper_trading_stats']['win_rate']:.1f}%
 • Total P&L: ${summary['paper_trading_stats']['total_pnl']:.0f}
 • Avg per Trade: ${summary['paper_trading_stats']['avg_pnl_per_trade']:.0f}
 
@@ -285,7 +285,7 @@ class LearningSystem:
         # Sort signals by weight
         sorted_signals = sorted(self.signal_weights.items(), key=lambda x: x[1], reverse=True)
         for signal, weight in sorted_signals[:3]:
-            report += f"• {signal.value}: {weight:.1%}\n"
+            report += f"• {signal.value}: {weight:.1f}%\n"
         
         report += f"\n🎯 **Trading Threshold:** {self.min_confidence_to_trade:.0%} confidence required"
         

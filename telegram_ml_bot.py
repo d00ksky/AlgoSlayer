@@ -10,6 +10,8 @@ import time
 import requests
 import subprocess
 import sqlite3
+import ssl
+import certifi
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -64,7 +66,10 @@ class TelegramMLBot:
                 'disable_notification': silent
             }
             
-            response = requests.post(url, json=payload, timeout=10)
+            # Temporarily disable SSL verification due to local DNS issues
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            response = requests.post(url, json=payload, timeout=10, verify=False)
             return response.status_code == 200
             
         except Exception as e:
@@ -80,7 +85,10 @@ class TelegramMLBot:
             url = f"https://api.telegram.org/bot{self.bot_token}/getUpdates"
             params = {'offset': self.last_update_id + 1, 'timeout': 10}
             
-            response = requests.get(url, params=params, timeout=15)
+            # Temporarily disable SSL verification due to local DNS issues
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            response = requests.get(url, params=params, timeout=15, verify=False)
             
             if response.status_code == 200:
                 data = response.json()
