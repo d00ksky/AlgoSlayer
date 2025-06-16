@@ -476,13 +476,14 @@ else
 fi
 """
             
-            # Write script to temp file
-            with open('/tmp/restart_rtx.sh', 'w') as f:
+            # Write script to writable directory
+            script_path = '/opt/rtx-trading/restart_rtx.sh'
+            with open(script_path, 'w') as f:
                 f.write(restart_script)
-            os.chmod('/tmp/restart_rtx.sh', 0o755)
+            os.chmod(script_path, 0o755)
             
             # Step 3: Run restart script in background (detached from current process)
-            subprocess.Popen(['/tmp/restart_rtx.sh'], 
+            subprocess.Popen([script_path], 
                            stdout=subprocess.PIPE, 
                            stderr=subprocess.PIPE,
                            start_new_session=True)
