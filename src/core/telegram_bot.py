@@ -447,51 +447,56 @@ Iron condors: Sideways strategy
             return await self.send_message(f"❌ <b>Error:</b> {str(e)}")
     
     async def send_restart_message(self) -> bool:
-        """Restart the trading service with force completion"""
+        """Restart the trading service with external script"""
         try:
             import subprocess
+            import os
             
             # Step 1: Send initial status
             await self.send_message("🔄 <b>Initiating restart sequence...</b>")
             
-            # Step 2: Stop the service
-            result = subprocess.run(['systemctl', 'stop', 'rtx-trading'], 
-                                  capture_output=True, text=True)
-            await asyncio.sleep(2)
+            # Step 2: Create restart script that runs externally
+            restart_script = """#!/bin/bash
+# External restart script to avoid systemctl deadlock
+sleep 2
+systemctl stop rtx-trading
+sleep 2
+systemctl kill rtx-trading
+sleep 1
+systemctl reset-failed rtx-trading
+sleep 1
+systemctl start rtx-trading
+sleep 3
+
+# Check if restart was successful
+if systemctl is-active --quiet rtx-trading; then
+    echo "SUCCESS"
+else
+    echo "FAILED"
+fi
+"""
             
-            # Step 3: Force kill if still running (handles the stuck shutdown issue)
-            subprocess.run(['systemctl', 'kill', 'rtx-trading'], 
-                          capture_output=True, text=True)
-            await asyncio.sleep(1)
+            # Write script to temp file
+            with open('/tmp/restart_rtx.sh', 'w') as f:
+                f.write(restart_script)
+            os.chmod('/tmp/restart_rtx.sh', 0o755)
             
-            # Step 4: Reset any failed state
-            subprocess.run(['systemctl', 'reset-failed', 'rtx-trading'], 
-                          capture_output=True, text=True)
+            # Step 3: Run restart script in background (detached from current process)
+            subprocess.Popen(['/tmp/restart_rtx.sh'], 
+                           stdout=subprocess.PIPE, 
+                           stderr=subprocess.PIPE,
+                           start_new_session=True)
             
-            # Step 5: Start the service
-            result = subprocess.run(['systemctl', 'start', 'rtx-trading'], 
-                                  capture_output=True, text=True)
+            # Step 4: Send follow-up message
+            await self.send_message(
+                "🔄 <b>Restart script launched!</b>\n\n"
+                "⏱️ The service will restart in ~10 seconds\n"
+                "📱 Send /status in 15 seconds to verify\n\n"
+                "✅ This avoids the systemctl deadlock issue"
+            )
             
-            if result.returncode == 0:
-                await asyncio.sleep(5)  # Wait for full startup
-                
-                # Step 6: Verify it's actually running
-                status_result = subprocess.run(['systemctl', 'is-active', 'rtx-trading'], 
-                                             capture_output=True, text=True)
-                status = status_result.stdout.strip()
-                
-                if status == 'active':
-                    return await self.send_message(
-                        "✅ <b>Service restarted successfully!</b>\n\n"
-                        "🔹 Trading system is operational\n"
-                        "🔹 Telegram listener active\n" 
-                        "🔹 All components loaded\n\n"
-                        "Send /status to verify full functionality"
-                    )
-                else:
-                    return await self.send_message(f"⚠️ <b>Restart completed but status is:</b> {status}")
-            else:
-                return await self.send_message(f"❌ <b>Restart failed:</b> {result.stderr}")
+            return True
+            
         except Exception as e:
             return await self.send_message(f"❌ <b>Error during restart:</b> {str(e)}")
     
