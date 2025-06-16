@@ -40,7 +40,8 @@
       "Bash(dig:*)",
       "Bash(./deploy_to_cloud.sh:*)",
       "Bash(sudo:*)",
-      "Bash(./setup_auto_deploy.sh:*)"
+      "Bash(./setup_auto_deploy.sh:*)",
+      "Bash(git rm:*)"
     ],
     "deny": []
   }

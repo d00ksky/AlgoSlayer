@@ -1,0 +1,103 @@
+{
+  "passed": 13,
+  "failed": 1,
+  "warnings": 2,
+  "tests": [
+    {
+      "name": "Database Tables",
+      "result": "PASS",
+      "details": "All 3 tables present",
+      "timestamp": "2025-06-16T21:52:53.415511"
+    },
+    {
+      "name": "Database Constraints",
+      "result": "PASS",
+      "details": "Constraints working",
+      "timestamp": "2025-06-16T21:52:53.415581"
+    },
+    {
+      "name": "Options Data Fetch",
+      "result": "PASS",
+      "details": "51 contracts loaded",
+      "timestamp": "2025-06-16T21:52:54.168814"
+    },
+    {
+      "name": "Options Data Quality",
+      "result": "PASS",
+      "details": "51 valid contracts",
+      "timestamp": "2025-06-16T21:52:54.168899"
+    },
+    {
+      "name": "Strike Range Coverage",
+      "result": "PASS",
+      "details": "Good range: $75",
+      "timestamp": "2025-06-16T21:52:54.310608"
+    },
+    {
+      "name": "Signal Generation Speed",
+      "result": "PASS",
+      "details": "6.7s for 3 runs",
+      "timestamp": "2025-06-16T21:53:00.966749"
+    },
+    {
+      "name": "Signal Consistency",
+      "result": "PASS",
+      "details": "Stable signals: 0.00",
+      "timestamp": "2025-06-16T21:53:00.966766"
+    },
+    {
+      "name": "Insufficient Funds Handling",
+      "result": "PASS",
+      "details": "Rejected expensive trade",
+      "timestamp": "2025-06-16T21:53:00.967470"
+    },
+    {
+      "name": "Balance Protection",
+      "result": "PASS",
+      "details": "Balance unchanged after rejection",
+      "timestamp": "2025-06-16T21:53:00.967480"
+    },
+    {
+      "name": "Valid Trade Setup",
+      "result": "WARNING",
+      "details": "No affordable options available",
+      "timestamp": "2025-06-16T21:53:00.967496"
+    },
+    {
+      "name": "Invalid Contract Handling",
+      "result": "PASS",
+      "details": "Rejected invalid contract",
+      "timestamp": "2025-06-16T21:53:01.233982"
+    },
+    {
+      "name": "Resource Monitoring",
+      "result": "WARNING",
+      "details": "psutil not available",
+      "timestamp": "2025-06-16T21:53:01.234212"
+    },
+    {
+      "name": "Configuration Loading",
+      "result": "FAIL",
+      "details": "cannot import name 'trading_config' from 'config.trading_config' (/home/dooksky/repo/AlgoSlayer/config/trading_config.py)",
+      "timestamp": "2025-06-16T21:53:01.234238"
+    },
+    {
+      "name": "API Call Speed",
+      "result": "PASS",
+      "details": "3 calls in 0.2s",
+      "timestamp": "2025-06-16T21:53:01.429907"
+    },
+    {
+      "name": "After Hours Detection",
+      "result": "PASS",
+      "details": "System running after hours",
+      "timestamp": "2025-06-16T21:53:01.429927"
+    },
+    {
+      "name": "Full Trading Cycle",
+      "result": "PASS",
+      "details": "Low confidence (50.0%) - no trade",
+      "timestamp": "2025-06-16T21:53:02.997857"
+    }
+  ]
+}
