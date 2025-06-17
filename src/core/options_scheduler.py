@@ -412,7 +412,7 @@ class OptionsScheduler:
     async def _execute_options_trade(self, prediction: Dict):
         """Execute options trade based on prediction"""
         
-        if not self.trading_mode.trading_enabled:
+        if not self.trading_mode.TRADING_ENABLED:
             logger.info("📊 Trading disabled - prediction only mode")
             return
         
