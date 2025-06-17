@@ -441,7 +441,7 @@ class OptionsScheduler:
                 f"📈 **Greeks & Analytics:**\n"
                 f"• Delta: {prediction['delta']:.3f}\n"
                 f"• IV: {prediction['implied_volatility']*100:.1f}%\n"
-                f"• Confidence: {prediction['confidence']:.1f}%\n"
+                f"• Confidence: {prediction['confidence']:.1%}\n"
                 f"• Expected Profit: {prediction['expected_profit_pct']:.1f}%\n\n"
                 f"🎯 **Exit Strategy:**\n"
                 f"• Target: ${prediction['profit_target_price']:.2f} (+100%)\n"
@@ -474,10 +474,10 @@ class OptionsScheduler:
         # Current prediction
         if prediction:
             message += f"🎯 **Latest Signal**: {prediction['action']} "
-            message += f"{prediction['contract_symbol']} ({prediction['confidence']:.1f}%)\n\n"
+            message += f"{prediction['contract_symbol']} ({prediction['confidence']:.1%})\n\n"
         else:
             message += f"🎯 **Latest Signal**: {signals_data['direction']} "
-            message += f"({signals_data['confidence']:.1f}%) - No options trade\n\n"
+            message += f"({signals_data['confidence']:.1%}) - No options trade\n\n"
         
         # Open positions
         if open_positions:

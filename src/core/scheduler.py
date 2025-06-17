@@ -213,7 +213,7 @@ class RTXTradingScheduler:
             
             # Add to reasoning
             if strength > 0.1:
-                reasoning_parts.append(f"{name}: {direction} ({confidence:.1f}%)")
+                reasoning_parts.append(f"{name}: {direction} ({confidence:.1%})")
         
         # Determine overall direction
         strength_diff = abs(buy_strength - sell_strength)
@@ -258,11 +258,11 @@ class RTXTradingScheduler:
         
         # Check if we should trade
         if not self.trading_mode.is_safe_to_trade():
-            logger.info(f"📊 Trade signal: {direction} ({confidence:.1f}%) - Trading disabled")
+            logger.info(f"📊 Trade signal: {direction} ({confidence:.1%}) - Trading disabled")
             return
         
         if confidence < config.HIGH_CONFIDENCE_THRESHOLD:
-            logger.info(f"📊 Trade signal: {direction} ({confidence:.1f}%) - Below high confidence threshold")
+            logger.info(f"📊 Trade signal: {direction} ({confidence:.1%}) - Below high confidence threshold")
             return
         
         # Calculate position size

@@ -95,7 +95,7 @@ class TelegramBot:
 🎯 <b>Symbol:</b> {symbol}
 💰 <b>Price:</b> ${price:.2f}
 🤖 <b>AI Signal:</b> {direction}
-📊 <b>Confidence:</b> {confidence:.1f}% ({confidence_text})
+📊 <b>Confidence:</b> {confidence:.1%} ({confidence_text})
 
 💭 <b>Analysis:</b> {reasoning}
 
@@ -119,7 +119,7 @@ class TelegramBot:
 🚨 <b>HIGH CONFIDENCE TRADE ALERT</b>
 
 🎯 <b>{symbol} - STRONG {action}</b>
-📊 <b>Confidence:</b> {confidence:.1f}%
+📊 <b>Confidence:</b> {confidence:.1%}
 💰 <b>Current:</b> ${price:.2f}
 📈 <b>Target:</b> ${target_price:.2f} (+{return_pct:.1f}%)
 🛡️ <b>Stop Loss:</b> ${stop_loss:.2f}

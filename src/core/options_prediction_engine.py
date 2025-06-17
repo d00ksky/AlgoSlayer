@@ -43,14 +43,14 @@ class OptionsPredictionEngine:
         # Minimum confidence threshold for options trading
         min_confidence = 0.75  # Higher than stock trading
         if confidence < min_confidence:
-            logger.info(f"📊 Confidence {confidence:.1f}% below {min_confidence:.1f}% threshold")
+            logger.info(f"📊 Confidence {confidence:.1%} below {min_confidence:.1%} threshold")
             return None
         
         if direction == "HOLD":
             logger.info("📊 No directional signal - holding")
             return None
         
-        logger.info(f"🎯 Generating options prediction: {direction} with {confidence:.1f}% confidence")
+        logger.info(f"🎯 Generating options prediction: {direction} with {confidence:.1%} confidence")
         
         # Get best option candidates
         best_options = options_data_engine.get_best_options_for_direction(
@@ -272,8 +272,8 @@ class OptionsPredictionEngine:
         stock_price = options_data_engine.get_current_stock_price() or 0
         
         reasoning_parts = [
-            f"High confidence {direction} signal ({confidence:.1f}%)",
-            f"Expected move: {expected_move:.1f}%",
+            f"High confidence {direction} signal ({confidence:.1%})",
+            f"Expected move: {expected_move:.1%}",
             f"Strike ${option['strike']:.2f} vs stock ${stock_price:.2f}",
             f"IV: {option['impliedVolatility']:.1f}%",
             f"Volume: {option['volume']}, OI: {option['openInterest']}",
