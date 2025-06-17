@@ -29,8 +29,8 @@ from src.signals.market_regime_signal import MarketRegimeSignal
 # Import new high-value options signals
 from src.signals.trump_geopolitical_signal import TrumpGeopoliticalSignal
 from src.signals.defense_contract_signal import DefenseContractSignal
-from src.signals.rtx_earnings_signal import RtxEarningsSignal
-from src.signals.options_iv_percentile_signal import OptionsIvPercentileSignal
+from src.signals.rtx_earnings_signal import RTXEarningsSignal
+from src.signals.options_iv_percentile_signal import OptionsIVPercentileSignal
 
 class OptionsScheduler:
     """Advanced scheduler for autonomous RTX options trading"""
@@ -73,8 +73,8 @@ class OptionsScheduler:
             # New high-value options signals
             "trump_geopolitical": TrumpGeopoliticalSignal(),
             "defense_contract": DefenseContractSignal(),
-            "rtx_earnings": RtxEarningsSignal(),
-            "options_iv_percentile": OptionsIvPercentileSignal()
+            "rtx_earnings": RTXEarningsSignal(),
+            "options_iv_percentile": OptionsIVPercentileSignal()
         }
         
         # Options trading state
