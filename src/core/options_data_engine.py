@@ -242,27 +242,40 @@ class OptionsDataEngine:
         
         options_chain = self.get_real_options_chain()
         if not options_chain:
+            logger.warning("❌ No options chain available")
             return []
         
         # Get current stock price for strike selection
         stock_price = self.get_current_stock_price()
         if not stock_price:
+            logger.warning("❌ No current stock price available")
             return []
+        
+        logger.info(f"🔍 OPTIONS FILTER DEBUG:")
+        logger.info(f"   • Direction: {direction}")
+        logger.info(f"   • Stock price: ${stock_price:.2f}")
+        logger.info(f"   • Account balance: ${account_balance:.2f}")
+        logger.info(f"   • Available contracts: {len(options_chain)}")
         
         # Filter options by direction
         filtered_options = []
+        rejected_reasons = {"direction": 0, "strike": 0, "cost": 0, "quality": 0}
         
         for contract_symbol, option_data in options_chain.items():
             # Direction filtering
             if direction == "BUY" and option_data['type'] != 'call':
+                rejected_reasons["direction"] += 1
                 continue
             if direction == "SELL" and option_data['type'] != 'put':
+                rejected_reasons["direction"] += 1
                 continue
             if direction == "HOLD":
+                rejected_reasons["direction"] += 1
                 continue
             
             # Strike selection logic
             if not self._is_suitable_strike(option_data['strike'], stock_price, direction, confidence):
+                rejected_reasons["strike"] += 1
                 continue
             
             # Affordability check
@@ -270,6 +283,8 @@ class OptionsDataEngine:
             option_cost = option_data['ask'] * 100  # Cost for 1 contract
             
             if option_cost > max_investment:
+                rejected_reasons["cost"] += 1
+                logger.debug(f"   ❌ {contract_symbol}: Too expensive (${option_cost:.0f} > ${max_investment:.0f})")
                 continue
             
             # Add to candidates with additional fields
@@ -296,46 +311,66 @@ class OptionsDataEngine:
             option_data['score'] = self._calculate_option_score(option_data)
             
             filtered_options.append(option_data)
+            logger.debug(f"   ✅ {contract_symbol}: ${option_data['strike']} strike @ ${option_cost:.0f}")
+        
+        # Log filtering summary
+        logger.info(f"   📊 FILTERING SUMMARY:")
+        logger.info(f"      • Rejected by direction: {rejected_reasons['direction']}")
+        logger.info(f"      • Rejected by strike: {rejected_reasons['strike']}")
+        logger.info(f"      • Rejected by cost: {rejected_reasons['cost']}")
+        logger.info(f"      • Passed all filters: {len(filtered_options)}")
+        
+        if not filtered_options:
+            logger.warning(f"   ❌ No options passed filters! Max investment: ${options_config.get_position_size(account_balance):.0f}")
+            return []
         
         # Sort by attractiveness (combination of liquidity, pricing, Greeks)
         filtered_options.sort(key=self._calculate_option_score, reverse=True)
+        
+        logger.info(f"   🎯 Top candidate: {filtered_options[0]['contract_symbol']} @ ${filtered_options[0]['cost_per_contract']:.0f}")
         
         return filtered_options[:5]  # Return top 5 candidates
     
     def _is_suitable_strike(self, strike: float, stock_price: float, direction: str, confidence: float) -> bool:
         """Determine if strike price is suitable for our strategy"""
         
-        strike_selection = options_config.STRIKE_SELECTION
+        # Get strike selection from config (default to adaptive if not set)
+        strike_selection = getattr(options_config, 'STRIKE_SELECTION', 'adaptive')
         
         if strike_selection == "atm":
-            # At-the-money: within 2% of current price
-            return abs(strike - stock_price) / stock_price <= 0.02
+            # At-the-money: within 3% of current price (more flexible)
+            suitable = abs(strike - stock_price) / stock_price <= 0.03
         
         elif strike_selection == "otm":
             if direction == "BUY":  # OTM calls
-                return strike > stock_price * 1.01  # At least 1% OTM
+                suitable = strike > stock_price * 1.005  # At least 0.5% OTM
             else:  # OTM puts
-                return strike < stock_price * 0.99
+                suitable = strike < stock_price * 0.995
         
         elif strike_selection == "itm":
             if direction == "BUY":  # ITM calls
-                return strike < stock_price * 0.99
+                suitable = strike < stock_price * 0.995
             else:  # ITM puts
-                return strike > stock_price * 1.01
+                suitable = strike > stock_price * 1.005
         
-        elif strike_selection == "adaptive":
-            # Higher confidence = more aggressive strikes
-            if confidence >= 0.8:
-                # High confidence: can go OTM for more leverage
+        else:  # "adaptive" - use confidence to determine strategy
+            if confidence > 0.8:
+                # High confidence: ATM for maximum delta
+                suitable = abs(strike - stock_price) / stock_price <= 0.05
+            elif confidence > 0.65:
+                # Medium confidence: Slightly OTM for better risk/reward
                 if direction == "BUY":
-                    return stock_price * 1.01 <= strike <= stock_price * 1.05
+                    suitable = strike >= stock_price * 0.98 and strike <= stock_price * 1.05
                 else:
-                    return stock_price * 0.95 <= strike <= stock_price * 0.99
+                    suitable = strike >= stock_price * 0.95 and strike <= stock_price * 1.02
             else:
-                # Lower confidence: stick to ATM/ITM
-                return abs(strike - stock_price) / stock_price <= 0.02
+                # Lower confidence: More conservative ATM
+                suitable = abs(strike - stock_price) / stock_price <= 0.02
         
-        return True
+        if not suitable:
+            logger.debug(f"   ❌ Strike ${strike:.0f} unsuitable for ${stock_price:.2f} stock (mode: {strike_selection})")
+        
+        return suitable
     
     def _calculate_option_score(self, option: Dict) -> float:
         """Calculate attractiveness score for option selection"""

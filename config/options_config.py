@@ -58,13 +58,19 @@ class OptionsConfig:
         """Calculate maximum position size based on account balance"""
         max_per_trade = account_balance * cls.MAX_POSITION_SIZE_PCT
         
-        # Adaptive sizing based on account growth
+        # Override for options trading - need higher limits for real options costs
+        # Check for user override
+        user_override = float(os.getenv("MAX_POSITION_SIZE", 0))
+        if user_override > 0:
+            return user_override
+        
+        # Adaptive sizing based on account growth (increased for options)
         if account_balance <= 1500:
-            return min(200, max_per_trade)
+            return min(400, max_per_trade)  # Increased from 200 to 400
         elif account_balance <= 3000:
-            return min(400, max_per_trade * 0.75)  # More conservative as we grow
+            return min(600, max_per_trade * 0.75)  # More conservative as we grow
         else:
-            return min(600, max_per_trade * 0.60)  # Even more conservative
+            return min(800, max_per_trade * 0.60)  # Even more conservative
     
     @classmethod
     def get_contracts_for_trade(cls, option_price: float, account_balance: float) -> int:
