@@ -32,6 +32,7 @@ class RTXTradingServer:
         self.scheduler = scheduler
         self.running = False
         self.start_time = None
+        self.shutdown_flag = False
         
         # Setup logging
         self._setup_logging()
@@ -79,8 +80,8 @@ class RTXTradingServer:
         """Setup signal handlers for graceful shutdown"""
         
         def signal_handler(signum, frame):
-            logger.info(f"📡 Received signal {signum}, initiating graceful shutdown...")
-            asyncio.create_task(self.stop())
+            logger.info(f"📡 Received signal {signum}, setting shutdown flag...")
+            self.shutdown_flag = True
         
         signal.signal(signal.SIGINT, signal_handler)   # Ctrl+C
         signal.signal(signal.SIGTERM, signal_handler)  # Termination signal
@@ -127,10 +128,47 @@ class RTXTradingServer:
         try:
             # Start the trading scheduler
             logger.info("🔄 Starting trading scheduler...")
+            
+            # Create scheduler task
             if USE_OPTIONS_SYSTEM:
-                await self.scheduler.start_autonomous_trading()
+                scheduler_task = asyncio.create_task(self.scheduler.start_autonomous_trading())
             else:
-                await self.scheduler.start()
+                scheduler_task = asyncio.create_task(self.scheduler.start())
+            
+            # Main event loop with shutdown flag monitoring
+            logger.info("🔄 Main event loop started - monitoring for shutdown signals...")
+            while not self.shutdown_flag and self.running:
+                try:
+                    # Check if scheduler task is still running
+                    if scheduler_task.done():
+                        # Scheduler task completed, check for exceptions
+                        try:
+                            await scheduler_task
+                        except Exception as e:
+                            logger.error(f"❌ Scheduler task failed: {e}")
+                            break
+                    
+                    # Sleep briefly to prevent busy waiting
+                    await asyncio.sleep(1)
+                    
+                except asyncio.CancelledError:
+                    logger.info("⏹️ Main loop cancelled")
+                    break
+            
+            # Shutdown detected
+            if self.shutdown_flag:
+                logger.info("🛑 Shutdown flag detected, initiating graceful shutdown...")
+            
+            # Cancel scheduler task if still running
+            if not scheduler_task.done():
+                logger.info("🔄 Cancelling scheduler task...")
+                scheduler_task.cancel()
+                try:
+                    await scheduler_task
+                except asyncio.CancelledError:
+                    logger.info("✅ Scheduler task cancelled successfully")
+            
+            await self.stop()
             
         except KeyboardInterrupt:
             logger.info("⌨️ Keyboard interrupt received")

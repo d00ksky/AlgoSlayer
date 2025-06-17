@@ -42,7 +42,11 @@
       "Bash(sudo:*)",
       "Bash(./setup_auto_deploy.sh:*)",
       "Bash(git rm:*)",
-      "Bash(doctl compute droplet:*)"
+      "Bash(doctl compute droplet:*)",
+      "Bash(curl:*)",
+      "Bash(systemctl:*)",
+      "Bash(ping:*)",
+      "Bash(nc:*)"
     ],
     "deny": []
   }

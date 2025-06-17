@@ -26,6 +26,12 @@ from src.signals.sector_correlation_signal import SectorCorrelationSignal
 from src.signals.mean_reversion_signal import MeanReversionSignal
 from src.signals.market_regime_signal import MarketRegimeSignal
 
+# Import new high-value options signals
+from src.signals.trump_geopolitical_signal import TrumpGeopoliticalSignal
+from src.signals.defense_contract_signal import DefenseContractSignal
+from src.signals.rtx_earnings_signal import RtxEarningsSignal
+from src.signals.options_iv_percentile_signal import OptionsIvPercentileSignal
+
 class OptionsScheduler:
     """Advanced scheduler for autonomous RTX options trading"""
     
@@ -34,19 +40,27 @@ class OptionsScheduler:
         self.start_time = None
         self.trading_mode = TradingModeConfig.load_from_env()
         
-        # Initialize AI signals with adaptive weights
+        # Initialize AI signals with adaptive weights (12 signals total)
         self.signal_weights = {
-            "news_sentiment": 0.15,
-            "technical_analysis": 0.15,
-            "options_flow": 0.15,
-            "volatility_analysis": 0.10,
-            "momentum": 0.10,
-            "sector_correlation": 0.10,
-            "mean_reversion": 0.10,
-            "market_regime": 0.15
+            # Classic signals (rebalanced)
+            "news_sentiment": 0.10,
+            "technical_analysis": 0.12,
+            "options_flow": 0.12,
+            "volatility_analysis": 0.08,
+            "momentum": 0.08,
+            "sector_correlation": 0.08,
+            "mean_reversion": 0.08,
+            "market_regime": 0.10,
+            
+            # New high-value options signals
+            "trump_geopolitical": 0.08,  # Political impact on defense
+            "defense_contract": 0.06,    # Government contracts
+            "rtx_earnings": 0.05,        # Earnings timing & IV
+            "options_iv_percentile": 0.05 # IV rank analysis
         }
         
         self.signals = {
+            # Classic signals
             "news_sentiment": NewsSentimentSignal(),
             "technical_analysis": TechnicalAnalysisSignal(),
             "options_flow": OptionsFlowSignal(),
@@ -54,7 +68,13 @@ class OptionsScheduler:
             "momentum": MomentumSignal(),
             "sector_correlation": SectorCorrelationSignal(),
             "mean_reversion": MeanReversionSignal(),
-            "market_regime": MarketRegimeSignal()
+            "market_regime": MarketRegimeSignal(),
+            
+            # New high-value options signals
+            "trump_geopolitical": TrumpGeopoliticalSignal(),
+            "defense_contract": DefenseContractSignal(),
+            "rtx_earnings": RtxEarningsSignal(),
+            "options_iv_percentile": OptionsIvPercentileSignal()
         }
         
         # Options trading state
