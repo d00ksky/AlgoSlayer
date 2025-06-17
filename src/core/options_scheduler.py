@@ -162,11 +162,15 @@ class OptionsScheduler:
                 return
             
             # Step 3: Create options prediction
+            logger.info("🎯 Creating options prediction from signals...")
             prediction = await self._create_options_prediction(signals_data)
             
             if prediction:
+                logger.info(f"📋 Options prediction created: {prediction.get('action', 'UNKNOWN')} confidence={prediction.get('confidence', 0):.1%}")
                 # Step 4: Execute trade (if conditions are met)
                 await self._execute_options_trade(prediction)
+            else:
+                logger.warning("⚠️ No options prediction generated - confidence too low or no suitable contracts")
             
             # Step 5: Send status update
             await self._send_cycle_update(signals_data, prediction)
@@ -238,6 +242,25 @@ class OptionsScheduler:
         # Aggregate signals using weighted voting
         aggregated = self._aggregate_signals(signal_results)
         
+        # DEBUG: Log detailed signal analysis
+        logger.info(f"🔍 SIGNAL ANALYSIS DEBUG:")
+        logger.info(f"   • Total signals: {len(self.signals)}")
+        logger.info(f"   • Successful signals: {successful_signals}")
+        logger.info(f"   • Aggregated confidence: {aggregated.get('confidence', 0):.1%}")
+        logger.info(f"   • Aggregated direction: {aggregated.get('direction', 'UNKNOWN')}")
+        logger.info(f"   • Expected move: {aggregated.get('expected_move_pct', 0):.2%}")
+        
+        # Log individual signal details
+        for name, result in signal_results.items():
+            if result and 'confidence' in result:
+                conf = result['confidence']
+                # Handle confidence as percentage (0-100) vs decimal (0-1)
+                if conf > 1:
+                    conf_display = f"{conf:.1f}%"
+                else:
+                    conf_display = f"{conf:.1%}"
+                logger.info(f"   • {name}: {result['direction']} ({conf_display})")
+        
         logger.success(f"✅ Generated {successful_signals}/{len(self.signals)} actionable signals")
         
         return {
@@ -274,11 +297,11 @@ class OptionsScheduler:
             }
     
     def _aggregate_signals(self, signal_results: Dict) -> Dict:
-        """Aggregate signals using weighted voting with options-specific logic"""
+        """Enhanced signal aggregation with high-confidence bias"""
         
-        buy_strength = 0.0
-        sell_strength = 0.0
-        total_confidence = 0.0
+        buy_signals = []
+        sell_signals = []
+        high_conf_signals = []
         
         for signal_name, result in signal_results.items():
             if "error" in result:
@@ -289,38 +312,77 @@ class OptionsScheduler:
             confidence = result.get("confidence", 0.5)
             weight = self.signal_weights.get(signal_name, 0.1)
             
-            # Apply weight to strength
-            weighted_strength = strength * weight
+            # Convert percentage confidence to decimal if needed
+            if confidence > 1:
+                confidence = confidence / 100.0
+            
+            signal_data = {
+                'name': signal_name,
+                'direction': direction,
+                'confidence': confidence,
+                'strength': strength,
+                'weight': weight,
+                'weighted_strength': strength * weight * confidence
+            }
             
             if direction == "BUY":
-                buy_strength += weighted_strength
+                buy_signals.append(signal_data)
             elif direction == "SELL":
-                sell_strength += weighted_strength
-            
-            total_confidence += confidence * weight
+                sell_signals.append(signal_data)
+                
+            # Track high confidence signals (>70%)
+            if confidence > 0.7:
+                high_conf_signals.append(signal_data)
         
-        # Determine final direction - higher threshold for options
+        # Calculate total strengths
+        buy_strength = sum(s['weighted_strength'] for s in buy_signals)
+        sell_strength = sum(s['weighted_strength'] for s in sell_signals)
+        
+        # Enhanced decision logic
+        logger.info(f"🔍 AGGREGATION DEBUG: BUY={buy_strength:.3f}, SELL={sell_strength:.3f}")
+        logger.info(f"   High-confidence signals: {len(high_conf_signals)}")
+        
+        # Check for overwhelming high-confidence signal
+        if high_conf_signals:
+            strongest_signal = max(high_conf_signals, key=lambda x: x['confidence'] * x['weight'])
+            if strongest_signal['confidence'] > 0.85:
+                logger.info(f"   🎯 Using strongest signal: {strongest_signal['name']} ({strongest_signal['confidence']:.1%})")
+                return {
+                    "direction": strongest_signal['direction'],
+                    "confidence": strongest_signal['confidence'] * 0.9,  # Slight discount for safety
+                    "expected_move_pct": strongest_signal['strength'] * 0.05,
+                    "buy_strength": buy_strength,
+                    "sell_strength": sell_strength,
+                    "dominant_signal": strongest_signal['name']
+                }
+        
+        # Standard aggregation with lower thresholds
         strength_diff = abs(buy_strength - sell_strength)
-        min_strength = 0.35  # Higher than stock trading
-        min_agreement = 0.25  # Require stronger agreement
+        total_strength = buy_strength + sell_strength
         
-        if buy_strength > sell_strength and buy_strength > min_strength and strength_diff > min_agreement:
+        # Lower thresholds to allow more trades
+        min_strength = 0.15  # Reduced from 0.35
+        min_agreement = 0.1   # Reduced from 0.25
+        
+        if buy_strength > sell_strength and total_strength > min_strength and strength_diff > min_agreement:
             final_direction = "BUY"
-            final_confidence = min(0.95, buy_strength / (buy_strength + sell_strength + 0.1))
-        elif sell_strength > buy_strength and sell_strength > min_strength and strength_diff > min_agreement:
-            final_direction = "SELL"
-            final_confidence = min(0.95, sell_strength / (buy_strength + sell_strength + 0.1))
+            final_confidence = min(0.85, (buy_strength / (total_strength + 0.01)) * 0.8 + 0.5)
+        elif sell_strength > buy_strength and total_strength > min_strength and strength_diff > min_agreement:
+            final_direction = "SELL" 
+            final_confidence = min(0.85, (sell_strength / (total_strength + 0.01)) * 0.8 + 0.5)
         else:
             final_direction = "HOLD"
             final_confidence = 0.5
         
-        # Calculate expected move based on signal strength
-        expected_move = min(0.08, strength_diff * 2)  # Max 8% expected move
+        # Calculate expected move
+        expected_move = min(0.06, strength_diff * 0.8)  # More conservative
+        
+        logger.info(f"   📊 Final: {final_direction} ({final_confidence:.1%})")
         
         return {
             "direction": final_direction,
             "confidence": final_confidence,
-            "expected_move": expected_move,
+            "expected_move_pct": expected_move,
             "buy_strength": buy_strength,
             "sell_strength": sell_strength
         }
