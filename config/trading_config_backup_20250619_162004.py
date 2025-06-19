@@ -39,9 +39,9 @@ class RTXTradingConfig:
     }
     
     # === TRADING THRESHOLDS ===
-    CONFIDENCE_THRESHOLD = 0.75  # ML Optimized: Increased from 0.35 for higher selectivity
+    CONFIDENCE_THRESHOLD = 0.35  # Minimum confidence to trade
     HIGH_CONFIDENCE_THRESHOLD = 0.75  # High confidence alerts
-    MIN_SIGNALS_REQUIRED = 4  # ML Optimized: Increased from 3 for higher conviction
+    MIN_SIGNALS_REQUIRED = 3  # Minimum signals that must agree
     
     # === RISK MANAGEMENT ===
     STOP_LOSS_PERCENTAGE = 0.15  # 15% stop loss

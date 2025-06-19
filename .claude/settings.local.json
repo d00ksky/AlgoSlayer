@@ -48,7 +48,8 @@
       "Bash(ping:*)",
       "Bash(nc:*)",
       "Bash(./smart_deploy.sh)",
-      "Bash(journalctl:*)"
+      "Bash(journalctl:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }
