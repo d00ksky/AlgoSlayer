@@ -7,6 +7,19 @@
 ![Options Trading](https://img.shields.io/badge/OPTIONS-TRADING-red?style=for-the-badge)
 ![AI Powered](https://img.shields.io/badge/AI-POWERED-purple?style=for-the-badge)
 ![Self Learning](https://img.shields.io/badge/SELF-LEARNING-blue?style=for-the-badge)
+![A/B Testing](https://img.shields.io/badge/A%2FB-TESTING-orange?style=for-the-badge)
+
+## 🔬 **CURRENT STATUS: A/B TESTING PHASE (June 19, 2025)**
+
+**The system is currently running a scientific A/B test to validate ML-recommended optimizations:**
+
+- **✅ Baseline Established**: 0% win rate, -55% avg P&L (3 completed trades)
+- **🎯 Optimizations Applied**: 75% confidence threshold, 4+ signals required
+- **📊 Testing Period**: 1-2 weeks for statistical significance
+- **🎯 Success Target**: 40%+ win rate, positive average P&L
+- **🧠 Self-Improving**: AI scientifically testing its own recommendations
+
+**Next trade will use stricter criteria - expecting fewer but higher quality predictions!**
 
 ## 🎯 System Overview
 
