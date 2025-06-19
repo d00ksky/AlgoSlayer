@@ -408,8 +408,81 @@ class OptionsDataEngine:
     
     def get_option_price_realtime(self, contract_symbol: str) -> Optional[Dict]:
         """Get real-time price for specific option contract"""
+        
+        # First try to get from cached/validated chain
         options_chain = self.get_real_options_chain(force_refresh=True)
-        return options_chain.get(contract_symbol)
+        if contract_symbol in options_chain:
+            return options_chain[contract_symbol]
+        
+        # If not found (e.g., contract no longer passes validation), 
+        # fetch directly from yfinance for existing positions
+        logger.info(f"📊 Contract {contract_symbol} not in validated chain, fetching directly...")
+        
+        try:
+            # Parse contract symbol: RTX250620C00147000
+            if len(contract_symbol) < 15:
+                logger.error(f"❌ Invalid contract symbol format: {contract_symbol}")
+                return None
+                
+            symbol_parts = {
+                'underlying': contract_symbol[:3],  # RTX
+                'date': contract_symbol[3:9],       # 250620
+                'type': contract_symbol[9],         # C or P
+                'strike': contract_symbol[10:]      # 00147000
+            }
+            
+            # Convert date and strike
+            expiry = f"20{symbol_parts['date'][:2]}-{symbol_parts['date'][2:4]}-{symbol_parts['date'][4:6]}"
+            strike = int(symbol_parts['strike']) / 1000
+            
+            # Get the option chain for this expiry
+            chain = self.ticker.option_chain(expiry)
+            
+            if symbol_parts['type'] == 'C':
+                options_df = chain.calls
+                option_type = 'call'
+            else:
+                options_df = chain.puts  
+                option_type = 'put'
+            
+            # Find the specific strike
+            option_row = options_df[options_df['strike'] == strike]
+            
+            if option_row.empty:
+                logger.error(f"❌ Strike ${strike} not found for {expiry}")
+                return None
+                
+            option = option_row.iloc[0]
+            
+            # Format the data (with relaxed validation for existing positions)
+            bid = float(option['bid']) if not pd.isna(option['bid']) else 0.0
+            ask = float(option['ask']) if not pd.isna(option['ask']) else 0.0
+            
+            data = {
+                'type': option_type,
+                'strike': strike,
+                'expiry': expiry,  # Keep YYYY-MM-DD format
+                'bid': bid,
+                'ask': ask,
+                'last': float(option['lastPrice']) if not pd.isna(option['lastPrice']) else 0.0,
+                'volume': int(option.get('volume', 0)) if not pd.isna(option.get('volume', 0)) else 0,
+                'openInterest': int(option.get('openInterest', 0)) if not pd.isna(option.get('openInterest', 0)) else 0,
+                'impliedVolatility': float(option['impliedVolatility']) if not pd.isna(option['impliedVolatility']) else 0.0,
+                'delta': float(option.get('delta', 0)) if not pd.isna(option.get('delta', 0)) else 0.0,
+                'gamma': float(option.get('gamma', 0)) if not pd.isna(option.get('gamma', 0)) else 0.0,
+                'theta': float(option.get('theta', 0)) if not pd.isna(option.get('theta', 0)) else 0.0,
+                'vega': float(option.get('vega', 0)) if not pd.isna(option.get('vega', 0)) else 0.0,
+                'timestamp': datetime.now().isoformat(),
+                'mid_price': (bid + ask) / 2 if bid > 0 and ask > 0 else 0,
+                'spread_pct': ((ask - bid) / ((ask + bid) / 2)) if bid > 0 and ask > 0 else 0
+            }
+            
+            logger.success(f"✅ Fetched {contract_symbol} directly: bid=${bid:.2f}, ask=${ask:.2f}")
+            return data
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to fetch {contract_symbol} directly: {e}")
+            return None
 
 # Create global instance
 options_data_engine = OptionsDataEngine("RTX")

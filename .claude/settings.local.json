@@ -47,7 +47,8 @@
       "Bash(systemctl:*)",
       "Bash(ping:*)",
       "Bash(nc:*)",
-      "Bash(./smart_deploy.sh)"
+      "Bash(./smart_deploy.sh)",
+      "Bash(journalctl:*)"
     ],
     "deny": []
   }

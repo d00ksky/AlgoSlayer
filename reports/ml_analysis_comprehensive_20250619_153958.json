@@ -1,0 +1,270 @@
+{
+  "analysis_timestamp": "2025-06-19T15:39:58.365120",
+  "enhanced_analysis": {
+    "performance_summary": {
+      "total_predictions": 2.0,
+      "completed_trades": 2.0,
+      "win_rate": 0.5,
+      "avg_pnl_percentage": 0.13447318840579708,
+      "avg_confidence": 42.925
+    },
+    "identified_issues": [
+      "\u274c Large losses: -66.8% (stop loss may not be working)",
+      "\u274c Missing signals data: 1 trades have no signal information",
+      "\u26a0\ufe0f Limited data: Only 2.0 completed trades (need 10+ for reliable analysis)"
+    ],
+    "recommendations": [
+      "\ud83d\udd27 FIX CRITICAL: Enable signals_data logging in options predictions",
+      "   - Check src/core/options_prediction_engine.py signal aggregation",
+      "   - Ensure all 12 signals are being captured and stored",
+      "\ud83d\udee1\ufe0f IMPROVE RISK MANAGEMENT:",
+      "   - Reduce stop loss from 50% to 40%",
+      "   - Add time-based stops (exit at 25% time decay)",
+      "   - Consider smaller position sizes",
+      "\ud83c\udfaf STRATEGY IMPROVEMENTS:",
+      "   - Track which signals actually correlate with profitable trades",
+      "   - Implement signal weight adjustment based on P&L performance",
+      "   - Add earnings calendar integration for timing",
+      "   - Focus on RTX-specific patterns (defense contracts, earnings)",
+      "\ud83d\udcda LEARNING SYSTEM:",
+      "   - Run system for 2-4 weeks to collect 20+ trades",
+      "   - Track signal combinations that lead to profits",
+      "   - Analyze optimal DTE, IV, and Delta combinations",
+      "   - Implement automatic signal weight adjustment"
+    ],
+    "signal_analysis": {
+      "signal_mentions": {
+        "news_sentiment": false,
+        "technical_analysis": false,
+        "options_flow": false,
+        "volatility_analysis": false,
+        "momentum": false,
+        "sector_correlation": false,
+        "mean_reversion": false,
+        "market_regime": false,
+        "trump_geopolitical": false,
+        "defense_contract": false,
+        "rtx_earnings": false,
+        "options_iv_percentile": false
+      },
+      "missing_signals": [
+        "news_sentiment",
+        "technical_analysis",
+        "options_flow",
+        "volatility_analysis",
+        "momentum",
+        "sector_correlation",
+        "mean_reversion",
+        "market_regime",
+        "trump_geopolitical",
+        "defense_contract",
+        "rtx_earnings",
+        "options_iv_percentile"
+      ],
+      "log_analysis": true
+    },
+    "learning_plan": {
+      "immediate_actions": [
+        "Fix signals_data logging in options predictions",
+        "Verify all 12 AI signals are operational",
+        "Check signal aggregation in options_prediction_engine.py",
+        "Test prediction cycle to ensure data capture"
+      ],
+      "short_term_goals": [
+        "Collect 20+ trades with complete signal data",
+        "Implement signal performance tracking",
+        "Add confidence threshold adjustment (60% \u2192 75%+)",
+        "Implement dynamic position sizing based on confidence"
+      ],
+      "long_term_objectives": [
+        "Achieve 40%+ win rate with positive expected value",
+        "Implement automatic signal weight adjustment",
+        "Add market regime detection for strategy adaptation",
+        "Build RTX-specific pattern recognition"
+      ],
+      "success_metrics": {
+        "min_win_rate": 0.4,
+        "min_profit_factor": 2.0,
+        "max_drawdown": 0.3,
+        "min_trades_per_month": 8,
+        "target_monthly_return": 0.15
+      }
+    },
+    "raw_performance_data": {
+      "summary_stats": {
+        "total_predictions": 2.0,
+        "completed_trades": 2.0,
+        "avg_pnl": -12.300000000000004,
+        "avg_pnl_pct": 0.13447318840579708,
+        "winning_trades": 1.0,
+        "worst_loss_pct": -0.6677536231884058,
+        "best_win_pct": 0.9367,
+        "avg_confidence": 42.925,
+        "avg_dte": 2.0,
+        "avg_iv_entry": 0.24475477905273435,
+        "win_rate": 0.5
+      },
+      "trades": [
+        {
+          "prediction_id": "test_20250619_153720",
+          "timestamp": "2025-06-19 13:37:21",
+          "confidence": 0.85,
+          "expected_move": 0.03,
+          "expected_profit_pct": 1.0,
+          "days_to_expiry": 1,
+          "implied_volatility": 0.25,
+          "delta_entry": 0.5,
+          "entry_price": 0.71,
+          "signals_data": "{\"technical_analysis\": {\"direction\": \"BUY\", \"confidence\": 0.8, \"strength\": 0.3}, \"momentum\": {\"direction\": \"BUY\", \"confidence\": 0.7, \"strength\": 0.25}, \"news_sentiment\": {\"direction\": \"HOLD\", \"confidence\": 0.5, \"strength\": 0.1}}",
+          "exit_timestamp": "2025-06-19T15:39:04.866212",
+          "exit_reason": "PROFIT_TARGET",
+          "days_held": 1,
+          "net_pnl": 67.55,
+          "pnl_percentage": 0.9367,
+          "stock_move_pct": 0.0089
+        },
+        {
+          "prediction_id": "test_20250616_214303",
+          "timestamp": "2025-06-16 19:43:03",
+          "confidence": 85.0,
+          "expected_move": 4.5,
+          "expected_profit_pct": 150.0,
+          "days_to_expiry": 3,
+          "implied_volatility": 0.2395095581054687,
+          "delta_entry": 0.0,
+          "entry_price": 1.38,
+          "signals_data": "{}",
+          "exit_timestamp": "2025-06-19 15:31:26.005755",
+          "exit_reason": "STOP_LOSS",
+          "days_held": 2,
+          "net_pnl": -92.15,
+          "pnl_percentage": -0.6677536231884058,
+          "stock_move_pct": -0.0038920592509888
+        }
+      ],
+      "analysis_timestamp": "2025-06-19T15:39:58.355401"
+    },
+    "generated_at": "2025-06-19T15:39:58.355728"
+  },
+  "learning_analysis": {
+    "analysis_timestamp": "2025-06-19T15:39:58.362522",
+    "trades_analyzed": 1,
+    "signals_analyzed": 3,
+    "performance_metrics": {
+      "overall_win_rate": 1.0,
+      "overall_avg_pnl_pct": 0.9367,
+      "best_signal": "technical_analysis",
+      "best_signal_score": 0.97468,
+      "worst_signal": "technical_analysis",
+      "worst_signal_score": 0.97468
+    },
+    "learning_opportunities": [],
+    "strategy_recommendations": [
+      "\ud83d\udcca Collect more trading data (target: 20+ trades)",
+      "\ud83d\udd50 Run system for 2-4 weeks in paper trading mode"
+    ],
+    "signal_performance_detail": {
+      "technical_analysis": {
+        "trades": [
+          {
+            "direction": "BUY",
+            "confidence": 0.8,
+            "profitable": true,
+            "pnl_pct": 0.9367
+          }
+        ],
+        "profitable_trades": 1,
+        "total_trades": 1,
+        "total_pnl": 0.9367,
+        "avg_confidence": 0.8,
+        "directions": {
+          "BUY": 1,
+          "SELL": 0,
+          "HOLD": 0
+        },
+        "win_rate": 1.0,
+        "avg_pnl_pct": 0.9367,
+        "direction_effectiveness": {
+          "BUY": 1.0
+        },
+        "signal_score": 0.97468
+      },
+      "momentum": {
+        "trades": [
+          {
+            "direction": "BUY",
+            "confidence": 0.7,
+            "profitable": true,
+            "pnl_pct": 0.9367
+          }
+        ],
+        "profitable_trades": 1,
+        "total_trades": 1,
+        "total_pnl": 0.9367,
+        "avg_confidence": 0.7,
+        "directions": {
+          "BUY": 1,
+          "SELL": 0,
+          "HOLD": 0
+        },
+        "win_rate": 1.0,
+        "avg_pnl_pct": 0.9367,
+        "direction_effectiveness": {
+          "BUY": 1.0
+        },
+        "signal_score": 0.97468
+      },
+      "news_sentiment": {
+        "trades": [
+          {
+            "direction": "HOLD",
+            "confidence": 0.5,
+            "profitable": true,
+            "pnl_pct": 0.9367
+          }
+        ],
+        "profitable_trades": 1,
+        "total_trades": 1,
+        "total_pnl": 0.9367,
+        "avg_confidence": 0.5,
+        "directions": {
+          "BUY": 0,
+          "SELL": 0,
+          "HOLD": 1
+        },
+        "win_rate": 1.0,
+        "avg_pnl_pct": 0.9367,
+        "direction_effectiveness": {
+          "HOLD": 1.0
+        },
+        "signal_score": 0.97468
+      }
+    },
+    "learning_status": "INSUFFICIENT_DATA - Need more trades for meaningful learning"
+  },
+  "current_weights": {
+    "news_sentiment": 0.1,
+    "technical_analysis": 0.12,
+    "options_flow": 0.12,
+    "volatility_analysis": 0.08,
+    "momentum": 0.08,
+    "sector_correlation": 0.08,
+    "mean_reversion": 0.08,
+    "market_regime": 0.1,
+    "trump_geopolitical": 0.08,
+    "defense_contract": 0.06,
+    "rtx_earnings": 0.05,
+    "options_iv_percentile": 0.05
+  },
+  "action_items": [
+    "\u274c Large losses: -66.8% (stop loss may not be working)",
+    "\u274c Missing signals data: 1 trades have no signal information",
+    "\ud83d\udcca Collect more trading data (target: 20+ trades)",
+    "\ud83d\udd50 Run system for 2-4 weeks in paper trading mode"
+  ],
+  "system_status": {
+    "status": "LEARNING_MODE",
+    "readiness": "Need more data (2.0/20 trades)",
+    "next_steps": "Continue paper trading to collect data"
+  }
+}
