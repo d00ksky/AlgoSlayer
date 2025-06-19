@@ -22,6 +22,7 @@ class OptionsPaperTrader:
         self.account_balance = 1000.0  # Starting with $1000
         self.total_pnl = 0.0
         self._init_database()
+        self._load_open_positions()  # Load existing open positions from database
     
     def _init_database(self):
         """Initialize options trading database"""
@@ -134,6 +135,108 @@ class OptionsPaperTrader:
         conn.commit()
         conn.close()
         logger.info("📊 Options paper trading database initialized")
+    
+    def _load_open_positions(self):
+        """Load open positions from database on startup"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Get the latest account balance from account history
+        cursor.execute("""
+        SELECT balance_after FROM account_history 
+        ORDER BY timestamp DESC LIMIT 1
+        """)
+        result = cursor.fetchone()
+        if result:
+            self.account_balance = result[0]
+            logger.info(f"📊 Restored account balance: ${self.account_balance:.2f}")
+        
+        # Load all open positions
+        cursor.execute("""
+        SELECT 
+            prediction_id, timestamp, symbol, action, contract_symbol, option_type, 
+            strike, expiry, days_to_expiry, entry_price, contracts, total_cost, 
+            commission, direction, confidence, expected_move, expected_profit_pct,
+            implied_volatility, delta_entry, gamma_entry, theta_entry, vega_entry,
+            profit_target_price, stop_loss_price, max_loss_dollars,
+            stock_price_entry, volume, open_interest, signals_data, reasoning,
+            account_balance_at_entry
+        FROM options_predictions 
+        WHERE status = 'OPEN'
+        """)
+        
+        open_positions_data = cursor.fetchall()
+        
+        for row in open_positions_data:
+            # Reconstruct prediction dictionary
+            prediction = {
+                'prediction_id': row[0],
+                'timestamp': row[1],
+                'symbol': row[2],
+                'action': row[3],
+                'contract_symbol': row[4],
+                'option_type': row[5],
+                'strike': row[6],
+                'expiry': row[7],
+                'days_to_expiry': row[8],
+                'entry_price': row[9],
+                'contracts': row[10],
+                'total_cost': row[11],
+                'commission': row[12],
+                'direction': row[13],
+                'confidence': row[14],
+                'expected_move': row[15],
+                'expected_profit_pct': row[16],
+                'implied_volatility': row[17],
+                'delta': row[18],
+                'gamma': row[19],
+                'theta': row[20],
+                'vega': row[21],
+                'profit_target_price': row[22],
+                'stop_loss_price': row[23],
+                'max_loss_dollars': row[24],
+                'stock_price_entry': row[25],
+                'volume': row[26],
+                'open_interest': row[27],
+                'individual_signals': json.loads(row[28]) if row[28] else {},
+                'reasoning': row[29],
+                'account_balance_at_entry': row[30]
+            }
+            
+            # Reconstruct execution details
+            execution = {
+                'execution_price': row[9],  # entry_price
+                'cost_per_contract': row[9] * 100,
+                'gross_cost': row[11] - row[12],  # total_cost - commission
+                'commission': row[12],
+                'total_cost': row[11],
+                'timestamp': datetime.fromisoformat(row[1]) if isinstance(row[1], str) else row[1]
+            }
+            
+            # Reconstruct position
+            position = {
+                'prediction': prediction,
+                'execution': execution,
+                'entry_timestamp': datetime.fromisoformat(row[1]) if isinstance(row[1], str) else row[1],
+                'status': 'OPEN'
+            }
+            
+            self.open_positions[row[0]] = position
+            logger.info(f"✅ Restored open position: {row[4]} x{row[10]} @ ${row[9]:.2f}")
+        
+        # Calculate total P&L from closed positions
+        cursor.execute("SELECT SUM(net_pnl) FROM options_outcomes")
+        result = cursor.fetchone()
+        if result and result[0]:
+            self.total_pnl = result[0]
+            logger.info(f"📊 Restored total P&L: ${self.total_pnl:.2f}")
+        
+        conn.close()
+        
+        if self.open_positions:
+            logger.success(f"📊 Loaded {len(self.open_positions)} open positions from database")
+        else:
+            logger.info("📊 No open positions to restore")
     
     def open_position(self, prediction: Dict) -> bool:
         """Open a new options position based on prediction"""
@@ -360,6 +463,9 @@ class OptionsPaperTrader:
         # Store outcome
         self._store_outcome(outcome)
         
+        # Update status to CLOSED in the database
+        self._update_position_status(prediction_id, 'CLOSED')
+        
         # Record transaction
         self._record_account_transaction(
             'CLOSE_POSITION', prediction_id, exit_proceeds - exit_commission,
@@ -447,6 +553,21 @@ class OptionsPaperTrader:
         INSERT INTO account_history (action, trade_id, amount, balance_before, balance_after, description)
         VALUES (?, ?, ?, ?, ?, ?)
         """, (action, trade_id, amount, balance_before, balance_after, description))
+        
+        conn.commit()
+        conn.close()
+    
+    def _update_position_status(self, prediction_id: str, status: str):
+        """Update position status in database"""
+        
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+        UPDATE options_predictions 
+        SET status = ? 
+        WHERE prediction_id = ?
+        """, (status, prediction_id))
         
         conn.commit()
         conn.close()
