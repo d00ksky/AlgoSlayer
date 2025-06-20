@@ -86,6 +86,7 @@ class LivesTracker:
             "status": "ACTIVE"
         }
         
+        self.current_life = new_life  # Set before saving
         self._save_lives_data()
         return new_life
         
