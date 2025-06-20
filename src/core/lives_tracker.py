@@ -90,7 +90,7 @@ class LivesTracker:
         self._save_lives_data()
         return new_life
         
-    def check_life_status(self, current_balance: float) -> Dict:
+    def check_life_status(self, current_balance: float, open_positions_count: int = 0) -> Dict:
         """Check if current life is still active or needs respawn"""
         life_status = {
             "life_number": self.current_life["current_life_number"],
@@ -100,19 +100,24 @@ class LivesTracker:
             "action_needed": None
         }
         
-        if current_balance < self.minimum_balance:
+        # Only reset if balance is low AND no open positions
+        if current_balance < self.minimum_balance and open_positions_count == 0:
             life_status["status"] = "DEPLETED"
             life_status["action_needed"] = "RESPAWN"
-            logger.warning(f"💀 Life #{self.current_life['current_life_number']} depleted! Balance: ${current_balance:.2f}")
+            logger.warning(f"💀 Life #{self.current_life['current_life_number']} depleted! Balance: ${current_balance:.2f}, No positions")
             
             # End current life
-            self._end_current_life(current_balance, "INSUFFICIENT_FUNDS")
+            self._end_current_life(current_balance, "INSUFFICIENT_FUNDS_NO_POSITIONS")
             
             # Start new life
             new_life_number = self.current_life["current_life_number"] + 1
             self.current_life = self._start_new_life(new_life_number)
             life_status["new_life_number"] = new_life_number
             life_status["message"] = f"Starting fresh with Life #{new_life_number}!"
+            
+        elif current_balance < self.minimum_balance and open_positions_count > 0:
+            life_status["status"] = "CRITICAL_WITH_POSITIONS"
+            life_status["message"] = f"⏳ Low funds (${current_balance:.2f}) but {open_positions_count} positions may recover"
             
         elif current_balance < self.starting_capital * 0.3:
             life_status["status"] = "CRITICAL"
