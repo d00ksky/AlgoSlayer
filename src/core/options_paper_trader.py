@@ -22,10 +22,10 @@ class OptionsPaperTrader:
             self.db_path = db_path
         self.open_positions = {}
         self.closed_positions = []
-        self.account_balance = initial_balance
+        self.account_balance = initial_balance  # Default, will be overridden by DB if exists
         self.total_pnl = 0.0
         self._init_database()
-        self._load_open_positions()  # Load existing open positions from database
+        self._load_open_positions()  # Load existing open positions and balance from database
     
     def _init_database(self):
         """Initialize options trading database"""
@@ -147,12 +147,15 @@ class OptionsPaperTrader:
         # Get the latest account balance from account history
         cursor.execute("""
         SELECT balance_after FROM account_history 
-        ORDER BY timestamp DESC LIMIT 1
+        ORDER BY rowid DESC LIMIT 1
         """)
         result = cursor.fetchone()
-        if result:
+        if result and result[0] is not None:
+            old_balance = self.account_balance
             self.account_balance = result[0]
-            logger.info(f"📊 Restored account balance: ${self.account_balance:.2f}")
+            logger.info(f"📊 Restored account balance: ${old_balance:.2f} → ${self.account_balance:.2f}")
+        else:
+            logger.info(f"📊 Using default balance: ${self.account_balance:.2f} (no DB history found)")
         
         # Load all open positions
         cursor.execute("""
