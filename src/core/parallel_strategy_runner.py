@@ -97,7 +97,7 @@ class ParallelStrategyRunner:
         try:
             while self.running:
                 # Check if market is open
-                if not config.is_market_hours():
+                if not base_config.is_market_hours():
                     logger.info("⏰ Market closed - sleeping")
                     await asyncio.sleep(300)  # 5 minutes
                     continue
@@ -114,7 +114,7 @@ class ParallelStrategyRunner:
                     await self._send_performance_update()
                     
                 # Sleep until next cycle
-                await asyncio.sleep(config.PREDICTION_INTERVAL_MINUTES * 60)
+                await asyncio.sleep(base_config.PREDICTION_INTERVAL_MINUTES * 60)
                 
         except Exception as e:
             logger.error(f"❌ Parallel trading error: {e}")
@@ -157,8 +157,7 @@ class ParallelStrategyRunner:
             
             # Check if signals meet strategy requirements
             confidence = signals_data.get("confidence", 0)
-            signals_agreeing = len([s for s, d in signals_data.get("signals", {}).items() 
-                                  if d.get("direction") == signals_data["direction"]])
+            signals_agreeing = signals_data.get("signals_agreeing", 0)
             
             logger.info(f"🎯 {config.name}: Confidence {confidence:.1%}, Signals agreeing: {signals_agreeing}")
             
@@ -201,8 +200,8 @@ class ParallelStrategyRunner:
     async def _generate_strategy_prediction(self, instance: StrategyInstance, signals_data: Dict, position_size_pct: float) -> Optional[Dict]:
         """Generate prediction with strategy-specific parameters"""
         # Override position size for this prediction
-        original_max = config.MAX_POSITION_SIZE
-        config.MAX_POSITION_SIZE = int(instance.balance * position_size_pct)
+        original_max = base_config.MAX_POSITION_SIZE
+        base_config.MAX_POSITION_SIZE = int(instance.balance * position_size_pct)
         
         try:
             # Use strategy's signal weights if available
@@ -223,7 +222,7 @@ class ParallelStrategyRunner:
             
         finally:
             # Restore original position size
-            config.MAX_POSITION_SIZE = original_max
+            base_config.MAX_POSITION_SIZE = original_max
             
     def _apply_custom_weights(self, signals_data: Dict, weights: Dict[str, float]) -> Dict:
         """Apply custom signal weights to signals data"""

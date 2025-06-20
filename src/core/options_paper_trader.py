@@ -15,11 +15,14 @@ from src.core.options_data_engine import options_data_engine
 class OptionsPaperTrader:
     """Realistic options paper trading simulation"""
     
-    def __init__(self, db_path: str = "data/options_performance.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = "data/options_performance.db", initial_balance: float = 1000.0, db_suffix: str = ""):
+        if db_suffix:
+            self.db_path = db_path.replace(".db", f"{db_suffix}.db")
+        else:
+            self.db_path = db_path
         self.open_positions = {}
         self.closed_positions = []
-        self.account_balance = 1000.0  # Starting with $1000
+        self.account_balance = initial_balance
         self.total_pnl = 0.0
         self._init_database()
         self._load_open_positions()  # Load existing open positions from database
