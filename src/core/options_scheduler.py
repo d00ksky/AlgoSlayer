@@ -82,9 +82,17 @@ class OptionsScheduler:
         self.prediction_count = 0
         self.cycle_count = 0
         
+        # Initialize lives tracker
+        from src.core.lives_tracker import LivesTracker
+        self.lives_tracker = LivesTracker()
+        
+        # Check life status on startup
+        life_status = self.lives_tracker.check_life_status(options_paper_trader.account_balance)
+        
         logger.info("🎯 Options Trading Scheduler initialized")
         logger.info(f"📊 Mode: {self.trading_mode.get_mode_description()}")
         logger.info(f"💰 Starting balance: ${options_paper_trader.account_balance:.2f}")
+        logger.info(f"🎮 Life #{life_status['life_number']} - Health: {life_status['health_percentage']:.1f}%")
     
     async def start_autonomous_trading(self):
         """Start the main autonomous trading loop"""
@@ -147,6 +155,23 @@ class OptionsScheduler:
         logger.info(f"🔄 Starting trading cycle #{self.cycle_count}")
         
         try:
+            # Step 0: Check life status
+            current_balance = self.paper_trader.account_balance
+            life_status = self.lives_tracker.check_life_status(current_balance)
+            
+            if life_status["action_needed"] == "RESPAWN":
+                logger.info(f"🎮 {life_status['message']}")
+                # Reset paper trader balance for new life
+                self.paper_trader.account_balance = 1000.0
+                self.paper_trader.available_cash = 1000.0
+                await self.telegram_bot.send_message(
+                    f"💀 Life #{life_status['life_number']-1} Lost!\n"
+                    f"🎮 Starting Life #{life_status['new_life_number']} with $1000\n"
+                    f"📊 All-time P&L: ${self.lives_tracker._calculate_all_time_pnl():.2f}"
+                )
+            elif life_status["status"] in ["CRITICAL", "DAMAGED"]:
+                logger.warning(life_status["message"])
+            
             # Step 1: Check existing positions
             await self._check_existing_positions()
             
