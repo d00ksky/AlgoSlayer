@@ -18,7 +18,7 @@ class OptionsPredictionEngine:
         self.last_prediction = None
         self.prediction_history = []
     
-    def generate_options_prediction(self, signals_data: Dict, account_balance: float) -> Optional[Dict]:
+    def generate_options_prediction(self, signals_data: Dict, account_balance: float, strategy_id: str = "default") -> Optional[Dict]:
         """
         Generate specific options prediction from AI signals
         
@@ -71,7 +71,7 @@ class OptionsPredictionEngine:
         # Generate complete prediction
         prediction = self._create_options_prediction(
             selected_option, direction, confidence, expected_move, 
-            signals_data, account_balance
+            signals_data, account_balance, strategy_id
         )
         
         # Validate prediction
@@ -153,7 +153,7 @@ class OptionsPredictionEngine:
         return volume_score + oi_score + spread_score + price_score + delta_score + gamma_score + theta_score
     
     def _create_options_prediction(self, option: Dict, direction: str, confidence: float, 
-                                 expected_move: float, signals_data: Dict, account_balance: float) -> Dict:
+                                 expected_move: float, signals_data: Dict, account_balance: float, strategy_id: str = "default") -> Dict:
         """Create complete options prediction with all details"""
         
         # Determine action
@@ -258,7 +258,7 @@ class OptionsPredictionEngine:
             'signal_weights': signals_data.get('signal_weights', {}),
             
             # Metadata
-            'prediction_id': f"RTX_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            'prediction_id': f"RTX_{strategy_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
             'account_balance': account_balance,
             'market_hours': options_config.is_market_hours(),
             'reasoning': self._generate_reasoning(option, direction, confidence, expected_move)

@@ -17,6 +17,7 @@ from src.core.options_paper_trader import OptionsPaperTrader
 from src.core.telegram_bot import telegram_bot
 from src.core.adaptive_learning_system import AdaptiveLearningSystem
 from config.trading_config import config as base_config
+from config.options_config import options_config
 
 class StrategyInstance:
     """Independent instance of a trading strategy"""
@@ -97,7 +98,7 @@ class ParallelStrategyRunner:
         try:
             while self.running:
                 # Check if market is open
-                if not base_config.is_market_hours():
+                if not options_config.is_market_hours():
                     logger.info("⏰ Market closed - sleeping")
                     await asyncio.sleep(300)  # 5 minutes
                     continue
@@ -173,9 +174,9 @@ class ParallelStrategyRunner:
                 instance, signals_data, config.position_size_pct
             )
             
-            if prediction:
+            if prediction and isinstance(prediction, dict) and "id" in prediction:
                 # Execute trade
-                await instance.paper_trader.open_position(prediction)
+                instance.paper_trader.open_position(prediction)
                 
                 # Record prediction for tracking
                 self.manager.record_prediction(strategy_id, prediction["id"])
@@ -211,11 +212,11 @@ class ParallelStrategyRunner:
                     signals_data, instance.strategy_config.signal_weights
                 )
                 prediction = instance.prediction_engine.generate_options_prediction(
-                    weighted_signals, instance.balance
+                    weighted_signals, instance.balance, instance.strategy_id
                 )
             else:
                 prediction = instance.prediction_engine.generate_options_prediction(
-                    signals_data, instance.balance
+                    signals_data, instance.balance, instance.strategy_id
                 )
                 
             return prediction
