@@ -35,6 +35,9 @@ class PerformanceDashboard:
             # Performance Charts
             dashboard += self._generate_performance_charts(strategy_data)
             
+            # Kelly Position Sizing
+            dashboard += self._generate_kelly_status()
+            
             # Signal Status
             dashboard += self._generate_signal_status()
             
@@ -272,6 +275,42 @@ class PerformanceDashboard:
             charts += "\n"
         
         return charts
+    
+    def _generate_kelly_status(self) -> str:
+        """Generate Kelly Criterion position sizing status"""
+        try:
+            # Import kelly sizer here to avoid circular imports
+            try:
+                from .kelly_position_sizer import kelly_sizer
+            except ImportError:
+                from src.core.kelly_position_sizer import kelly_sizer
+            
+            kelly_data = kelly_sizer.get_all_kelly_sizes()
+            
+            kelly_status = "📈 **Kelly Position Sizing**\n\n"
+            
+            for strategy_id, data in kelly_data.items():
+                emoji = self.strategy_emojis[strategy_id]
+                
+                kelly_status += f"{emoji} **{strategy_id.title()}**: {data['optimal_size']:.1%}"
+                
+                # Show adjustment from base
+                if abs(data['adjustment']) > 0.01:  # Only show if > 1% change
+                    direction = "↑" if data['adjustment'] > 0 else "↓"
+                    kelly_status += f" ({direction}{abs(data['adjustment']):.1%})"
+                
+                # Show key reason
+                reason = data['reason'].replace('_', ' ')
+                if 'insufficient' not in reason:
+                    kelly_status += f" • {reason.title()}"
+                
+                kelly_status += "\n"
+                
+            kelly_status += "\n"
+            return kelly_status
+            
+        except Exception as e:
+            return f"📈 **Kelly Sizing**: Error loading\n\n"
     
     def _generate_signal_status(self) -> str:
         """Generate signal performance status"""

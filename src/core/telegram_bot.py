@@ -359,6 +359,8 @@ Iron condors: Sideways strategy
             return await self.send_thresholds_message()
         elif command == "/positions" or command == "positions":
             return await self.send_positions_message()
+        elif command == "/kelly" or command == "kelly":
+            return await self.send_kelly_message()
         else:
             return await self.send_message(f"❓ Unknown command: {command}\n\nType /help for available commands")
     
@@ -370,6 +372,7 @@ Iron condors: Sideways strategy
 📊 <b>/dashboard</b> - Live performance dashboard
 🎯 <b>/thresholds</b> - Dynamic threshold status
 💰 <b>/positions</b> - Account positions & trades
+📈 <b>/kelly</b> - Kelly Criterion position sizing
 
 📚 <b>/explain</b> - Quick options guide
 📝 <b>/terms</b> - Options terminology
@@ -592,7 +595,7 @@ fi
                         # Only respond to authorized chat
                         if chat_id == self.chat_id and text:
                             logger.info(f"Processing Telegram command: {text}")
-                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart', 'memory', 'dashboard', 'thresholds', 'positions']:
+                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart', 'memory', 'dashboard', 'thresholds', 'positions', 'kelly']:
                                 await self.handle_command(text)
                             
             except Exception as e:
@@ -706,6 +709,23 @@ fi
         except Exception as e:
             logger.error(f"❌ Positions error: {e}")
             return await self.send_message(f"❌ <b>Positions Error:</b> {str(e)}")
+    
+    async def send_kelly_message(self) -> bool:
+        """Send Kelly Criterion position sizing status"""
+        try:
+            # Import kelly sizer here to avoid circular imports
+            try:
+                from .kelly_position_sizer import kelly_sizer
+            except ImportError:
+                from src.core.kelly_position_sizer import kelly_sizer
+            
+            kelly_text = kelly_sizer.get_kelly_summary()
+            
+            return await self.send_message(kelly_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Kelly error: {e}")
+            return await self.send_message(f"❌ <b>Kelly Error:</b> {str(e)}")
 
 # Global telegram bot instance
 telegram_bot = TelegramBot() 

@@ -18,6 +18,7 @@ from src.core.telegram_bot import telegram_bot
 from src.core.adaptive_learning_system import AdaptiveLearningSystem
 from src.core.dynamic_thresholds import dynamic_threshold_manager
 from src.core.dashboard import dashboard
+from src.core.kelly_position_sizer import kelly_sizer
 from config.trading_config import config as base_config
 from config.options_config import options_config
 
@@ -182,9 +183,14 @@ class ParallelStrategyRunner:
             if signals_agreeing < config.min_signals_required:
                 return f"Insufficient signals ({signals_agreeing} < {config.min_signals_required})"
                 
-            # Generate prediction with strategy-specific parameters
+            # Get Kelly-optimized position size
+            kelly_size, kelly_reason, kelly_metrics = kelly_sizer.calculate_optimal_position_size(strategy_id)
+            
+            logger.info(f"🎯 {config.name}: Kelly position size {kelly_size:.1%} (reason: {kelly_reason})")
+            
+            # Generate prediction with Kelly-optimized position size
             prediction = await self._generate_strategy_prediction(
-                instance, signals_data, config.position_size_pct
+                instance, signals_data, kelly_size
             )
             
             if prediction and isinstance(prediction, dict) and "id" in prediction:
@@ -303,10 +309,13 @@ class ParallelStrategyRunner:
             # Add dynamic threshold status
             message += dynamic_threshold_manager.get_threshold_summary()
             
+            # Add Kelly position sizing summary
+            message += "\n" + kelly_sizer.get_kelly_summary()
+            
             # Add insights from manager if available
             report = self.manager.get_comparison_report()
             if report.get("insights"):
-                message += "💡 **Insights:**\n"
+                message += "\n💡 **Insights:**\n"
                 for insight in report["insights"][:2]:  # Limit to 2 for space
                     message += f"• {insight}\n"
                     
