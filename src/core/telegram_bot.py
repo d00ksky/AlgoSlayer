@@ -353,6 +353,12 @@ Iron condors: Sideways strategy
             return await self.send_restart_message()
         elif command == "/memory" or command == "memory":
             return await self.send_memory_message()
+        elif command == "/dashboard" or command == "dashboard":
+            return await self.send_dashboard_message()
+        elif command == "/thresholds" or command == "thresholds":
+            return await self.send_thresholds_message()
+        elif command == "/positions" or command == "positions":
+            return await self.send_positions_message()
         else:
             return await self.send_message(f"❓ Unknown command: {command}\n\nType /help for available commands")
     
@@ -361,9 +367,14 @@ Iron condors: Sideways strategy
         help_text = """
 🤖 <b>RTX TRADING BOT COMMANDS</b>
 
+📊 <b>/dashboard</b> - Live performance dashboard
+🎯 <b>/thresholds</b> - Dynamic threshold status
+💰 <b>/positions</b> - Account positions & trades
+
 📚 <b>/explain</b> - Quick options guide
 📝 <b>/terms</b> - Options terminology
 🤖 <b>/signals</b> - AI signals explained
+
 📊 <b>/status</b> - System status
 📋 <b>/logs</b> - Recent system logs
 🔄 <b>/restart</b> - Restart service
@@ -581,7 +592,7 @@ fi
                         # Only respond to authorized chat
                         if chat_id == self.chat_id and text:
                             logger.info(f"Processing Telegram command: {text}")
-                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart', 'memory']:
+                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart', 'memory', 'dashboard', 'thresholds', 'positions']:
                                 await self.handle_command(text)
                             
             except Exception as e:
@@ -589,6 +600,112 @@ fi
                 await asyncio.sleep(5)
             
             await asyncio.sleep(1)
+    
+    async def send_dashboard_message(self) -> bool:
+        """Send live performance dashboard"""
+        try:
+            # Import dashboard here to avoid circular imports
+            try:
+                from .dashboard import dashboard
+            except ImportError:
+                from src.core.dashboard import dashboard
+            
+            dashboard_text = dashboard.generate_dashboard()
+            
+            # Limit message length for Telegram (4096 char limit)
+            if len(dashboard_text) > 4000:
+                dashboard_text = dashboard_text[:3900] + "\n\n... (Dashboard truncated for Telegram)"
+                
+            return await self.send_message(dashboard_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Dashboard error: {e}")
+            return await self.send_message(f"❌ <b>Dashboard Error:</b> {str(e)}")
+    
+    async def send_thresholds_message(self) -> bool:
+        """Send dynamic threshold status"""
+        try:
+            # Import thresholds here to avoid circular imports
+            try:
+                from .dynamic_thresholds import dynamic_threshold_manager
+            except ImportError:
+                from src.core.dynamic_thresholds import dynamic_threshold_manager
+            
+            thresholds_text = dynamic_threshold_manager.get_threshold_summary()
+            
+            return await self.send_message(thresholds_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Thresholds error: {e}")
+            return await self.send_message(f"❌ <b>Thresholds Error:</b> {str(e)}")
+    
+    async def send_positions_message(self) -> bool:
+        """Send account positions and strategy status"""
+        try:
+            import sqlite3
+            import os
+            
+            message = "📊 <b>Account Status</b>\n\n"
+            
+            strategies = ["conservative", "moderate", "aggressive"]
+            emojis = {"conservative": "🛡️", "moderate": "⚖️", "aggressive": "🚀"}
+            
+            total_positions = 0
+            total_balance = 0
+            
+            for strategy in strategies:
+                try:
+                    # Try production path first, fallback to local
+                    db_path = f"/opt/rtx-trading/data/options_performance_{strategy}.db"
+                    if not os.path.exists(db_path):
+                        db_path = f"data/options_performance_{strategy}.db"
+                    
+                    if os.path.exists(db_path):
+                        conn = sqlite3.connect(db_path)
+                        cursor = conn.cursor()
+                        
+                        # Get balance
+                        cursor.execute("SELECT balance_after FROM account_history ORDER BY rowid DESC LIMIT 1")
+                        balance_row = cursor.fetchone()
+                        balance = balance_row[0] if balance_row else 1000.0
+                        total_balance += balance
+                        
+                        # Count positions
+                        cursor.execute("SELECT COUNT(*) FROM options_predictions WHERE status = 'OPEN'")
+                        positions = cursor.fetchone()[0]
+                        total_positions += positions
+                        
+                        emoji = emojis.get(strategy, "📊")
+                        message += f"{emoji} <b>{strategy.title()}</b>: ${balance:.2f}\n"
+                        message += f"   📈 Open Positions: {positions}\n"
+                        
+                        if positions > 0:
+                            cursor.execute("SELECT contract_symbol, entry_price FROM options_predictions WHERE status = 'OPEN' LIMIT 2")
+                            for row in cursor.fetchall():
+                                message += f"      • {row[0]} @ ${row[1]:.2f}\n"
+                        
+                        if balance < 300 and positions == 0:
+                            message += f"   ⚠️ Ready for reset!\n"
+                        
+                        conn.close()
+                    else:
+                        message += f"{emojis.get(strategy, '📊')} <b>{strategy.title()}</b>: No database found\n"
+                    
+                    message += "\n"
+                    
+                except Exception as e:
+                    message += f"{emojis.get(strategy, '📊')} <b>{strategy.title()}</b>: Error - {str(e)}\n\n"
+            
+            message += f"💰 <b>Total Positions:</b> {total_positions}\n"
+            message += f"💳 <b>Total Balance:</b> ${total_balance:.2f}\n"
+            message += f"📊 <b>Combined Return:</b> {((total_balance - 3000) / 3000 * 100):+.1f}%\n"
+            message += f"\n⏰ <b>Updated:</b> {datetime.now().strftime('%H:%M:%S')}"
+            
+            return await self.send_message(message)
+            
+        except Exception as e:
+            logger.error(f"❌ Positions error: {e}")
+            return await self.send_message(f"❌ <b>Positions Error:</b> {str(e)}")
 
 # Global telegram bot instance
 telegram_bot = TelegramBot() 
