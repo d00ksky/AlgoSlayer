@@ -16,6 +16,7 @@ from src.core.options_prediction_engine import OptionsPredictionEngine
 from src.core.options_paper_trader import OptionsPaperTrader
 from src.core.telegram_bot import telegram_bot
 from src.core.adaptive_learning_system import AdaptiveLearningSystem
+from src.core.dynamic_thresholds import dynamic_threshold_manager
 from config.trading_config import config as base_config
 from config.options_config import options_config
 
@@ -160,11 +161,18 @@ class ParallelStrategyRunner:
             confidence = signals_data.get("confidence", 0)
             signals_agreeing = signals_data.get("signals_agreeing", 0)
             
-            logger.info(f"🎯 {config.name}: Confidence {confidence:.1%}, Signals agreeing: {signals_agreeing}")
+            # Get dynamic confidence threshold
+            dynamic_threshold, threshold_reason = dynamic_threshold_manager.calculate_optimal_threshold(strategy_id)
             
-            # Apply strategy-specific thresholds
-            if confidence < config.confidence_threshold:
-                return f"Below confidence threshold ({confidence:.1%} < {config.confidence_threshold:.1%})"
+            # Update the instance config with dynamic threshold
+            original_threshold = config.confidence_threshold
+            config.confidence_threshold = dynamic_threshold
+            
+            logger.info(f"🎯 {config.name}: Confidence {confidence:.1%}, Dynamic threshold: {dynamic_threshold:.1%} (was {original_threshold:.1%}, reason: {threshold_reason}), Signals agreeing: {signals_agreeing}")
+            
+            # Apply dynamic threshold
+            if confidence < dynamic_threshold:
+                return f"Below dynamic threshold ({confidence:.1%} < {dynamic_threshold:.1%}, reason: {threshold_reason})"
                 
             if signals_agreeing < config.min_signals_required:
                 return f"Insufficient signals ({signals_agreeing} < {config.min_signals_required})"
@@ -294,9 +302,12 @@ class ParallelStrategyRunner:
         if report["winner"]:
             message += f"\n🏆 **Current Winner**: {report['winner_name']}!\n"
             
+        # Add dynamic threshold status
+        message += "\n" + dynamic_threshold_manager.get_threshold_summary()
+            
         # Insights
         if report["insights"]:
-            message += "\n💡 **Insights:**\n"
+            message += "💡 **Insights:**\n"
             for insight in report["insights"][:3]:
                 message += f"• {insight}\n"
                 

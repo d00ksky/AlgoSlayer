@@ -27,6 +27,8 @@ class TelegramCommands:
             return await self.get_memory()
         elif command == '/positions':
             return await self.get_positions()
+        elif command == '/thresholds':
+            return await self.get_thresholds()
         elif command == '/help':
             return await self.get_help()
         else:
@@ -203,6 +205,34 @@ print(f"💰 **Total Positions**: {total_positions}")
         except Exception as e:
             return f"❌ Error: {str(e)}"
 
+    async def get_thresholds(self):
+        """Get dynamic threshold status"""
+        try:
+            result = subprocess.run([
+                '/opt/rtx-trading/rtx-env/bin/python', '-c',
+                '''
+import sys
+import os
+sys.path.append("/opt/rtx-trading")
+
+# Suppress logging
+import logging
+logging.disable(logging.CRITICAL)
+os.environ["LOGURU_LEVEL"] = "CRITICAL"
+
+from src.core.dynamic_thresholds import dynamic_threshold_manager
+
+print(dynamic_threshold_manager.get_threshold_summary())
+'''
+            ], capture_output=True, text=True, timeout=10, env={**os.environ, 'PYTHONWARNINGS': 'ignore'})
+            
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+            else:
+                return f"❌ Error: {result.stderr or 'No threshold data'}"
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
+
     async def get_help(self):
         """Show available commands"""
         return """🤖 **Available Commands:**
@@ -210,6 +240,7 @@ print(f"💰 **Total Positions**: {total_positions}")
 /status - Service status & health
 /logs - Recent log entries  
 /positions - Account balances & trades
+/thresholds - Dynamic threshold status 🎯
 /memory - Memory usage
 /restart - Restart trading service
 /help - Show this help
