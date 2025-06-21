@@ -17,6 +17,7 @@ from src.core.options_paper_trader import OptionsPaperTrader
 from src.core.telegram_bot import telegram_bot
 from src.core.adaptive_learning_system import AdaptiveLearningSystem
 from src.core.dynamic_thresholds import dynamic_threshold_manager
+from src.core.dashboard import dashboard
 from config.trading_config import config as base_config
 from config.options_config import options_config
 
@@ -114,6 +115,10 @@ class ParallelStrategyRunner:
                 # Send periodic updates every hour
                 if hasattr(self, 'cycle_count') and self.cycle_count % 4 == 0:
                     await self._send_performance_update()
+                    
+                # Send full dashboard every 4 hours (16 cycles at 15min intervals)
+                if hasattr(self, 'cycle_count') and self.cycle_count % 16 == 0:
+                    await self._send_dashboard_update()
                     
                 # Sleep until next cycle
                 await asyncio.sleep(base_config.PREDICTION_INTERVAL_MINUTES * 60)
@@ -287,31 +292,52 @@ class ParallelStrategyRunner:
         await telegram_bot.send_message(message)
         
     async def _send_performance_update(self):
-        """Send periodic performance update"""
-        report = self.manager.get_comparison_report()
-        
-        message = "📊 **Multi-Strategy Performance Update**\n\n"
-        
-        # Current rankings
-        leaderboard = self.manager.get_leaderboard()
-        for entry in leaderboard:
-            message += f"{entry['rank']}. **{entry['strategy']}**: ${entry['balance']:.2f} "
-            message += f"({entry['win_rate']:.1f}% WR, {entry['trades']} trades)\n"
+        """Send periodic performance update with dashboard"""
+        try:
+            # Get dashboard summary for quick update
+            quick_summary = dashboard.get_quick_summary()
             
-        # Winner if determined
-        if report["winner"]:
-            message += f"\n🏆 **Current Winner**: {report['winner_name']}!\n"
+            message = "📊 **Multi-Strategy Performance Update**\n\n"
+            message += quick_summary + "\n\n"
             
-        # Add dynamic threshold status
-        message += "\n" + dynamic_threshold_manager.get_threshold_summary()
+            # Add dynamic threshold status
+            message += dynamic_threshold_manager.get_threshold_summary()
             
-        # Insights
-        if report["insights"]:
-            message += "💡 **Insights:**\n"
-            for insight in report["insights"][:3]:
-                message += f"• {insight}\n"
+            # Add insights from manager if available
+            report = self.manager.get_comparison_report()
+            if report.get("insights"):
+                message += "💡 **Insights:**\n"
+                for insight in report["insights"][:2]:  # Limit to 2 for space
+                    message += f"• {insight}\n"
+                    
+            message += "\n💡 Use /dashboard for full details"
                 
-        await telegram_bot.send_message(message)
+            await telegram_bot.send_message(message)
+            
+        except Exception as e:
+            logger.error(f"❌ Performance update error: {e}")
+            # Fallback to basic update
+            await telegram_bot.send_message(f"📊 Performance update error: {str(e)}")
+            
+    async def _send_dashboard_update(self):
+        """Send full dashboard update (less frequent)"""
+        try:
+            full_dashboard = dashboard.generate_dashboard()
+            
+            # Check if message is too long for Telegram (4096 char limit)
+            if len(full_dashboard) > 4000:
+                # Send in parts
+                await telegram_bot.send_message("📊 **Live Dashboard** (Part 1/2)")
+                await telegram_bot.send_message(full_dashboard[:2000])
+                await asyncio.sleep(1)
+                await telegram_bot.send_message("📊 **Live Dashboard** (Part 2/2)")
+                await telegram_bot.send_message(full_dashboard[2000:4000])
+            else:
+                await telegram_bot.send_message(full_dashboard)
+                
+        except Exception as e:
+            logger.error(f"❌ Dashboard update error: {e}")
+            await telegram_bot.send_message(f"❌ Dashboard error: {str(e)}")
         
     def stop(self):
         """Stop parallel trading"""

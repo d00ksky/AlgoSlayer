@@ -29,6 +29,8 @@ class TelegramCommands:
             return await self.get_positions()
         elif command == '/thresholds':
             return await self.get_thresholds()
+        elif command == '/dashboard':
+            return await self.get_dashboard()
         elif command == '/help':
             return await self.get_help()
         else:
@@ -233,10 +235,44 @@ print(dynamic_threshold_manager.get_threshold_summary())
         except Exception as e:
             return f"❌ Error: {str(e)}"
 
+    async def get_dashboard(self):
+        """Get comprehensive real-time dashboard"""
+        try:
+            result = subprocess.run([
+                '/opt/rtx-trading/rtx-env/bin/python', '-c',
+                '''
+import sys
+import os
+sys.path.append("/opt/rtx-trading")
+
+# Suppress logging
+import logging
+logging.disable(logging.CRITICAL)
+os.environ["LOGURU_LEVEL"] = "CRITICAL"
+
+from src.core.dashboard import dashboard
+
+print(dashboard.generate_dashboard())
+'''
+            ], capture_output=True, text=True, timeout=15, env={**os.environ, 'PYTHONWARNINGS': 'ignore'})
+            
+            if result.returncode == 0 and result.stdout.strip():
+                # Limit message length for Telegram (4096 char limit)
+                output = result.stdout.strip()
+                if len(output) > 4000:
+                    # Truncate and add note
+                    output = output[:3900] + "\n\n... (Dashboard truncated for Telegram)"
+                return output
+            else:
+                return f"❌ Error: {result.stderr or 'No dashboard data'}"
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
+
     async def get_help(self):
         """Show available commands"""
         return """🤖 **Available Commands:**
 
+/dashboard - Live performance dashboard 📊
 /status - Service status & health
 /logs - Recent log entries  
 /positions - Account balances & trades
