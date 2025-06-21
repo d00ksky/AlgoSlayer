@@ -930,8 +930,8 @@ For technical support:
 
 **🏆 Multi-strategy competition system is LIVE and ready for the next market cycle!**
 
-**📱 Working Commands:** `/positions`, `/status`, `/logs`, `/restart`, `/memory`, `/help`  
-**🎯 Next Milestone:** Implement dynamic confidence thresholds and real-time dashboard
+**📱 Working Commands:** `/dashboard`, `/positions`, `/thresholds`, `/status`, `/logs`, `/restart`, `/memory`, `/help`  
+**🎯 Latest Enhancements:** ✅ Dynamic ML confidence thresholds, ✅ Real-time performance dashboard
 
 ## 🚀 **Enhancement Roadmap**
 
