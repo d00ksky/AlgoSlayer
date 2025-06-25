@@ -161,14 +161,15 @@ class KellyPositionSizer:
         return kelly_fraction, reason
     
     def calculate_optimal_position_size(self, strategy_id: str) -> Tuple[float, str, Dict]:
-        """Calculate optimal position size for a strategy"""
+        """Calculate optimal position size for a strategy with earnings integration"""
         
         # Get performance data
         performance = self.get_strategy_performance(strategy_id)
         
         if not performance:
             base_size = self.base_position_sizes.get(strategy_id, 0.20)
-            return base_size, "insufficient_data", {}
+            # Still apply earnings adjustment even without performance data
+            return self._apply_earnings_adjustment(base_size, "insufficient_data", {})
             
         # Calculate Kelly fraction
         kelly_fraction, kelly_reason = self.calculate_kelly_fraction(performance)
@@ -209,7 +210,55 @@ class KellyPositionSizer:
         
         logger.success(f"🎯 {strategy_id}: Kelly size {final_size:.1%} (reason: {final_reason})")
         
-        return final_size, final_reason, metrics
+        # Apply earnings adjustment
+        return self._apply_earnings_adjustment(final_size, final_reason, metrics)
+    
+    def _apply_earnings_adjustment(self, base_size: float, base_reason: str, base_metrics: Dict) -> Tuple[float, str, Dict]:
+        """Apply earnings calendar adjustment to position size"""
+        try:
+            # Import earnings calendar here to avoid circular imports
+            try:
+                from .earnings_calendar import rtx_earnings
+            except ImportError:
+                from src.core.earnings_calendar import rtx_earnings
+            
+            # Get earnings adjustment
+            kelly_boost, earnings_reason = rtx_earnings.get_earnings_kelly_adjustment()
+            should_scale, scale_multiplier, scale_reason = rtx_earnings.should_scale_positions()
+            
+            # Apply earnings boost to Kelly size
+            earnings_adjusted_size = base_size + kelly_boost
+            
+            # Apply position scaling
+            if should_scale:
+                earnings_adjusted_size *= scale_multiplier
+                
+            # Apply bounds again after earnings adjustment
+            final_size = max(self.min_position_size, min(self.max_position_size, earnings_adjusted_size))
+            
+            # Update reason if earnings adjustment applied
+            if abs(kelly_boost) > 0.001 or scale_multiplier != 1.0:
+                final_reason = f"{base_reason}_earnings_{earnings_reason}"
+                
+                # Add earnings info to metrics
+                base_metrics.update({
+                    "earnings_kelly_boost": kelly_boost,
+                    "earnings_scale_multiplier": scale_multiplier,
+                    "earnings_reason": earnings_reason,
+                    "base_size_before_earnings": base_size,
+                    "final_size_after_earnings": final_size
+                })
+                
+                logger.info(f"📅 Earnings adjustment: {base_size:.1%} → {final_size:.1%} (boost: {kelly_boost:+.1%}, scale: {scale_multiplier:.1f}x)")
+            else:
+                final_reason = base_reason
+                final_size = base_size
+                
+            return final_size, final_reason, base_metrics
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Earnings adjustment failed: {e}")
+            return base_size, base_reason, base_metrics
     
     def get_all_kelly_sizes(self) -> Dict[str, Dict]:
         """Get Kelly position sizes for all strategies"""

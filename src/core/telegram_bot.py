@@ -361,6 +361,14 @@ Iron condors: Sideways strategy
             return await self.send_positions_message()
         elif command == "/kelly" or command == "kelly":
             return await self.send_kelly_message()
+        elif command == "/earnings" or command == "earnings":
+            return await self.send_earnings_message()
+        elif command == "/cross_strategy" or command == "cross_strategy":
+            return await self.send_cross_strategy_message()
+        elif command == "/learning" or command == "learning":
+            return await self.send_learning_summary_message()
+        elif command == "/ml_status" or command == "ml_status":
+            return await self.send_ml_optimization_status()
         else:
             return await self.send_message(f"❓ Unknown command: {command}\n\nType /help for available commands")
     
@@ -373,6 +381,11 @@ Iron condors: Sideways strategy
 🎯 <b>/thresholds</b> - Dynamic threshold status
 💰 <b>/positions</b> - Account positions & trades
 📈 <b>/kelly</b> - Kelly Criterion position sizing
+📅 <b>/earnings</b> - RTX earnings calendar & strategy
+
+🧠 <b>/cross_strategy</b> - Cross-strategy learning dashboard
+🎓 <b>/learning</b> - Quick learning progress summary
+🤖 <b>/ml_status</b> - ML optimization status and performance
 
 📚 <b>/explain</b> - Quick options guide
 📝 <b>/terms</b> - Options terminology
@@ -391,9 +404,9 @@ Iron condors: Sideways strategy
 
 ⚡ <b>SYSTEM:</b>
 • 12 AI signals active
-• Paper trading ($1,000)
-• 75% confidence threshold
-• Ready for Monday!
+• Cross-strategy learning active
+• Paper trading ($3,000 total)
+• Advanced ML optimizations
         """
         return await self.send_message(help_text.strip())
     
@@ -595,7 +608,7 @@ fi
                         # Only respond to authorized chat
                         if chat_id == self.chat_id and text:
                             logger.info(f"Processing Telegram command: {text}")
-                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart', 'memory', 'dashboard', 'thresholds', 'positions', 'kelly']:
+                            if text.startswith('/') or text.lower() in ['explain', 'terms', 'signals', 'help', 'status', 'logs', 'restart', 'memory', 'dashboard', 'thresholds', 'positions', 'kelly', 'earnings', 'cross_strategy', 'learning', 'ml_status']:
                                 await self.handle_command(text)
                             
             except Exception as e:
@@ -726,6 +739,83 @@ fi
         except Exception as e:
             logger.error(f"❌ Kelly error: {e}")
             return await self.send_message(f"❌ <b>Kelly Error:</b> {str(e)}")
+    
+    async def send_earnings_message(self) -> bool:
+        """Send RTX earnings calendar status"""
+        try:
+            # Import earnings calendar here to avoid circular imports
+            try:
+                from .earnings_calendar import rtx_earnings
+            except ImportError:
+                from src.core.earnings_calendar import rtx_earnings
+            
+            earnings_text = rtx_earnings.get_earnings_summary()
+            
+            # Check if there's an urgent earnings alert
+            alert = rtx_earnings.get_earnings_alert()
+            if alert:
+                earnings_text = f"{alert}\n\n{earnings_text}"
+            
+            return await self.send_message(earnings_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Earnings error: {e}")
+            return await self.send_message(f"❌ <b>Earnings Error:</b> {str(e)}")
+    
+    async def send_cross_strategy_message(self) -> bool:
+        """Send comprehensive cross-strategy learning dashboard"""
+        try:
+            # Import cross-strategy dashboard here to avoid circular imports
+            try:
+                from .cross_strategy_dashboard import cross_strategy_dashboard
+            except ImportError:
+                from src.core.cross_strategy_dashboard import cross_strategy_dashboard
+            
+            dashboard_text = cross_strategy_dashboard.generate_comprehensive_dashboard()
+            
+            # Limit message length for Telegram (4096 char limit)
+            if len(dashboard_text) > 4000:
+                dashboard_text = dashboard_text[:3900] + "\n\n... (Dashboard truncated for Telegram)"
+            
+            return await self.send_message(dashboard_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Cross-strategy dashboard error: {e}")
+            return await self.send_message(f"❌ <b>Cross-Strategy Error:</b> {str(e)}")
+    
+    async def send_learning_summary_message(self) -> bool:
+        """Send quick learning summary"""
+        try:
+            # Import cross-strategy dashboard here to avoid circular imports
+            try:
+                from .cross_strategy_dashboard import cross_strategy_dashboard
+            except ImportError:
+                from src.core.cross_strategy_dashboard import cross_strategy_dashboard
+            
+            learning_text = cross_strategy_dashboard.get_quick_learning_summary()
+            
+            return await self.send_message(learning_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Learning summary error: {e}")
+            return await self.send_message(f"❌ <b>Learning Summary Error:</b> {str(e)}")
+    
+    async def send_ml_optimization_status(self) -> bool:
+        """Send ML optimization status and performance"""
+        try:
+            # Import ML optimization applier here to avoid circular imports
+            try:
+                from .ml_optimization_applier import ml_applier
+            except ImportError:
+                from src.core.ml_optimization_applier import ml_applier
+            
+            status_text = ml_applier.generate_optimization_report()
+            
+            return await self.send_message(status_text)
+            
+        except Exception as e:
+            logger.error(f"❌ ML status error: {e}")
+            return await self.send_message(f"❌ <b>ML Status Error:</b> {str(e)}")
 
 # Global telegram bot instance
 telegram_bot = TelegramBot() 
