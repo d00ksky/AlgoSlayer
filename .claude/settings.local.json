@@ -50,7 +50,8 @@
       "Bash(./smart_deploy.sh)",
       "Bash(journalctl:*)",
       "Bash(git reset:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(/mnt/d/Repo/AlgoSlayer/setup_claude_ssh.sh)"
     ],
     "deny": []
   }
