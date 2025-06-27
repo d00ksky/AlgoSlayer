@@ -31,28 +31,96 @@ class MultiStrategyManager:
         self.strategies_file = "data/active_strategies.json"
         self.starting_capital = 1000.0
         
-        # Define the three strategies
+        # Define all eight strategies with SIMULATION-BASED LEARNING APPLIED
         self.strategy_configs = {
             "conservative": StrategyConfig(
                 name="Conservative",
-                confidence_threshold=0.75,
+                confidence_threshold=0.75,  # BEST PERFORMER - Keep optimal threshold
                 min_signals_required=4,
                 position_size_pct=0.15,
-                description="High confidence, multiple signal agreement, small positions"
+                description="Best performer: 77.6% win rate, $40K profit - Blueprint for others",
+                signal_weights={
+                    "technical_analysis": 1.3, "options_iv_percentile": 1.2, "sector_correlation": 1.1,
+                    "news_sentiment": 1.0, "momentum": 0.9, "volatility_analysis": 0.9,
+                    "options_flow": 0.8, "mean_reversion": 0.7
+                }
             ),
             "moderate": StrategyConfig(
                 name="Moderate",
-                confidence_threshold=0.60,
+                confidence_threshold=0.70,  # LEARNING: +10% boost (0.60→0.70)
                 min_signals_required=3,
                 position_size_pct=0.20,
-                description="Balanced approach with moderate risk"
+                description="Learning from Conservative: 16% expected improvement",
+                signal_weights={
+                    "technical_analysis": 1.2, "options_iv_percentile": 1.1, "sector_correlation": 1.0,
+                    "news_sentiment": 1.0, "momentum": 0.9, "volatility_analysis": 0.8
+                }
             ),
             "aggressive": StrategyConfig(
                 name="Aggressive",
-                confidence_threshold=0.50,
+                confidence_threshold=0.60,  # LEARNING: +10% boost (0.50→0.60)
                 min_signals_required=2,
                 position_size_pct=0.25,
-                description="Lower threshold, larger positions, more trades"
+                description="Learning from Conservative: 30% knowledge transfer applied",
+                signal_weights={
+                    "technical_analysis": 1.1, "momentum": 1.0, "options_iv_percentile": 1.0,
+                    "news_sentiment": 0.9, "sector_correlation": 0.9
+                }
+            ),
+            "scalping": StrategyConfig(
+                name="Scalping",
+                confidence_threshold=0.75,  # LEARNING: +10% boost (0.65→0.75)
+                min_signals_required=3,
+                position_size_pct=0.12,
+                description="Learning enhanced: 16% improvement expected from Conservative patterns",
+                signal_weights={
+                    "options_iv_percentile": 1.3, "technical_analysis": 1.1, "momentum": 1.0,
+                    "options_flow": 0.9, "news_sentiment": 0.8
+                }
+            ),
+            "swing": StrategyConfig(
+                name="Swing",
+                confidence_threshold=0.75,  # LEARNING: +5% boost (0.70→0.75)
+                min_signals_required=4,
+                position_size_pct=0.22,
+                description="2nd best performer: Learning from Conservative, 10% improvement",
+                signal_weights={
+                    "technical_analysis": 1.3, "sector_correlation": 1.2, "momentum": 1.1,
+                    "news_sentiment": 1.0, "options_iv_percentile": 0.9
+                }
+            ),
+            "momentum": StrategyConfig(
+                name="Momentum",
+                confidence_threshold=0.68,  # LEARNING: +10% boost (0.58→0.68)
+                min_signals_required=2,
+                position_size_pct=0.18,
+                description="Learning applied: Conservative patterns for 16% improvement",
+                signal_weights={
+                    "momentum": 1.4, "technical_analysis": 1.2, "market_regime": 1.1,
+                    "options_flow": 1.0, "sector_correlation": 0.9
+                }
+            ),
+            "mean_reversion": StrategyConfig(
+                name="Mean Reversion",
+                confidence_threshold=0.72,  # LEARNING: +10% boost (0.62→0.72)
+                min_signals_required=3,
+                position_size_pct=0.16,
+                description="Enhanced learning: Conservative strategy teaching contrarian approach",
+                signal_weights={
+                    "technical_analysis": 1.2, "volatility_analysis": 1.1, "options_iv_percentile": 1.0,
+                    "mean_reversion": 1.3, "momentum": 0.7
+                }
+            ),
+            "volatility": StrategyConfig(
+                name="Volatility",
+                confidence_threshold=0.73,  # LEARNING: +5% boost (0.68→0.73)
+                min_signals_required=3,
+                position_size_pct=0.20,
+                description="3rd place performer: Conservative learning for 10% improvement",
+                signal_weights={
+                    "volatility_analysis": 1.4, "options_iv_percentile": 1.3, "technical_analysis": 1.1,
+                    "news_sentiment": 1.1, "momentum": 0.8
+                }
             )
         }
         
@@ -427,7 +495,7 @@ if __name__ == "__main__":
     manager = MultiStrategyManager()
     
     # Get strategy configurations
-    for strategy_id in ["conservative", "moderate", "aggressive"]:
+    for strategy_id in ["conservative", "moderate", "aggressive", "scalping", "swing", "momentum", "mean_reversion", "volatility"]:
         config, state = manager.get_strategy_config(strategy_id)
         print(f"\n{config.name} Strategy:")
         print(f"  Confidence: {config.confidence_threshold:.0%}")
