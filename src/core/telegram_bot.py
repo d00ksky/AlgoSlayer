@@ -33,6 +33,35 @@ class TelegramBot:
             self.enabled = True
             logger.info("📱 Telegram bot initialized successfully")
     
+    def _sanitize_message(self, message: str, parse_mode: str = "HTML") -> str:
+        """Sanitize message for Telegram parsing"""
+        if parse_mode == "HTML":
+            # Escape HTML characters
+            message = message.replace("&", "&amp;")
+            message = message.replace("<", "&lt;")
+            message = message.replace(">", "&gt;")
+            # Convert ** to <b></b> for HTML
+            import re
+            message = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', message)
+        elif parse_mode == "Markdown":
+            # Keep markdown as is but escape problematic chars
+            message = message.replace("_", "\\_")
+            message = message.replace("[", "\\[")
+            message = message.replace("]", "\\]")
+            message = message.replace("(", "\\(")
+            message = message.replace(")", "\\)")
+        else:
+            # Plain text - remove all formatting
+            import re
+            message = re.sub(r'\*\*(.*?)\*\*', r'\1', message)
+            message = message.replace("*", "")
+        
+        # Limit message length
+        if len(message) > 4000:
+            message = message[:3950] + "\n\n... (Message truncated for Telegram)"
+        
+        return message
+    
     async def send_message(self, message: str, parse_mode: str = "HTML") -> bool:
         """Send message to Telegram chat"""
         if not self.enabled:
@@ -40,10 +69,13 @@ class TelegramBot:
             return False
         
         try:
+            # Sanitize message for Telegram
+            sanitized_message = self._sanitize_message(message, parse_mode)
+            
             url = f"{self.base_url}/sendMessage"
             data = {
                 "chat_id": self.chat_id,
-                "text": message,
+                "text": sanitized_message,
                 "parse_mode": parse_mode,
                 "disable_web_page_preview": True
             }
@@ -948,6 +980,90 @@ fi
         except Exception as e:
             logger.error(f"❌ ML status error: {e}")
             return await self.send_message(f"❌ <b>ML Status Error:</b> {str(e)}")
+    
+    async def send_dashboard_message(self) -> bool:
+        """Send live multi-strategy dashboard"""
+        try:
+            # Import dashboard here to avoid circular imports
+            try:
+                from .dashboard import PerformanceDashboard
+            except ImportError:
+                from src.core.dashboard import PerformanceDashboard
+            
+            dashboard = PerformanceDashboard()
+            dashboard_text = dashboard.generate_dashboard()
+            
+            # Limit message length for Telegram (4096 char limit)
+            if len(dashboard_text) > 4000:
+                dashboard_text = dashboard_text[:3900] + "\n\n... (Dashboard truncated for Telegram)"
+            
+            return await self.send_message(dashboard_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Dashboard error: {e}")
+            return await self.send_message(f"❌ <b>Dashboard Error:</b> {str(e)}")
+    
+    async def send_positions_message(self) -> bool:
+        """Send current positions for all 8 strategies"""
+        try:
+            # Import dashboard here to avoid circular imports
+            try:
+                from .dashboard import PerformanceDashboard
+            except ImportError:
+                from src.core.dashboard import PerformanceDashboard
+            
+            dashboard = PerformanceDashboard()
+            # Use the comprehensive dashboard which includes positions info
+            dashboard_text = dashboard.generate_dashboard()
+            
+            # Focus on positions section
+            positions_header = "💰 **Strategy Positions & Performance**\n" + "=" * 40 + "\n\n"
+            positions_text = positions_header + dashboard_text
+            
+            # Limit message length for Telegram (4096 char limit)
+            if len(positions_text) > 4000:
+                positions_text = positions_text[:3900] + "\n\n... (Positions truncated for Telegram)"
+            
+            return await self.send_message(positions_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Positions error: {e}")
+            return await self.send_message(f"❌ <b>Positions Error:</b> {str(e)}")
+    
+    async def send_thresholds_message(self) -> bool:
+        """Send dynamic thresholds for all 8 strategies"""
+        try:
+            # Import dynamic thresholds here to avoid circular imports
+            try:
+                from .dynamic_thresholds import dynamic_threshold_manager
+            except ImportError:
+                from src.core.dynamic_thresholds import dynamic_threshold_manager
+            
+            thresholds_text = dynamic_threshold_manager.get_threshold_summary()
+            
+            return await self.send_message(thresholds_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Thresholds error: {e}")
+            return await self.send_message(f"❌ <b>Thresholds Error:</b> {str(e)}")
+    
+    async def send_kelly_message(self) -> bool:
+        """Send Kelly Criterion position sizing for all strategies"""
+        try:
+            # Import Kelly optimizer here to avoid circular imports
+            try:
+                from .kelly_position_sizer import KellyPositionSizer
+            except ImportError:
+                from src.core.kelly_position_sizer import KellyPositionSizer
+            
+            kelly_sizer = KellyPositionSizer()
+            kelly_text = kelly_sizer.get_kelly_summary()
+            
+            return await self.send_message(kelly_text)
+            
+        except Exception as e:
+            logger.error(f"❌ Kelly error: {e}")
+            return await self.send_message(f"❌ <b>Kelly Error:</b> {str(e)}")
 
 # Global telegram bot instance
 telegram_bot = TelegramBot() 

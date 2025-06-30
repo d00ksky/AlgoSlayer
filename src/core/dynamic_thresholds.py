@@ -28,14 +28,24 @@ class DynamicThresholdManager:
         self.base_thresholds = {
             "conservative": 0.75,
             "moderate": 0.7,
-            "aggressive": 0.65
+            "aggressive": 0.65,
+            "scalping": 0.6,
+            "swing": 0.6,
+            "momentum": 0.6,
+            "volatility": 0.6,
+            "mean_reversion": 0.6
         }
         
         # Dynamic ranges (min, max)
         self.threshold_ranges = {
             "conservative": (0.65, 0.85),
             "moderate": (0.50, 0.70),
-            "aggressive": (0.40, 0.60)
+            "aggressive": (0.40, 0.60),
+            "scalping": (0.50, 0.75),
+            "swing": (0.50, 0.75),
+            "momentum": (0.50, 0.75),
+            "volatility": (0.50, 0.75),
+            "mean_reversion": (0.50, 0.75)
         }
         
         # Performance windows
