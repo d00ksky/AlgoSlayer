@@ -1,0 +1,35 @@
+            ),
+            scalping: StrategyConfig(
+                name=Scalping,
+                confidence_threshold=0.75,
+                min_signals_required=3,
+                position_size_pct=0.10,
+                description=Fast 15min-2hr trades, high confidence, small positions
+            ),
+            swing: StrategyConfig(
+                name=Swing,
+                confidence_threshold=0.70,
+                min_signals_required=3,
+                position_size_pct=0.30,
+                description=2-5 day holds, moderate confidence, larger positions
+            ),
+            momentum: StrategyConfig(
+                name=Momentum,
+                confidence_threshold=0.68,
+                min_signals_required=2,
+                position_size_pct=0.20,
+                description=Trend following, momentum-based entries
+            ),
+            volatility: StrategyConfig(
+                name=Volatility,
+                confidence_threshold=0.73,
+                min_signals_required=3,
+                position_size_pct=0.25,
+                description=IV expansion plays, volatility timing
+            ),
+            mean_reversion: StrategyConfig(
+                name=Mean Reversion,
+                confidence_threshold=0.72,
+                min_signals_required=3,
+                position_size_pct=0.22,
+                description=Counter-trend, oversold/overbought plays

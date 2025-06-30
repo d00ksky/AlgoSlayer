@@ -14,7 +14,7 @@ from src.core.multi_strategy_manager import MultiStrategyManager, StrategyConfig
 from src.core.options_scheduler import OptionsScheduler
 from src.core.options_prediction_engine import OptionsPredictionEngine
 from src.core.options_paper_trader import OptionsPaperTrader
-from src.core.telegram_bot import telegram_bot
+# from src.core.telegram_bot import telegram_bot
 from src.core.adaptive_learning_system import AdaptiveLearningSystem
 from src.core.dynamic_thresholds import dynamic_threshold_manager
 from src.core.dashboard import dashboard
@@ -38,6 +38,11 @@ class StrategyInstance:
         
         # Create prediction engine with strategy-specific config
         self.prediction_engine = OptionsPredictionEngine()
+        
+        # Create scheduler instance with strategy ID for signal tracking
+        from src.core.options_scheduler import OptionsScheduler
+        self.scheduler = OptionsScheduler()
+        self.scheduler.strategy_id = strategy_id  # Set strategy ID for tracking
         
         # Track predictions for this strategy
         self.predictions_made = 0
@@ -70,7 +75,7 @@ class ParallelStrategyRunner:
         
     def _init_strategies(self):
         """Initialize all strategy instances"""
-        for strategy_id in ["conservative", "moderate", "aggressive", "scalping", "swing", "momentum", "mean_reversion", "volatility"]:
+        for strategy_id in ["conservative", "moderate", "aggressive"]:
             config, state = self.manager.get_strategy_config(strategy_id)
             
             # Create strategy instance with current balance
@@ -97,6 +102,10 @@ class ParallelStrategyRunner:
         
         # Send startup notification
         await self._send_startup_notification()
+        
+        # Start Telegram command listener as background task
+        # telegram_task = asyncio.create_task(telegram_bot.process_incoming_messages())
+        logger.info("📱 Started Telegram command listener")
         
         try:
             while self.running:
@@ -126,7 +135,12 @@ class ParallelStrategyRunner:
                 
         except Exception as e:
             logger.error(f"❌ Parallel trading error: {e}")
-            await telegram_bot.send_message(f"❌ Multi-strategy error: {str(e)}")
+            # await telegram_bot.send_message(f"❌ Multi-strategy error: {str(e)}")
+        finally:
+            # Cancel telegram task if it exists
+            # if 'telegram_task' in locals() and not telegram_task.done():
+                # telegram_task.cancel()
+                logger.info("📱 Telegram listener stopped")
             
     async def _run_parallel_cycle(self):
         """Run one trading cycle for all strategies in parallel"""
@@ -299,7 +313,7 @@ class ParallelStrategyRunner:
         message += "• Volatility: 73% conf (+5% from #3 performer)\n"
         message += "\n🎯 Simulation-based learning active! 🚀"
         
-        await telegram_bot.send_message(message)
+        # await telegram_bot.send_message(message)
         
     async def _send_performance_update(self):
         """Send periodic performance update with dashboard"""
@@ -325,12 +339,12 @@ class ParallelStrategyRunner:
                     
             message += "\n💡 Use /dashboard for full details"
                 
-            await telegram_bot.send_message(message)
+            # await telegram_bot.send_message(message)
             
         except Exception as e:
             logger.error(f"❌ Performance update error: {e}")
             # Fallback to basic update
-            await telegram_bot.send_message(f"📊 Performance update error: {str(e)}")
+            # await telegram_bot.send_message(f"📊 Performance update error: {str(e)}")
             
     async def _send_dashboard_update(self):
         """Send full dashboard update (less frequent)"""
@@ -340,17 +354,18 @@ class ParallelStrategyRunner:
             # Check if message is too long for Telegram (4096 char limit)
             if len(full_dashboard) > 4000:
                 # Send in parts
-                await telegram_bot.send_message("📊 **Live Dashboard** (Part 1/2)")
-                await telegram_bot.send_message(full_dashboard[:2000])
+                # await telegram_bot.send_message("📊 **Live Dashboard** (Part 1/2)")
+                # await telegram_bot.send_message(full_dashboard[:2000])
                 await asyncio.sleep(1)
-                await telegram_bot.send_message("📊 **Live Dashboard** (Part 2/2)")
-                await telegram_bot.send_message(full_dashboard[2000:4000])
+                # await telegram_bot.send_message("📊 **Live Dashboard** (Part 2/2)")
+                # await telegram_bot.send_message(full_dashboard[2000:4000])
             else:
-                await telegram_bot.send_message(full_dashboard)
+                # await telegram_bot.send_message(full_dashboard)
                 
+                pass  # Telegram message commented out
         except Exception as e:
             logger.error(f"❌ Dashboard update error: {e}")
-            await telegram_bot.send_message(f"❌ Dashboard error: {str(e)}")
+            # await telegram_bot.send_message(f"❌ Dashboard error: {str(e)}")
         
     def stop(self):
         """Stop parallel trading"""

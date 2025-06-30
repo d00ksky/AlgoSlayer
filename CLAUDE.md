@@ -75,6 +75,25 @@ The system now features the most comprehensive mobile trading control interface 
 - **Performance Analytics** - Detailed reports and optimization tracking
 - **Emergency Controls** - Remote restart and health monitoring
 
+## 🚨 **CRITICAL: Service Architecture**
+
+**⚠️ IMPORTANT**: The system currently runs TWO trading services:
+
+1. **`rtx-trading.service`** → `run_server.py` → **TELEGRAM BOT RUNS HERE** 🤖
+2. **`multi-strategy-trading.service`** → `run_multi_strategy.py` → Multi-strategy system
+
+**For Telegram bot changes**: Always restart `rtx-trading.service`, NOT `multi-strategy-trading.service`
+
+```bash
+# ✅ CORRECT - Updates Telegram bot
+sudo systemctl restart rtx-trading.service
+
+# ❌ WRONG - Telegram bot not here
+sudo systemctl restart multi-strategy-trading.service
+```
+
+**Full documentation**: See `SERVICES_ARCHITECTURE.md` for complete details.
+
 ## Key Commands
 
 ### Testing (Updated with New Test Suites)
