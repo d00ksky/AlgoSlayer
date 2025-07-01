@@ -756,10 +756,10 @@ fi
             et = pytz.timezone('US/Eastern')
             now = datetime.now(et)
             
-            message = f"""🔔 <b>MARKET OPEN STATUS</b> - {now.strftime('%A, %B %d')}
-⏰ <b>Time:</b> {now.strftime('%H:%M ET')}
+            message = f"""🔔 *MARKET OPEN STATUS* — {now.strftime('%A, %B %d')}
+⏰ *Time:* {now.strftime('%H:%M ET')}
 
-🤖 <b>SYSTEM STATUS</b>
+🤖 *SYSTEM STATUS*
 """
             
             # Check service status
@@ -771,12 +771,12 @@ fi
             except:
                 service_status = "⚠️ UNKNOWN"
                 
-            message += f"📊 <b>Trading Service:</b> {service_status}\n"
-            message += f"🎯 <b>Target:</b> RTX Corporation\n"
-            message += f"📈 <b>Mode:</b> Paper Trading\n\n"
+            message += f"📊 *Trading Service:* {service_status}\n"
+            message += f"🎯 *Target:* RTX Corporation\n"
+            message += f"📈 *Mode:* Paper Trading\n\n"
             
             # Get current positions and balance
-            message += "💰 <b>ACCOUNT STATUS</b>\n"
+            message += "💰 *ACCOUNT STATUS*\n"
             
             try:
                 import sqlite3
@@ -808,89 +808,89 @@ fi
                         cursor.execute("SELECT COUNT(*) FROM options_predictions WHERE DATE(timestamp) = ?", (today,))
                         today_trades = cursor.fetchone()[0]
                     
-                    message += f"💳 <b>Balance:</b> ${balance:.2f}\n"
-                    message += f"📊 <b>Open Positions:</b> {open_positions}\n"
-                    message += f"🔄 <b>Today's Trades:</b> {today_trades}\n"
+                    message += f"💳 *Balance:* ${balance:.2f}\n"
+                    message += f"📊 *Open Positions:* {open_positions}\n"
+                    message += f"🔄 *Today's Trades:* {today_trades}\n"
                     
                     # Show any open positions
                     if open_positions > 0:
                         cursor.execute("SELECT contract_symbol, entry_price, confidence FROM options_predictions WHERE status = 'OPEN' LIMIT 3")
                         positions = cursor.fetchall()
-                        message += "\n📈 <b>Open Positions:</b>\n"
+                        message += "\n📈 *Open Positions:*\n"
                         for pos in positions:
                             message += f"   • {pos[0]} @ ${pos[1]:.2f} ({pos[2]:.0%})\n"
                     
                     conn.close()
                 else:
-                    message += "💳 <b>Balance:</b> $1,000.00 (initial)\n"
-                    message += "📊 <b>Open Positions:</b> 0\n"
-                    message += "🔄 <b>Today's Trades:</b> 0\n"
+                    message += "💳 *Balance:* $1,000.00 (initial)\n"
+                    message += "📊 *Open Positions:* 0\n"
+                    message += "🔄 *Today's Trades:* 0\n"
                     
             except Exception as e:
-                message += f"⚠️ <b>Account Status:</b> Error retrieving data\n"
+                message += f"⚠️ *Account Status:* Error retrieving data\n"
                 logger.error(f"Error getting account status: {e}")
             
             # Get current RTX stock price
-            message += "\n🎯 <b>RTX MARKET DATA</b>\n"
+            message += "\n🎯 *RTX MARKET DATA*\n"
             try:
                 # Import options data engine to get stock price
                 from .options_data_engine import options_data_engine
                 current_price = options_data_engine.get_current_stock_price()
                 if current_price:
-                    message += f"💰 <b>Current Price:</b> ${current_price:.2f}\n"
+                    message += f"💰 *Current Price:* ${current_price:.2f}\n"
                 else:
-                    message += "💰 <b>Current Price:</b> Fetching...\n"
+                    message += "💰 *Current Price:* Fetching...\n"
             except Exception as e:
-                message += "💰 <b>Current Price:</b> Error fetching\n"
+                message += "💰 *Current Price:* Error fetching\n"
                 logger.error(f"Error getting RTX price: {e}")
             
             # AI signals status
-            message += "\n🤖 <b>AI SIGNALS STATUS</b>\n"
-            message += "📊 <b>Active Signals:</b> 12 AI modules\n"
-            message += "🔍 <b>Analysis Interval:</b> Every 5 minutes\n"
-            message += "⚡ <b>Confidence Threshold:</b> 60% minimum\n"
+            message += "\n🤖 *AI SIGNALS STATUS*\n"
+            message += "📊 *Active Signals:* 12 AI modules\n"
+            message += "🔍 *Analysis Interval:* Every 5 minutes\n"
+            message += "⚡ *Confidence Threshold:* 60% minimum\n"
             
             # System health indicators
-            message += "\n🏥 <b>SYSTEM HEALTH</b>\n"
+            message += "\n🏥 *SYSTEM HEALTH*\n"
             
             # Check if options data is available
             try:
                 from .options_data_engine import options_data_engine
                 chain = options_data_engine.get_real_options_chain()
                 options_count = len(chain)
-                message += f"📊 <b>Options Available:</b> {options_count} contracts\n"
+                message += f"📊 *Options Available:* {options_count} contracts\n"
             except:
-                message += "📊 <b>Options Available:</b> Error checking\n"
+                message += "📊 *Options Available:* Error checking\n"
             
             # Check position sizing
             try:
                 from config.options_config import options_config
                 max_investment = options_config.get_position_size(1000.0)
-                message += f"💰 <b>Max Position Size:</b> ${max_investment:.0f}\n"
+                message += f"💰 *Max Position Size:* ${max_investment:.0f}\n"
             except:
-                message += "💰 <b>Max Position Size:</b> Error checking\n"
+                message += "💰 *Max Position Size:* Error checking\n"
             
-            message += f"\n✅ <b>Status:</b> All systems operational\n"
-            message += f"📱 <b>Notifications:</b> Active (you'll get alerts when trades execute)\n"
-            message += f"\n<i>Good luck trading today! 🚀</i>"
+            message += f"\n✅ *Status:* All systems operational\n"
+            message += f"📱 *Notifications:* Active (you'll get alerts when trades execute)\n"
+            message += f"\n_Good luck trading today! 🚀_"
             
-            return await self.send_message(message.strip(), parse_mode="HTML")
+            return await self.send_message(message.strip(), parse_mode="Markdown")
             
         except Exception as e:
             # Even if there's an error, send a basic status message
-            error_message = f"""🔔 <b>MARKET OPEN STATUS</b> - {datetime.now().strftime('%A, %B %d')}
-⏰ <b>Time:</b> {datetime.now().strftime('%H:%M ET')}
+            error_message = f"""🔔 *MARKET OPEN STATUS* — {datetime.now().strftime('%A, %B %d')}
+⏰ *Time:* {datetime.now().strftime('%H:%M ET')}
 
-⚠️ <b>SYSTEM STATUS:</b> Error retrieving full status
-❌ <b>Error:</b> {str(e)}
+⚠️ *SYSTEM STATUS:* Error retrieving full status
+❌ *Error:* {str(e)}
 
-🤖 <b>Basic Status:</b> Trading system is running
-📱 <b>Notifications:</b> You're receiving this message, so Telegram works!
+🤖 *Basic Status:* Trading system is running
+📱 *Notifications:* You're receiving this message, so Telegram works!
 
-<i>Please check system manually or contact support.</i>"""
+_Please check system manually or contact support._"""
             
             logger.error(f"❌ Market open status error: {e}")
-            return await self.send_message(error_message.strip(), parse_mode="HTML")
+            return await self.send_message(error_message.strip(), parse_mode="Markdown")
     
     async def process_incoming_messages(self):
         """Process incoming messages from Telegram"""
