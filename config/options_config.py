@@ -66,7 +66,7 @@ class OptionsConfig:
         
         # Adaptive sizing based on account growth (increased for options)
         if account_balance <= 1500:
-            return min(400, max_per_trade)  # Increased from 200 to 400
+            return max(400, max_per_trade)  # Use 400 OR 20%, whichever is higher
         elif account_balance <= 3000:
             return min(600, max_per_trade * 0.75)  # More conservative as we grow
         else:

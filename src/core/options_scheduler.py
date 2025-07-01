@@ -88,6 +88,10 @@ class OptionsScheduler:
         self.prediction_count = 0
         self.cycle_count = 0
         
+        # Market open status tracking
+        self.market_open_message_sent = False
+        self.last_market_open_date = None
+        
         # Initialize lives tracker (temporarily disabled for deployment)
         # from src.core.lives_tracker import LivesTracker
         # self.lives_tracker = LivesTracker()
@@ -129,6 +133,9 @@ class OptionsScheduler:
                     logger.info("⏰ Market closed - sleeping")
                     await asyncio.sleep(300)  # Check every 5 minutes
                     continue
+                
+                # Send market open status message (once per day)
+                await self._check_and_send_market_open_status()
                 
                 # Run trading cycle
                 await self._run_trading_cycle()
@@ -579,6 +586,43 @@ class OptionsScheduler:
             message += f"PF: {performance['profit_factor']:.1f}"
         
         await telegram_bot.send_message(message)
+    
+    async def _check_and_send_market_open_status(self):
+        """Check if we should send the daily market open status message"""
+        try:
+            # Get current date in ET timezone
+            import pytz
+            et = pytz.timezone('US/Eastern')
+            now = datetime.now(et)
+            current_date = now.date()
+            current_time = now.time()
+            
+            # Check if it's a new trading day and we haven't sent the message yet
+            if (self.last_market_open_date != current_date and 
+                not self.market_open_message_sent):
+                
+                # Send market open status at 9:30 AM ET or shortly after
+                market_open_time = dt_time(9, 30)  # 9:30 AM ET
+                
+                # Send if it's after market open (9:30 AM) and before 10:00 AM
+                if market_open_time <= current_time <= dt_time(10, 0):
+                    logger.info("📱 Sending daily market open status message...")
+                    success = await telegram_bot.send_market_open_status()
+                    
+                    if success:
+                        self.market_open_message_sent = True
+                        self.last_market_open_date = current_date
+                        logger.success("✅ Market open status message sent successfully")
+                    else:
+                        logger.error("❌ Failed to send market open status message")
+                        
+            # Reset flag for new day
+            elif self.last_market_open_date != current_date:
+                self.market_open_message_sent = False
+                self.last_market_open_date = current_date
+                
+        except Exception as e:
+            logger.error(f"❌ Error checking market open status: {e}")
     
     def stop(self):
         """Stop the trading scheduler"""

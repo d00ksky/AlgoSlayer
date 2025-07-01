@@ -52,7 +52,13 @@
       "Bash(git reset:*)",
       "Bash(git checkout:*)",
       "Bash(/mnt/d/Repo/AlgoSlayer/setup_claude_ssh.sh)",
-      "Bash(rtx-env/bin/python:*)"
+      "Bash(rtx-env/bin/python:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(PYTHONPATH=/opt/rtx-trading /opt/rtx-trading/rtx-env/bin/python -c \"\nimport sys\nsys.path.insert(0, '/opt/rtx-trading')\nfrom src.core.dashboard import PerformanceDashboard\ndashboard = PerformanceDashboard()\nprint('✅ Dashboard has strategies:', dashboard.strategies)\nprint('✅ Strategy emojis:', list(dashboard.strategy_emojis.keys()))\n\")",
+      "Bash(PYTHONPATH=/opt/rtx-trading /opt/rtx-trading/rtx-env/bin/python /opt/rtx-trading/comprehensive_system_test.py)",
+      "Bash(PYTHONPATH=/opt/rtx-trading /opt/rtx-trading/rtx-env/bin/python:*)",
+      "Bash(git config:*)"
     ],
     "deny": []
   }
