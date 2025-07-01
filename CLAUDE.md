@@ -8,24 +8,24 @@ AlgoSlayer is the **world's most advanced 8-strategy autonomous RTX OPTIONS trad
 
 **🏆 STATUS: 8-STRATEGY SIMULATION-BASED LEARNING SYSTEM - 100% COMPLETE (June 27, 2025)**
 
-## 🚨 **CRITICAL: Service Architecture**
+## 🚨 **CRITICAL: Service Architecture** (Updated July 1, 2025)
 
-**⚠️ IMPORTANT**: The system currently runs TWO trading services:
+**✅ OPTIMIZED**: The system now runs a SINGLE superior trading service:
 
-1. **`rtx-trading.service`** → `run_server.py` → **TELEGRAM BOT RUNS HERE** 🤖
-2. **`multi-strategy-trading.service`** → `run_multi_strategy.py` → Multi-strategy system
+1. **`rtx-trading.service`** → `run_server.py` → **FULL SYSTEM WITH TELEGRAM BOT** 🤖
+2. ~~`multi-strategy-trading.service`~~ → **DISABLED** (redundant, no benefits)
 
-**For Telegram bot changes**: Always restart `rtx-trading.service`, NOT `multi-strategy-trading.service`
+**For ALL changes**: Always restart the main service:
 
 ```bash
-# ✅ CORRECT - Updates Telegram bot
+# ✅ CORRECT - Restarts entire trading system + Telegram bot
 sudo systemctl restart rtx-trading.service
 
-# ❌ WRONG - Telegram bot not here
-sudo systemctl restart multi-strategy-trading.service
+# ✅ Check system status
+systemctl status rtx-trading.service
 ```
 
-**Full documentation**: See `SERVICES_ARCHITECTURE.md` for complete details.
+**Full documentation**: See `/opt/rtx-trading/SERVICES_ARCHITECTURE.md` for complete details.
 
 ## 🚀 **REVOLUTIONARY 8-STRATEGY SIMULATION-LEARNING SYSTEM - 100% COMPLETE**
 
@@ -55,6 +55,13 @@ sudo systemctl restart multi-strategy-trading.service
 
 The system now features the most comprehensive mobile trading control interface ever created:
 
+### **🔔 NEW: Daily Market Open Status (9:30 AM ET)**
+- **Automatic daily notification** when market opens
+- **Complete system health check** with service status
+- **Account balance and positions** summary
+- **RTX current price** and options availability
+- **Peace of mind** that your system is working
+
 ### **Core Commands:**
 - **`/help`** - Complete command reference and system guide
 - **`/status`** - Real-time system status and account balances
@@ -75,24 +82,24 @@ The system now features the most comprehensive mobile trading control interface 
 - **Performance Analytics** - Detailed reports and optimization tracking
 - **Emergency Controls** - Remote restart and health monitoring
 
-## 🚨 **CRITICAL: Service Architecture**
+## 🚨 **CRITICAL: Service Architecture** (Updated July 1, 2025)
 
-**⚠️ IMPORTANT**: The system currently runs TWO trading services:
+**✅ OPTIMIZED**: The system now runs a SINGLE superior trading service:
 
-1. **`rtx-trading.service`** → `run_server.py` → **TELEGRAM BOT RUNS HERE** 🤖
-2. **`multi-strategy-trading.service`** → `run_multi_strategy.py` → Multi-strategy system
+1. **`rtx-trading.service`** → `run_server.py` → **FULL SYSTEM WITH TELEGRAM BOT** 🤖
+2. ~~`multi-strategy-trading.service`~~ → **DISABLED** (redundant, no benefits)
 
-**For Telegram bot changes**: Always restart `rtx-trading.service`, NOT `multi-strategy-trading.service`
+**For ALL changes**: Always restart the main service:
 
 ```bash
-# ✅ CORRECT - Updates Telegram bot
+# ✅ CORRECT - Restarts entire trading system + Telegram bot
 sudo systemctl restart rtx-trading.service
 
-# ❌ WRONG - Telegram bot not here
-sudo systemctl restart multi-strategy-trading.service
+# ✅ Check system status
+systemctl status rtx-trading.service
 ```
 
-**Full documentation**: See `SERVICES_ARCHITECTURE.md` for complete details.
+**Full documentation**: See `/opt/rtx-trading/SERVICES_ARCHITECTURE.md` for complete details.
 
 ## Key Commands
 
