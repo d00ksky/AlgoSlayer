@@ -31,7 +31,7 @@ class MultiStrategyManager:
         self.strategies_file = "data/active_strategies.json"
         self.starting_capital = 1000.0
         
-        # Define the eight strategies
+        # Define the three strategies
         self.strategy_configs = {
             "conservative": StrategyConfig(
                 name="Conservative",
@@ -53,41 +53,6 @@ class MultiStrategyManager:
                 min_signals_required=2,
                 position_size_pct=0.25,
                 description="Lower threshold, larger positions, more trades"
-            ),
-            "scalping": StrategyConfig(
-                name="Scalping",
-                confidence_threshold=0.75,
-                min_signals_required=3,
-                position_size_pct=0.15,
-                description="Quick trades, 15min-2hr holds"
-            ),
-            "swing": StrategyConfig(
-                name="Swing",
-                confidence_threshold=0.75,
-                min_signals_required=3,
-                position_size_pct=0.20,
-                description="Multi-day holds, trend following"
-            ),
-            "momentum": StrategyConfig(
-                name="Momentum",
-                confidence_threshold=0.68,
-                min_signals_required=3,
-                position_size_pct=0.20,
-                description="Trend following, momentum based"
-            ),
-            "volatility": StrategyConfig(
-                name="Volatility",
-                confidence_threshold=0.73,
-                min_signals_required=3,
-                position_size_pct=0.18,
-                description="IV expansion plays"
-            ),
-            "mean_reversion": StrategyConfig(
-                name="Mean Reversion",
-                confidence_threshold=0.72,
-                min_signals_required=3,
-                position_size_pct=0.18,
-                description="Contrarian plays"
             )
         }
         

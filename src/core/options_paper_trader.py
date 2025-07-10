@@ -153,7 +153,20 @@ class OptionsPaperTrader:
         if result and result[0] is not None:
             old_balance = self.account_balance
             self.account_balance = result[0]
-            logger.info(f"📊 Restored account balance: ${old_balance:.2f} → ${self.account_balance:.2f}")
+            logger.info(f"📊 Restored account balance from DB: ${old_balance:.2f} → ${self.account_balance:.2f}")
+            
+            # Debug: Check for discrepancies
+            cursor.execute("SELECT SUM(net_pnl) FROM options_outcomes")
+            pnl_result = cursor.fetchone()
+            total_pnl = pnl_result[0] if pnl_result and pnl_result[0] else 0.0
+            expected_balance = 1000.0 + total_pnl  # Initial balance + P&L
+            
+            if abs(self.account_balance - expected_balance) > 0.01:
+                logger.warning(f"⚠️ Balance discrepancy detected!")
+                logger.warning(f"   • DB Balance: ${self.account_balance:.2f}")
+                logger.warning(f"   • Expected (1000 + P&L): ${expected_balance:.2f}")
+                logger.warning(f"   • Total P&L: ${total_pnl:.2f}")
+                logger.warning(f"   • Difference: ${self.account_balance - expected_balance:.2f}")
         else:
             logger.info(f"📊 Using default balance: ${self.account_balance:.2f} (no DB history found)")
         

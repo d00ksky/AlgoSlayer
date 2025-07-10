@@ -367,7 +367,7 @@ class OptionsScheduler:
                 'confidence': confidence,
                 'strength': strength,
                 'weight': weight,
-                'weighted_strength': weight * confidence
+                'weighted_strength': strength * weight * confidence
             }
             
             if direction == "BUY":
@@ -380,8 +380,8 @@ class OptionsScheduler:
                 high_conf_signals.append(signal_data)
         
         # Calculate total strengths
-        buy_strength = sum(s['weighted_strength'] for s in buy_signals) / max(sum(self.signal_weights.values()), 1.0) if buy_signals else 0
-        sell_strength = sum(s['weighted_strength'] for s in sell_signals) / max(sum(self.signal_weights.values()), 1.0) if sell_signals else 0
+        buy_strength = sum(s['weighted_strength'] for s in buy_signals)
+        sell_strength = sum(s['weighted_strength'] for s in sell_signals)
         
         # Enhanced decision logic
         logger.info(f"🔍 AGGREGATION DEBUG: BUY={buy_strength:.3f}, SELL={sell_strength:.3f}")

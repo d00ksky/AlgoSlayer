@@ -75,7 +75,7 @@ class ParallelStrategyRunner:
         
     def _init_strategies(self):
         """Initialize all strategy instances"""
-        for strategy_id in ["conservative", "moderate", "aggressive", "scalping", "swing", "momentum", "volatility", "mean_reversion"]:
+        for strategy_id in ["conservative", "moderate", "aggressive"]:
             config, state = self.manager.get_strategy_config(strategy_id)
             
             # Create strategy instance with current balance
