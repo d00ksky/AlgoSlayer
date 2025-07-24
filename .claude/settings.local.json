@@ -58,7 +58,11 @@
       "Bash(PYTHONPATH=/opt/rtx-trading /opt/rtx-trading/rtx-env/bin/python -c \"\nimport sys\nsys.path.insert(0, '/opt/rtx-trading')\nfrom src.core.dashboard import PerformanceDashboard\ndashboard = PerformanceDashboard()\nprint('✅ Dashboard has strategies:', dashboard.strategies)\nprint('✅ Strategy emojis:', list(dashboard.strategy_emojis.keys()))\n\")",
       "Bash(PYTHONPATH=/opt/rtx-trading /opt/rtx-trading/rtx-env/bin/python /opt/rtx-trading/comprehensive_system_test.py)",
       "Bash(PYTHONPATH=/opt/rtx-trading /opt/rtx-trading/rtx-env/bin/python:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(cp:*)",
+      "Bash(pip3 install:*)",
+      "Bash(brew install:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }

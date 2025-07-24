@@ -1,10 +1,8 @@
-● rtx-trading.service - RTX Trading System - AI Trading with IBKR
+○ rtx-trading.service - RTX Trading System - AI Trading with IBKR
      Loaded: loaded (/etc/systemd/system/rtx-trading.service; enabled; preset: enabled)
-     Active: active (running) since Tue 2025-06-10 17:46:18 UTC; 20h ago
- Invocation: c099add50a4a402ea00db8511d29ed13
-   Main PID: 31086 (python)
-      Tasks: 2 (limit: 2318)
-     Memory: 82.6M (limit: 1.4G peak: 82.9M)
-        CPU: 40.403s
-     CGroup: /system.slice/rtx-trading.service
-             └─31086 /opt/rtx-trading/rtx-env/bin/python /opt/rtx-trading/run_server.py
+     Active: inactive (dead) since Thu 2025-07-10 16:35:28 UTC; 2 weeks 0 days ago
+   Duration: 7min 12.595s
+ Invocation: c3c5ba88d5fb4ca28724fa8b889b7829
+   Main PID: 190510 (code=exited, status=0/SUCCESS)
+   Mem peak: 123.6M
+        CPU: 3.723s

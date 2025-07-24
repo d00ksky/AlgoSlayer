@@ -1,4 +1,9 @@
 PAPER_TRADING=true
-TRADING_ENABLED=false
+TRADING_ENABLED=true
 PAPER_TRADING=true          # true = fake money, false = real money
 PREDICTION_ONLY=false       # true = notifications only, no orders
+CONFIDENCE_THRESHOLD=0.60
+MIN_SIGNALS_AGREEING=3
+TRADING_ENABLED=true
+PAPER_TRADING=true
+CONFIDENCE_THRESHOLD=0.60

@@ -1,5 +1,5 @@
 # ML Training Report
-Generated: 2025-06-16 21:22:48
+Generated: 2025-07-24 19:27:38
 
 ## Training Data Summary
 - Total predictions: 4146
@@ -8,7 +8,7 @@ Generated: 2025-06-16 21:22:48
 
 ## Model Performance
 - logistic: 0.900 accuracy
-- xgboost: 0.900 accuracy
+- xgboost: 0.896 accuracy
 - gradient_boost: 0.896 accuracy
 - neural_net: 0.896 accuracy
 - random_forest: 0.894 accuracy

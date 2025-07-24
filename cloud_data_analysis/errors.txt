@@ -1,2 +1,1 @@
-2025-06-10 19:31:48 | ERROR    | src.core.ibkr_manager:_get_yfinance_data:173 - 📊 yfinance error: argument of type 'NoneType' is not iterable
-2025-06-10 19:46:50 | ERROR    | src.signals.options_flow_signal:_get_options_data:79 - 📊 Options data error: Expecting value: line 1 column 1 (char 0)
+No errors found

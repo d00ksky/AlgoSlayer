@@ -1,49 +1,53 @@
 # RTX Trading System - Cloud Data Summary
 
-Generated: Wed Jun 11 16:18:11 CEST 2025
+Generated: Thu Jul 24 19:22:44 CEST 2025
 Server: root@64.226.96.90
 
 ## System Status
-     Active: active (running) since Tue 2025-06-10 17:46:18 UTC; 20h ago
-   Main PID: 31086 (python)
+     Active: inactive (dead) since Thu 2025-07-10 16:35:28 UTC; 2 weeks 0 days ago
+   Main PID: 190510 (code=exited, status=0/SUCCESS)
 
 ## Configuration
 ```
 PAPER_TRADING=true
-TRADING_ENABLED=false
+TRADING_ENABLED=true
 PAPER_TRADING=true          # true = fake money, false = real money
 PREDICTION_ONLY=false       # true = notifications only, no orders
+CONFIDENCE_THRESHOLD=0.60
+MIN_SIGNALS_AGREEING=3
+TRADING_ENABLED=true
+PAPER_TRADING=true
+CONFIDENCE_THRESHOLD=0.60
 ```
 
 ## Recent Predictions Summary
-- Total predictions in sample: 12
-- High confidence (≥80%): 18
+- Total predictions in sample:       39
+- High confidence (≥80%):       50
 
 ### Latest Predictions
 ```
-2025-06-10 18:01:26 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-10 18:16:29 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-10 18:31:32 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-10 18:46:34 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-10 19:01:37 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-10 19:16:40 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-10 19:46:52 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (75.3%)
-2025-06-11 13:35:07 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (68.0%)
-2025-06-11 13:50:10 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-11 14:05:13 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (75.3%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 16:47:04 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.8%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 17:02:09 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.8%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 17:17:13 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.8%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 17:32:19 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.8%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 17:47:24 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.8%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 18:02:29 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.8%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 18:17:34 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.9%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 18:32:41 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.9%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 18:44:34 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.9%)
+/opt/rtx-trading/logs/rtx_trading_2025-06-16.log:2025-06-16 18:47:14 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:153 - ✅ Prediction cycle complete: BUY (23.8%)
 ```
 
 ### High Confidence Signals
 ```
-2025-06-10 19:01:37 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-10 19:16:40 | INFO     | src.core.scheduler:_execute_trade_decision:249 - 📊 Trade signal: BUY (81.7%) - Trading disabled
-2025-06-10 19:16:40 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
-2025-06-11 13:50:10 | INFO     | src.core.scheduler:_execute_trade_decision:249 - 📊 Trade signal: BUY (81.7%) - Trading disabled
-2025-06-11 13:50:10 | SUCCESS  | src.core.scheduler:_run_prediction_cycle:149 - ✅ Prediction cycle complete: BUY (81.7%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 15:34:41 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • rtx_earnings: BUY (85.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 15:49:47 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • rtx_earnings: BUY (85.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • rtx_earnings: BUY (85.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • rtx_earnings: BUY (85.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • rtx_earnings: BUY (85.0%)
 ```
 
 ## Errors
 ```
-2025-06-10 19:31:48 | ERROR    | src.core.ibkr_manager:_get_yfinance_data:173 - 📊 yfinance error: argument of type 'NoneType' is not iterable
-2025-06-10 19:46:50 | ERROR    | src.signals.options_flow_signal:_get_options_data:79 - 📊 Options data error: Expecting value: line 1 column 1 (char 0)
+No errors found
 ```

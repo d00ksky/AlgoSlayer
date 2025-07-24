@@ -24,3 +24,99 @@
 2025-06-11 13:35:07 | INFO     | src.core.scheduler:_execute_trade_decision:249 - 📊 Trade signal: BUY (68.0%) - Trading disabled
 2025-06-11 13:50:10 | INFO     | src.core.scheduler:_execute_trade_decision:249 - 📊 Trade signal: BUY (81.7%) - Trading disabled
 2025-06-11 14:05:13 | INFO     | src.core.scheduler:_execute_trade_decision:249 - 📊 Trade signal: BUY (75.3%) - Trading disabled
+
+=== news_sentiment ===
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • options_flow: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • news_sentiment: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • technical_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • options_flow: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • news_sentiment: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • technical_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • options_flow: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+
+=== technical_analysis ===
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • technical_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • options_flow: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • technical_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • options_flow: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+
+=== options_flow ===
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • options_flow: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • options_flow: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+
+=== volatility_analysis ===
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • volatility_analysis: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+
+=== momentum ===
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:04:51 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • momentum: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+
+=== sector_correlation ===
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_aggregate_signals:387 - 🔍 AGGREGATION DEBUG: BUY=0.043, SELL=0.057
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • trump_geopolitical: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_aggregate_signals:387 - 🔍 AGGREGATION DEBUG: BUY=0.043, SELL=0.057
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • sector_correlation: SELL (71.5%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • trump_geopolitical: HOLD (50.0%)
+
+=== mean_reversion ===
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_aggregate_signals:387 - 🔍 AGGREGATION DEBUG: BUY=0.043, SELL=0.057
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • trump_geopolitical: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • defense_contract: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_aggregate_signals:387 - 🔍 AGGREGATION DEBUG: BUY=0.043, SELL=0.057
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • mean_reversion: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • trump_geopolitical: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • defense_contract: HOLD (50.0%)
+
+=== market_regime ===
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • trump_geopolitical: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • defense_contract: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:19:55 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • rtx_earnings: BUY (85.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_aggregate_signals:387 - 🔍 AGGREGATION DEBUG: BUY=0.043, SELL=0.057
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_aggregate_signals:425 -    📊 Final: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log:2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • market_regime: HOLD (40.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • trump_geopolitical: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • defense_contract: HOLD (50.0%)
+/opt/rtx-trading/logs/rtx_trading_2025-07-10.log-2025-07-10 16:28:19 | INFO     | src.core.options_scheduler:_generate_signals:307 -    • rtx_earnings: BUY (85.0%)
