@@ -29,7 +29,7 @@ class MultiStrategyManager:
     def __init__(self, db_path: str = "data/options_performance.db"):
         self.db_path = db_path
         self.strategies_file = "data/active_strategies.json"
-        self.starting_capital = 1000.0
+        self.starting_capital = 2000.0  # Increased for realistic options trading
         
         # Define the eight strategies
         self.strategy_configs = {
@@ -107,7 +107,7 @@ class MultiStrategyManager:
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 config TEXT NOT NULL,
                 status TEXT DEFAULT 'ACTIVE',
-                current_balance REAL DEFAULT 1000.0,
+                current_balance REAL DEFAULT 2000.0,
                 total_trades INTEGER DEFAULT 0,
                 winning_trades INTEGER DEFAULT 0,
                 total_pnl REAL DEFAULT 0.0,

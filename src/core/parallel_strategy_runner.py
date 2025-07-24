@@ -14,7 +14,7 @@ from src.core.multi_strategy_manager import MultiStrategyManager, StrategyConfig
 from src.core.options_scheduler import OptionsScheduler
 from src.core.options_prediction_engine import OptionsPredictionEngine
 from src.core.options_paper_trader import OptionsPaperTrader
-# from src.core.telegram_bot import telegram_bot
+from src.core.telegram_bot import telegram_bot
 from src.core.adaptive_learning_system import AdaptiveLearningSystem
 from src.core.dynamic_thresholds import dynamic_threshold_manager
 from src.core.dashboard import dashboard
@@ -25,7 +25,7 @@ from config.options_config import options_config
 class StrategyInstance:
     """Independent instance of a trading strategy"""
     
-    def __init__(self, strategy_id: str, strategy_config: StrategyConfig, initial_balance: float = 1000.0):
+    def __init__(self, strategy_id: str, strategy_config: StrategyConfig, initial_balance: float = 2000.0):
         self.strategy_id = strategy_id
         self.strategy_config = strategy_config
         self.balance = initial_balance
@@ -104,7 +104,7 @@ class ParallelStrategyRunner:
         await self._send_startup_notification()
         
         # Start Telegram command listener as background task
-        # telegram_task = asyncio.create_task(telegram_bot.process_incoming_messages())
+        telegram_task = asyncio.create_task(telegram_bot.process_incoming_messages())
         logger.info("📱 Started Telegram command listener")
         
         try:
@@ -135,11 +135,11 @@ class ParallelStrategyRunner:
                 
         except Exception as e:
             logger.error(f"❌ Parallel trading error: {e}")
-            # await telegram_bot.send_message(f"❌ Multi-strategy error: {str(e)}")
+            await telegram_bot.send_message(f"❌ Multi-strategy error: {str(e)}")
         finally:
             # Cancel telegram task if it exists
-            # if 'telegram_task' in locals() and not telegram_task.done():
-                # telegram_task.cancel()
+            if 'telegram_task' in locals() and not telegram_task.done():
+                telegram_task.cancel()
                 logger.info("📱 Telegram listener stopped")
             
     async def _run_parallel_cycle(self):
@@ -313,7 +313,7 @@ class ParallelStrategyRunner:
         message += "• Volatility: 73% conf (+5% from #3 performer)\n"
         message += "\n🎯 Simulation-based learning active! 🚀"
         
-        # await telegram_bot.send_message(message)
+        await telegram_bot.send_message(message)
         
     async def _send_performance_update(self):
         """Send periodic performance update with dashboard"""
@@ -339,7 +339,7 @@ class ParallelStrategyRunner:
                     
             message += "\n💡 Use /dashboard for full details"
                 
-            # await telegram_bot.send_message(message)
+            await telegram_bot.send_message(message)
             
         except Exception as e:
             logger.error(f"❌ Performance update error: {e}")
