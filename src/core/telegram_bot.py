@@ -112,12 +112,13 @@ class TelegramBot:
         return await self.send_message(message.strip())
     
     async def send_prediction_alert(self, prediction_data: Dict) -> bool:
-        """Send AI prediction alert"""
+        """Send enhanced AI prediction alert with ML insights"""
         symbol = prediction_data.get("symbol", "RTX")
         price = prediction_data.get("current_price", 0)
         direction = prediction_data.get("direction", "HOLD")
         confidence = prediction_data.get("confidence", 0)
         reasoning = prediction_data.get("reasoning", "Multiple AI signals")
+        strategy_id = prediction_data.get("strategy_id", "Unknown")
         
         # Determine emoji based on direction and confidence
         if direction == "BUY":
@@ -129,6 +130,9 @@ class TelegramBot:
         
         confidence_text = "HIGH" if confidence > 0.75 else "MEDIUM" if confidence > 0.5 else "LOW"
         
+        # Get ML enhancement info
+        ml_enhancement = await self._get_ml_enhancement_info(strategy_id, confidence)
+        
         message = f"""
 {emoji} <b>RTX PREDICTION ALERT</b>
 
@@ -136,6 +140,9 @@ class TelegramBot:
 💰 <b>Price:</b> ${price:.2f}
 🤖 <b>AI Signal:</b> {direction}
 📊 <b>Confidence:</b> {confidence:.1%} ({confidence_text})
+🧠 <b>Strategy:</b> {strategy_id}
+
+{ml_enhancement}
 
 💭 <b>Analysis:</b> {reasoning}
 
@@ -207,7 +214,7 @@ class TelegramBot:
         return await self.send_message(message.strip())
     
     async def send_daily_summary(self, summary_data: Dict) -> bool:
-        """Send daily performance summary"""
+        """Send enhanced daily performance summary with ML insights"""
         date = summary_data.get("date", datetime.now().strftime('%Y-%m-%d'))
         predictions_made = summary_data.get("predictions_made", 0)
         accuracy_rate = summary_data.get("accuracy_rate", 0)
@@ -218,6 +225,9 @@ class TelegramBot:
         
         pnl_emoji = "💚" if pnl > 0 else "❌" if pnl < 0 else "➖"
         price_emoji = "📈" if price_change > 0 else "📉" if price_change < 0 else "➖"
+        
+        # Get ML insights
+        ml_insight = await self._get_ml_insight_for_summary()
         
         message = f"""
 📊 <b>DAILY TRADING SUMMARY</b>
@@ -234,6 +244,8 @@ class TelegramBot:
 📈 <b>RTX PERFORMANCE:</b>
    • Price: ${rtx_price:.2f}
    • Change: {price_emoji} {price_change:+.1f}%
+
+{ml_insight}
 
 🎯 <b>TOMORROW'S FOCUS:</b>
    • Continue monitoring RTX patterns
@@ -528,8 +540,14 @@ Iron condors: Sideways strategy
             return await self.send_cross_strategy_message()
         elif command == "/learning" or command == "learning":
             return await self.send_learning_summary_message()
-        elif command == "/ml_status, signal_effectiveness" or command == "ml_status":
+        elif command == "/ml_status" or command == "ml_status":
+            return await self.send_comprehensive_ml_status()
+        elif command == "/ml_quick" or command == "ml_quick":
+            return await self.send_quick_ml_summary()
+        elif command == "/ml_legacy" or command == "signal_effectiveness":
             return await self.send_ml_optimization_status()
+        elif command == "/ml_alerts" or command == "ml_alerts":
+            return await self.send_learning_progress_alerts()
         else:
             return await self.send_message(f"❓ Unknown command: {command}\n\nType /help for available commands")
     
@@ -546,7 +564,10 @@ Iron condors: Sideways strategy
 
 🧠 <b>/cross_strategy</b> - Cross-strategy learning dashboard
 🎓 <b>/learning</b> - Quick learning progress summary
-🤖 <b>/ml_status, signal_effectiveness</b> - ML optimization status and performance
+🤖 <b>/ml_status</b> - Comprehensive ML system status and health
+⚡ <b>/ml_quick</b> - Quick ML summary for frequent updates
+🚨 <b>/ml_alerts</b> - Check for recent learning progress improvements
+🔧 <b>/ml_legacy</b> - Legacy ML optimization status
 📊 <b>/signal_effectiveness</b> - Signal performance analysis
 🔧 <b>/monitor</b> - System health and performance alerts\n🧠 <b>/learning</b> - Cross-strategy learning analysis\n📅 <b>/earnings</b> - RTX earnings calendar and volatility analysis\n🔬 <b>/backtest</b> - Strategy backtesting analysis\n📊 <b>/iv</b> - IV rank monitoring and volatility alerts\n🎮 <b>/lives</b> - Strategy lives management and reset status\n🚀 <b>/ready</b> - Live trading readiness evaluation
 🔧 <b>/monitor</b> - System health and performance alerts\n🧠 <b>/learning</b> - Cross-strategy learning analysis\n📅 <b>/earnings</b> - RTX earnings calendar and volatility analysis\n🔬 <b>/backtest</b> - Strategy backtesting analysis\n📊 <b>/iv</b> - IV rank monitoring and volatility alerts\n🎮 <b>/lives</b> - Strategy lives management and reset status\n🚀 <b>/ready</b> - Live trading readiness evaluation
@@ -1124,6 +1145,155 @@ _Please check system manually or contact support._"""
         except Exception as e:
             logger.error(f"❌ ML status error: {e}")
             return await self.send_message(f"❌ <b>ML Status Error:</b> {str(e)}")
+    
+    async def send_comprehensive_ml_status(self) -> bool:
+        """Send comprehensive ML system status report"""
+        try:
+            from src.core.ml_status_monitor import ml_status_monitor
+            
+            status_data = ml_status_monitor.get_comprehensive_ml_status()
+            message = ml_status_monitor.format_ml_status_message(status_data)
+            
+            return await self.send_message(message)
+            
+        except Exception as e:
+            logger.error(f"❌ Comprehensive ML status error: {e}")
+            return await self.send_message(f"❌ <b>ML Status Error:</b> {str(e)}")
+    
+    async def send_quick_ml_summary(self) -> bool:
+        """Send quick ML summary for frequent updates"""
+        try:
+            from src.core.ml_status_monitor import ml_status_monitor
+            
+            status_data = ml_status_monitor.get_comprehensive_ml_status()
+            message = ml_status_monitor.format_quick_ml_summary(status_data)
+            
+            return await self.send_message(message)
+            
+        except Exception as e:
+            logger.error(f"❌ Quick ML summary error: {e}")
+            return await self.send_message(f"❌ <b>ML Summary Error:</b> {str(e)}")
+    
+    async def send_automated_ml_notification(self) -> bool:
+        """Send automated ML notification if conditions are met"""
+        try:
+            from src.core.ml_status_monitor import ml_status_monitor
+            from src.core.ml_learning_alerts import ml_learning_alerts
+            
+            # Check for learning improvements first (these are high priority)
+            learning_alerts = ml_learning_alerts.check_for_learning_improvements()
+            if learning_alerts:
+                alert_message = ml_learning_alerts.format_learning_progress_alert(learning_alerts)
+                await self.send_message(alert_message)
+                logger.info("📱 Learning progress alert sent")
+                return True
+            
+            # Check if regular notification should be sent
+            if not ml_status_monitor.should_send_notification():
+                return False
+            
+            # Send comprehensive status
+            status_data = ml_status_monitor.get_comprehensive_ml_status()
+            message = f"🔄 **AUTOMATED ML STATUS UPDATE**\n\n{ml_status_monitor.format_ml_status_message(status_data)}"
+            
+            result = await self.send_message(message)
+            
+            if result:
+                ml_status_monitor.mark_notification_sent()
+                logger.info("📱 Automated ML notification sent successfully")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Automated ML notification error: {e}")
+            return False
+    
+    async def _get_ml_insight_for_summary(self) -> str:
+        """Get ML insight snippet for daily summary"""
+        try:
+            from src.core.ml_status_monitor import ml_status_monitor
+            
+            status_data = ml_status_monitor.get_comprehensive_ml_status()
+            health = status_data.get("overall_health", {})
+            learning = status_data.get("learning_effectiveness", {})
+            
+            health_emoji = health.get("emoji", "⚪")
+            health_status = health.get("status", "Unknown")
+            learning_active = "✅ Active" if learning.get("learning_applied", False) else "⚠️ Inactive"
+            
+            return f"""🧠 <b>ML HEALTH:</b>
+   • System Status: {health_emoji} {health_status}
+   • Learning: {learning_active}
+   • Strategies Enhanced: {learning.get('strategies_enhanced', 0)}/8"""
+            
+        except Exception as e:
+            logger.error(f"❌ ML insight error: {e}")
+            return "🧠 <b>ML STATUS:</b> Available via /ml_status"
+    
+    async def _get_ml_enhancement_info(self, strategy_id: str, confidence: float) -> str:
+        """Get ML enhancement information for predictions"""
+        try:
+            from src.core.ml_status_monitor import ml_status_monitor
+            
+            status_data = ml_status_monitor.get_comprehensive_ml_status()
+            learning = status_data.get("learning_effectiveness", {})
+            strategies = status_data.get("strategy_comparison", {})
+            
+            # Check if this strategy was enhanced by ML
+            enhanced = "✅ ML Enhanced" if learning.get("learning_applied", False) else "⚪ Standard"
+            
+            # Get strategy performance if available
+            strategy_perf = strategies.get(strategy_id, {})
+            if strategy_perf:
+                recent_wr = strategy_perf.get("win_rate", 0)
+                wr_text = f"Recent: {recent_wr:.1f}% WR"
+            else:
+                wr_text = "Recent: No data"
+            
+            # Confidence context
+            if confidence >= 0.8:
+                conf_context = "🔥 Excellent confidence"
+            elif confidence >= 0.7:
+                conf_context = "✅ Good confidence"
+            elif confidence >= 0.6:
+                conf_context = "⚡ Acceptable confidence"
+            else:
+                conf_context = "⚠️ Low confidence"
+            
+            return f"""🎓 <b>ML Context:</b> {enhanced} • {wr_text}
+🎯 <b>Signal Quality:</b> {conf_context}"""
+            
+        except Exception as e:
+            logger.error(f"❌ ML enhancement info error: {e}")
+            return "🧠 <b>ML Enhancement:</b> Data unavailable"
+    
+    async def send_learning_progress_alerts(self) -> bool:
+        """Send manual check for learning progress alerts"""
+        try:
+            from src.core.ml_learning_alerts import ml_learning_alerts
+            
+            learning_alerts = ml_learning_alerts.check_for_learning_improvements()
+            
+            if learning_alerts:
+                message = ml_learning_alerts.format_learning_progress_alert(learning_alerts)
+            else:
+                message = """📊 <b>ML Learning Progress Check</b>
+
+✅ <b>Status:</b> No significant improvements detected in recent period
+
+🔍 <b>Monitoring:</b>
+   • Win rate changes: < 3% threshold
+   • Strategy activations: None recent  
+   • System improvements: Within normal range
+   • Learning effectiveness: Stable
+
+ℹ️ <b>Note:</b> Alerts are sent automatically when significant improvements occur. Use /ml_status for detailed analysis."""
+            
+            return await self.send_message(message)
+            
+        except Exception as e:
+            logger.error(f"❌ Learning progress alerts error: {e}")
+            return await self.send_message(f"❌ <b>Learning Progress Error:</b> {str(e)}")
     
     async def send_dashboard_message(self) -> bool:
         """Send live multi-strategy dashboard"""

@@ -137,6 +137,9 @@ class OptionsScheduler:
                 # Send market open status message (once per day)
                 await self._check_and_send_market_open_status()
                 
+                # Check for automated ML notifications
+                await self._check_and_send_ml_notification()
+                
                 # Run trading cycle
                 await self._run_trading_cycle()
                 
@@ -648,6 +651,15 @@ class OptionsScheduler:
                 
         except Exception as e:
             logger.error(f"❌ Error checking market open status: {e}")
+    
+    async def _check_and_send_ml_notification(self):
+        """Check if we should send automated ML status notification"""
+        try:
+            # Send automated ML notification if conditions are met
+            await telegram_bot.send_automated_ml_notification()
+            
+        except Exception as e:
+            logger.error(f"❌ Error checking ML notification: {e}")
     
     def stop(self):
         """Stop the trading scheduler"""
