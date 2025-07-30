@@ -26,7 +26,7 @@ class StrategyConfig:
 class MultiStrategyManager:
     """Manage multiple parallel trading strategies with independent learning"""
     
-    def __init__(self, db_path: str = "data/options_performance.db"):
+    def __init__(self, db_path: str = "data/algoslayer_multi_strategy.db"):
         self.db_path = db_path
         self.strategies_file = "data/active_strategies.json"
         self.starting_capital = 2000.0  # Increased for realistic options trading
@@ -35,56 +35,56 @@ class MultiStrategyManager:
         self.strategy_configs = {
             "conservative": StrategyConfig(
                 name="Conservative",
-                confidence_threshold=0.75,
+                confidence_threshold=0.5,
                 min_signals_required=4,
                 position_size_pct=0.15,
                 description="High confidence, multiple signal agreement, small positions"
             ),
             "moderate": StrategyConfig(
                 name="Moderate",
-                confidence_threshold=0.60,
+                confidence_threshold=0.5,
                 min_signals_required=3,
                 position_size_pct=0.20,
                 description="Balanced approach with moderate risk"
             ),
             "aggressive": StrategyConfig(
                 name="Aggressive",
-                confidence_threshold=0.50,
+                confidence_threshold=0.5,
                 min_signals_required=2,
                 position_size_pct=0.25,
                 description="Lower threshold, larger positions, more trades"
             ),
             "scalping": StrategyConfig(
                 name="Scalping",
-                confidence_threshold=0.75,
+                confidence_threshold=0.65,
                 min_signals_required=3,
                 position_size_pct=0.15,
                 description="Quick trades, 15min-2hr holds"
             ),
             "swing": StrategyConfig(
                 name="Swing",
-                confidence_threshold=0.75,
+                confidence_threshold=0.65,
                 min_signals_required=3,
                 position_size_pct=0.20,
                 description="Multi-day holds, trend following"
             ),
             "momentum": StrategyConfig(
                 name="Momentum",
-                confidence_threshold=0.68,
+                confidence_threshold=0.6,
                 min_signals_required=3,
                 position_size_pct=0.20,
                 description="Trend following, momentum based"
             ),
             "volatility": StrategyConfig(
                 name="Volatility",
-                confidence_threshold=0.73,
+                confidence_threshold=0.63,
                 min_signals_required=3,
                 position_size_pct=0.18,
                 description="IV expansion plays"
             ),
             "mean_reversion": StrategyConfig(
                 name="Mean Reversion",
-                confidence_threshold=0.72,
+                confidence_threshold=0.62,
                 min_signals_required=3,
                 position_size_pct=0.18,
                 description="Contrarian plays"

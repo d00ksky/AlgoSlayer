@@ -79,7 +79,7 @@ class RealTimeDataStream:
         self.options_data: List[OptionsData] = []
         
         # Configuration
-        self.symbols = ['RTX', 'SPY', 'VIX', 'DXY', 'ITA']
+        self.symbols = ['RTX', 'SPY', '^VIX', 'DX-Y.NYB', 'ITA']
         self.update_interval = 1  # seconds
         self.history_length = 1000  # keep last N data points
         
@@ -336,8 +336,8 @@ class RealTimeDataStream:
             }
             
             # VIX regime
-            if 'VIX' in self.latest_prices:
-                vix_price = self.latest_prices['VIX'].price
+            if '^VIX' in self.latest_prices:
+                vix_price = self.latest_prices['^VIX'].price
                 if vix_price < 15:
                     regime['vix_regime'] = 'low'
                 elif vix_price > 25:
@@ -367,7 +367,7 @@ class RealTimeDataStream:
     def should_trigger_prediction(self) -> bool:
         """Determine if we should trigger a new prediction"""
         # Check if we have recent data for key symbols
-        required_symbols = ['RTX', 'SPY', 'VIX']
+        required_symbols = ['RTX', 'SPY', '^VIX']
         current_time = datetime.now()
         
         for symbol in required_symbols:
@@ -399,8 +399,8 @@ class RealTimeDataStream:
                     features['rtx_momentum_5min'] = (recent_prices[-1] - recent_prices[0]) / recent_prices[0]
             
             # VIX features
-            if 'VIX' in self.latest_prices:
-                vix_data = self.latest_prices['VIX']
+            if '^VIX' in self.latest_prices:
+                vix_data = self.latest_prices['^VIX']
                 features['vix_level'] = vix_data.price
                 features['vix_regime'] = 'normal'
                 if vix_data.price < 15:

@@ -65,7 +65,7 @@ class RealTimeFeatureEngine:
         self.last_calculation: Optional[datetime] = None
         
         # Symbols we track
-        self.symbols = ['RTX', 'SPY', 'VIX', 'DXY', 'ITA']
+        self.symbols = ['RTX', 'SPY', '^VIX', 'DX-Y.NYB', 'ITA']
         
         # Initialize rolling windows
         for symbol in self.symbols:
@@ -111,7 +111,7 @@ class RealTimeFeatureEngine:
     def should_calculate_features(self) -> bool:
         """Determine if we should recalculate features"""
         # Check if we have recent data for all key symbols
-        required_symbols = ['RTX', 'SPY', 'VIX']
+        required_symbols = ['RTX', 'SPY', '^VIX']
         
         for symbol in required_symbols:
             if not self.price_windows[symbol]:
@@ -215,10 +215,10 @@ class RealTimeFeatureEngine:
             # Add current market data to the row
             if 'SPY' in latest_data:
                 data_row['spy_price'] = latest_data['SPY']['price']
-            if 'VIX' in latest_data:
-                data_row['vix_price'] = latest_data['VIX']['price']
-            if 'DXY' in latest_data:
-                data_row['dxy_price'] = latest_data['DXY']['price']
+            if '^VIX' in latest_data:
+                data_row['vix_price'] = latest_data['^VIX']['price']
+            if 'DX-Y.NYB' in latest_data:
+                data_row['dxy_price'] = latest_data['DX-Y.NYB']['price']
             if 'ITA' in latest_data:
                 data_row['ita_price'] = latest_data['ITA']['price']
             
@@ -277,7 +277,7 @@ class RealTimeFeatureEngine:
                     features['rtx_volatility_1min'] = np.std(rtx_prices) / np.mean(rtx_prices)
                 
                 # Cross-asset momentum
-                for symbol in ['SPY', 'VIX', 'DXY']:
+                for symbol in ['SPY', '^VIX', 'DX-Y.NYB']:
                     if len(self.price_windows[symbol]) > 3:
                         prices = [dp['price'] for dp in list(self.price_windows[symbol])[-3:]]
                         features[f'{symbol.lower()}_momentum_30s'] = (prices[-1] - prices[0]) / prices[0]
