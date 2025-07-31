@@ -331,19 +331,90 @@ Each signal now benefits from optimization layer integration:
 - **Optimization Score**: Combined metric of all 14 enhancements
 - **Live Trading Readiness**: Real-time evaluation via `/ready` command
 
-### Database Schema (Enterprise-Optimized)
+### Database Architecture (Multi-Strategy Design)
+
+**🚨 IMPORTANT: AlgoSlayer uses MULTIPLE databases by design - this is NOT a bug!**
+
+#### **Central Coordination Database**
+- **`algoslayer_multi_strategy.db`** (28KB) - Central coordination
+  - `trading_strategies` - Strategy configuration and status
+  - `strategy_predictions` - Cross-strategy prediction tracking
+  - `strategy_performance` - Daily performance summaries
+
+#### **Individual Strategy Databases** 
+Each of the 8 strategies has its own dedicated database:
+- **`options_performance_conservative.db`** (24KB)
+- **`options_performance_moderate.db`** (24KB) 
+- **`options_performance_aggressive.db`** (32KB)
+- **`options_performance_scalping.db`** (24KB)
+- **`options_performance_swing.db`** (24KB)
+- **`options_performance_momentum.db`** (24KB)
+- **`options_performance_volatility.db`** (24KB)
+- **`options_performance_mean_reversion.db`** (24KB)
+
+**Each strategy database contains:**
 ```sql
--- Optimized predictions with all enhancement data
-predictions: prediction_id, confidence, kelly_sizing, iv_rank, earnings_proximity
+-- Complete options predictions with Greeks and IV data
+options_predictions: prediction_id, timestamp, symbol, action, contract_symbol, 
+    option_type, strike, expiry, entry_price, contracts, total_cost, commission,
+    direction, confidence, expected_move, implied_volatility, delta_entry, 
+    stock_price_entry, volume, open_interest, signals_data, reasoning, status
 
--- Enhanced outcomes with optimization tracking
-outcomes: exit_price, net_pnl, optimization_score, kelly_performance
+-- Detailed trade outcomes with P&L tracking
+options_outcomes: outcome_id, prediction_id, exit_timestamp, exit_price, 
+    exit_reason, days_held, entry_cost, exit_proceeds, gross_pnl, 
+    commissions_total, net_pnl, pnl_percentage, stock_price_exit, 
+    stock_move_pct, prediction_accuracy
 
--- Cross-strategy learning data
-strategy_learning: strategy_id, learned_patterns, performance_improvement
+-- Complete account balance history
+account_history: history_id, timestamp, action, trade_id, amount, 
+    balance_before, balance_after, description
+```
 
--- Optimization performance tracking
-optimization_metrics: module_name, performance_impact, success_rate
+#### **Legacy/Support Databases**
+- **`algoslayer_main.db`** (92KB) - Legacy main database
+- **`signal_performance.db`** (696KB) - Signal effectiveness tracking
+- **`signal_effectiveness.db`** (32KB) - Signal optimization data
+
+#### **Database Usage Examples**
+```bash
+# Check individual strategy performance
+ssh root@64.226.96.90 "cd /opt/rtx-trading && rtx-env/bin/python -c \"
+import sqlite3
+conn = sqlite3.connect('data/options_performance_conservative.db')
+cursor = conn.cursor()
+cursor.execute('SELECT SUM(net_pnl) FROM options_outcomes')
+print(f'Conservative P&L: \${cursor.fetchone()[0]:.2f}')
+\""
+
+# Check all strategies from central DB
+ssh root@64.226.96.90 "cd /opt/rtx-trading && rtx-env/bin/python -c \"
+import sqlite3
+conn = sqlite3.connect('data/algoslayer_multi_strategy.db')
+cursor = conn.cursor()
+cursor.execute('SELECT name, current_balance, total_pnl FROM trading_strategies')
+for row in cursor.fetchall():
+    print(f'{row[0]}: Balance \${row[1]:.2f}, P&L \${row[2]:.2f}')
+\""
+```
+
+#### **Why Multiple Databases?**
+1. **Performance**: Each strategy writes independently without locks
+2. **Isolation**: Strategy failures don't affect others
+3. **Backup**: Individual strategy data can be backed up separately
+4. **Scalability**: Easy to add new strategies without schema changes
+5. **Debugging**: Clear separation for troubleshooting individual strategies
+
+#### **Database Maintenance Commands**
+```bash
+# Check all database sizes
+find /opt/rtx-trading/data -name "*.db" -type f -exec ls -lh {} \;
+
+# Backup specific strategy
+cp /opt/rtx-trading/data/options_performance_conservative.db /tmp/conservative_backup.db
+
+# Check database integrity
+rtx-env/bin/python -c "import sqlite3; conn = sqlite3.connect('data/algoslayer_multi_strategy.db'); print('OK' if conn.execute('PRAGMA integrity_check').fetchone()[0] == 'ok' else 'ERROR')"
 ```
 
 ## 🔧 Configuration Options (Optimization-Enhanced)
@@ -597,6 +668,110 @@ cursor = conn.cursor()
 cursor.execute('SELECT name FROM sqlite_master WHERE type=\'index\'')
 print(f'Optimization indexes: {len(cursor.fetchall())}')
 "
+```
+
+## 🔧 **Troubleshooting Common Issues**
+
+### **Balance/Profit Confusion (July 29, 2025 Reset Issue)**
+
+**Problem**: Strategy shows $2000 balance but notifications mention 400%+ profit
+
+**Root Cause**: On July 29, 2025, all strategy balances were reset from actual performance to $2000, but historical trading data remains in individual databases.
+
+**Example - Conservative Strategy:**
+- **Historical Performance**: 6 trades, +$110 profit (11% gain from $1000)
+- **Balance Progression**: $1000 → $1110 → **RESET** → $2000
+- **Current Status**: $2000 balance + $110 historical P&L in database
+
+**To Check Real Performance:**
+```bash
+# Check actual historical performance for any strategy
+ssh root@64.226.96.90 "cd /opt/rtx-trading && rtx-env/bin/python -c \"
+import sqlite3
+strategy = 'conservative'  # Change to: moderate, aggressive, etc.
+conn = sqlite3.connect(f'data/options_performance_{strategy}.db')
+cursor = conn.cursor()
+
+# Get real trading performance
+cursor.execute('SELECT COUNT(*) as trades, SUM(net_pnl) as total_pnl FROM options_outcomes')
+perf = cursor.fetchone()
+print(f'{strategy.title()} Strategy Reality:')
+print(f'  Completed Trades: {perf[0]}')
+print(f'  Actual P&L: \${perf[1]:.2f}' if perf[1] else '  Actual P&L: \$0.00')
+
+# Get final balance before reset
+cursor.execute('SELECT balance_after FROM account_history ORDER BY timestamp DESC LIMIT 1')
+final = cursor.fetchone()
+if final:
+    print(f'  Final Balance Before Reset: \${final[0]:.2f}')
+    print(f'  Current Balance After Reset: \$2000.00')
+\"" 
+```
+
+**To Fix Notification Confusion:**
+The reset was intentional to give all strategies adequate capital ($2000) for RTX options trading. The historical P&L data is preserved for learning purposes but should not be added to current balance calculations.
+
+### **Database "Empty" Confusion**
+
+**Problem**: Thinking databases are empty when they contain data
+
+**Reality Check:**
+```bash
+# Quick database status check
+ssh root@64.226.96.90 "cd /opt/rtx-trading && echo 'Database Status:' && 
+ls -lh data/*.db | grep -E '(conservative|multi_strategy|main)' && 
+echo -e '\nConservative Strategy Data:' &&
+rtx-env/bin/python -c \"
+import sqlite3
+conn = sqlite3.connect('data/options_performance_conservative.db')
+cursor = conn.cursor()
+cursor.execute('SELECT COUNT(*) FROM options_predictions')
+preds = cursor.fetchone()[0]
+cursor.execute('SELECT COUNT(*) FROM options_outcomes') 
+outcomes = cursor.fetchone()[0]
+print(f'  Predictions: {preds}, Completed Trades: {outcomes}')
+\""
+```
+
+### **Multi-Strategy System Not Trading**
+
+**Problem**: System running but no trades executing
+
+**Diagnosis Steps:**
+1. **Check Options Rejection**: Look for "Rejected by strike/cost" in logs
+2. **Verify Market Hours**: System only trades 9:30 AM - 4 PM ET
+3. **Check Confidence Thresholds**: Ensure strategies have achievable thresholds
+
+```bash
+# Recent rejection analysis
+ssh root@64.226.96.90 "journalctl -u rtx-trading --since '1 hour ago' | 
+grep -E '(FILTERING|Rejected|No suitable|Stock price)' | tail -20"
+```
+
+### **Service Restart After Changes**
+
+**When to Restart:**
+- Configuration changes (options_config.py, trading_config.py)
+- Code changes (options_data_engine.py, multi_strategy_manager.py)
+- Database schema changes
+
+```bash
+# Proper restart sequence
+ssh root@64.226.96.90 "systemctl restart rtx-trading && 
+sleep 5 && systemctl status rtx-trading"
+```
+
+### **Database Backup & Recovery**
+
+**Before Major Changes:**
+```bash
+# Backup all strategy databases
+ssh root@64.226.96.90 "cd /opt/rtx-trading && 
+tar -czf backup_$(date +%Y%m%d_%H%M%S).tar.gz data/*.db"
+
+# Restore if needed
+ssh root@64.226.96.90 "cd /opt/rtx-trading && 
+tar -xzf backup_YYYYMMDD_HHMMSS.tar.gz"
 ```
 
 **🎯 The AlgoSlayer RTX Options Trading System is now fully optimized and ready to demonstrate world-class performance!** ✨
