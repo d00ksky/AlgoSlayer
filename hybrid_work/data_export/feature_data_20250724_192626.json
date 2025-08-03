@@ -1,0 +1,24 @@
+{
+  "export_timestamp": "2025-07-24T19:26:26.951678",
+  "cutoff_date": "2025-04-25T19:26:25.278517",
+  "phase1_features": {
+    "total_features": 82,
+    "categories": {
+      "temporal": 0.62,
+      "volatility": 0.14,
+      "signal_interactions": 0.12,
+      "cross_asset": 0.11,
+      "momentum": 0.01
+    }
+  },
+  "enhanced_features_info": {
+    "description": "Phase 1 enhanced features from advanced_features.py",
+    "includes": [
+      "Temporal patterns (market timing, day of week effects)",
+      "Volatility analysis (IV, expected moves)",
+      "Signal interactions (cross-signal agreement)",
+      "Cross-asset features (SPY, VIX, Defense ETF)",
+      "Rolling statistics and momentum indicators"
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "current_weights": {
+    "technical_analysis": 0.16203490408471016,
+    "momentum": 0.16203490408471016,
+    "news_sentiment": 0.16203490408471016,
+    "volatility_analysis": 0.16203490408471016,
+    "options_flow": 0.16203490408471016,
+    "sector_correlation": 0.16203490408471016,
+    "mean_reversion": 0.16203490408471016,
+    "market_regime": 0.16203490408471016
+  },
+  "continuous_learning_status": {
+    "last_update": "2025-07-24T14:26:26.941424",
+    "next_update": "2025-07-24T18:26:26.941424",
+    "signal_weights": {
+      "technical_analysis": 0.16203490408471016,
+      "momentum": 0.16203490408471016,
+      "news_sentiment": 0.16203490408471016,
+      "volatility_analysis": 0.16203490408471016,
+      "options_flow": 0.16203490408471016,
+      "sector_correlation": 0.16203490408471016,
+      "mean_reversion": 0.16203490408471016,
+      "market_regime": 0.16203490408471016
+    },
+    "model_active": false,
+    "model_type": null,
+    "performance_history": [],
+    "update_interval_hours": 4.0,
+    "min_samples_threshold": 50
+  },
+  "historical_weights": [],
+  "export_timestamp": "2025-07-24T19:26:26.943071"
+}

@@ -62,7 +62,8 @@
       "Bash(cp:*)",
       "Bash(pip3 install:*)",
       "Bash(brew install:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(launchctl:*)"
     ],
     "deny": []
   }

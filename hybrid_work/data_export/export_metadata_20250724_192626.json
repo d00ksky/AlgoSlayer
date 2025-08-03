@@ -1,0 +1,54 @@
+{
+  "export_info": {
+    "timestamp": "2025-07-24T19:26:26.952611",
+    "days_back": 90,
+    "server_hostname": "algo-slayer",
+    "export_version": "1.0"
+  },
+  "files_exported": {
+    "predictions": "/opt/rtx-trading/data_export/predictions_data_20250724_192625.csv",
+    "signals": "/opt/rtx-trading/data_export/signal_performance_20250724_192625.json",
+    "strategies": "/opt/rtx-trading/data_export/strategy_data_20250724_192626.json",
+    "features": "/opt/rtx-trading/data_export/feature_data_20250724_192626.json"
+  },
+  "database_info": {
+    "total_databases": 9,
+    "databases": [
+      "options_performance.db",
+      "options_performance_momentum.db",
+      "options_performance_aggressive.db",
+      "options_performance_conservative.db",
+      "options_performance_mean_reversion.db",
+      "options_performance_moderate.db",
+      "options_performance_volatility.db",
+      "options_performance_scalping.db",
+      "options_performance_swing.db"
+    ]
+  },
+  "system_status": {
+    "phase1_active": true,
+    "phase2_available": true,
+    "phase3_active": true,
+    "continuous_learning_active": true
+  },
+  "training_recommendations": {
+    "models_to_train": [
+      "lstm",
+      "ensemble",
+      "multitask"
+    ],
+    "expected_accuracy": "82.4%+",
+    "training_frequency": "weekly",
+    "deployment_method": "model_integration.py"
+  },
+  "data_quality": {
+    "total_predictions": 46,
+    "completed_trades": 0,
+    "completion_rate": 0.0,
+    "data_quality_score": 0.0,
+    "recommendations": [
+      "Low completion rate - wait for more trades to close",
+      "Insufficient data for robust training - need 100+ completed trades"
+    ]
+  }
+}
