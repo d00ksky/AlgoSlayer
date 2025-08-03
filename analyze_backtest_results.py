@@ -177,6 +177,9 @@ class BacktestAnalyzer:
         
         # 5. Monthly Performance
         ax5 = plt.subplot(3, 3, 5)
+        # Ensure timestamp is datetime
+        if self.trades_df['timestamp'].dtype == 'object':
+            self.trades_df['timestamp'] = pd.to_datetime(self.trades_df['timestamp'])
         self.trades_df['month'] = self.trades_df['timestamp'].dt.to_period('M')
         monthly_pnl = self.trades_df.groupby('month')['pnl'].sum()
         monthly_pnl.plot(kind='bar', ax=ax5, color='purple')
@@ -317,10 +320,13 @@ class BacktestAnalyzer:
         enhanced_df = self.features_df.copy()
         
         # Add time-based features
-        enhanced_df['timestamp'] = pd.to_datetime(enhanced_df['timestamp'])
-        enhanced_df['day_of_week'] = enhanced_df['timestamp'].dt.dayofweek
-        enhanced_df['month'] = enhanced_df['timestamp'].dt.month
-        enhanced_df['quarter'] = enhanced_df['timestamp'].dt.quarter
+        if 'timestamp' in enhanced_df.columns and enhanced_df['timestamp'].dtype == 'object':
+            enhanced_df['timestamp'] = pd.to_datetime(enhanced_df['timestamp'])
+        # Only add time features if timestamp is datetime
+        if 'timestamp' in enhanced_df.columns and pd.api.types.is_datetime64_any_dtype(enhanced_df['timestamp']):
+            enhanced_df['day_of_week'] = enhanced_df['timestamp'].dt.dayofweek
+            enhanced_df['month'] = enhanced_df['timestamp'].dt.month
+            enhanced_df['quarter'] = enhanced_df['timestamp'].dt.quarter
         
         # Add derived features
         enhanced_df['confidence_squared'] = enhanced_df['confidence'] ** 2
