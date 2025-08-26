@@ -26,10 +26,11 @@ class OptionsDataEngine:
     def get_real_options_chain(self, force_refresh: bool = False) -> Dict:
         """Get validated, real options chain data"""
         
-        # Check if we need fresh data
+        # Check if we need fresh data (but never use empty cached data)
         if (not force_refresh and 
             self.last_update and 
-            datetime.now() - self.last_update < timedelta(minutes=options_config.MAX_DATA_AGE_MINUTES)):
+            datetime.now() - self.last_update < timedelta(minutes=options_config.MAX_DATA_AGE_MINUTES) and
+            self.cached_chain):  # Only use cache if it has data
             logger.info("📊 Using cached options data")
             return self.cached_chain
         
@@ -80,10 +81,14 @@ class OptionsDataEngine:
                     logger.debug(f"Traceback: {traceback.format_exc()}")
                     continue
             
-            self.cached_chain = validated_chain
-            self.last_update = datetime.now()
+            # Only cache non-empty results
+            if validated_chain:
+                self.cached_chain = validated_chain
+                self.last_update = datetime.now()
+                logger.success(f"✅ Loaded {total_contracts} validated options contracts")
+            else:
+                logger.warning(f"⚠️ No valid options found - not caching empty result")
             
-            logger.success(f"✅ Loaded {total_contracts} validated options contracts")
             return validated_chain
             
         except Exception as e:
@@ -425,6 +430,14 @@ class OptionsDataEngine:
             logger.error(f"❌ Failed to get stock price: {e}")
         return None
     
+    async def get_current_price(self, symbol: str = None) -> float:
+        """Async wrapper for get_current_stock_price - alias for compatibility"""
+        return self.get_current_stock_price()
+    
+    async def get_options_chain(self, symbol: str = None) -> Dict:
+        """Async wrapper for get_real_options_chain - alias for compatibility"""
+        return self.get_real_options_chain()
+
     def get_option_price_realtime(self, contract_symbol: str) -> Optional[Dict]:
         """Get real-time price for specific option contract"""
         

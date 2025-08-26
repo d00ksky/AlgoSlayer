@@ -142,12 +142,41 @@ class ParallelStrategyRunner:
                 telegram_task.cancel()
                 logger.info("📱 Telegram listener stopped")
             
+    async def _check_all_positions(self):
+        """Check all open positions for exit conditions"""
+        logger.info("🔍 Checking open positions for exit conditions...")
+        
+        positions_closed = 0
+        for strategy_id, instance in self.strategies.items():
+            try:
+                # Check positions for this strategy
+                actions = instance.paper_trader.check_positions()
+                if actions:
+                    for action in actions:
+                        logger.success(f"✅ {strategy_id}: {action}")
+                        positions_closed += 1
+                        
+                    # Update balance after closing positions
+                    new_balance = instance.paper_trader.account_balance
+                    self.manager.update_strategy_balance(
+                        strategy_id, new_balance, 
+                        {"profitable": instance.paper_trader.total_pnl > 0}
+                    )
+            except Exception as e:
+                logger.error(f"❌ Error checking positions for {strategy_id}: {e}")
+        
+        if positions_closed > 0:
+            logger.success(f"📊 Closed {positions_closed} positions across strategies")
+            
     async def _run_parallel_cycle(self):
         """Run one trading cycle for all strategies in parallel"""
         self.cycle_count = getattr(self, 'cycle_count', 0) + 1
         logger.info(f"🔄 Parallel cycle #{self.cycle_count}")
         
-        # Step 1: Generate signals (shared across all strategies)
+        # Step 1: Check and close positions that meet exit criteria
+        await self._check_all_positions()
+        
+        # Step 2: Generate signals (shared across all strategies)
         signals_data = await self.scheduler._generate_signals()
         
         if not signals_data or signals_data.get("direction") == "HOLD":
@@ -207,12 +236,12 @@ class ParallelStrategyRunner:
                 instance, signals_data, kelly_size
             )
             
-            if prediction and isinstance(prediction, dict) and "id" in prediction:
+            if prediction and isinstance(prediction, dict) and "prediction_id" in prediction:
                 # Execute trade
                 instance.paper_trader.open_position(prediction)
                 
                 # Record prediction for tracking
-                self.manager.record_prediction(strategy_id, prediction["id"])
+                self.manager.record_prediction(strategy_id, prediction["prediction_id"])
                 instance.predictions_made += 1
                 instance.last_prediction = prediction
                 

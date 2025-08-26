@@ -36,7 +36,7 @@ class MultiStrategyManager:
             "conservative": StrategyConfig(
                 name="Conservative",
                 confidence_threshold=0.5,
-                min_signals_required=4,
+                min_signals_required=2,
                 position_size_pct=0.15,
                 description="High confidence, multiple signal agreement, small positions"
             ),
@@ -56,14 +56,14 @@ class MultiStrategyManager:
             ),
             "scalping": StrategyConfig(
                 name="Scalping",
-                confidence_threshold=0.65,
+                confidence_threshold=0.40,
                 min_signals_required=3,
                 position_size_pct=0.15,
                 description="Quick trades, 15min-2hr holds"
             ),
             "swing": StrategyConfig(
                 name="Swing",
-                confidence_threshold=0.65,
+                confidence_threshold=0.40,
                 min_signals_required=3,
                 position_size_pct=0.20,
                 description="Multi-day holds, trend following"

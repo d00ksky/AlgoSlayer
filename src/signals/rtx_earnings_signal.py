@@ -137,27 +137,27 @@ class RTXEarningsSignal(BaseSignal):
         
         # 21-14 days before: Early IV expansion phase
         if 14 <= days_to_earnings <= 21:
-            confidence = 75
+            confidence = 0.75
             return "BUY", confidence, f"Early IV expansion phase ({days_to_earnings}d to earnings)"
         
         # 7-14 days before: Prime IV expansion
         if 7 <= days_to_earnings <= 13:
-            confidence = 85
+            confidence = 0.85
             return "BUY", confidence, f"Prime IV expansion period ({days_to_earnings}d to earnings)"
         
         # 2-6 days before: Maximum IV expansion
         if 2 <= days_to_earnings <= 6:
-            confidence = 90
+            confidence = 0.90
             return "BUY", confidence, f"Maximum IV expansion ({days_to_earnings}d to earnings)"
         
         # 0-1 days before/after: IV crush danger zone
         if -1 <= days_to_earnings <= 1:
-            confidence = 85
+            confidence = 0.85
             return "SELL", confidence, f"IV crush risk zone ({days_to_earnings}d to earnings)"
         
         # 2-7 days after: IV normalizing
         if -7 <= days_to_earnings <= -2:
-            confidence = 60
+            confidence = 0.60
             return "HOLD", confidence, f"IV normalizing ({abs(days_to_earnings)}d after earnings)"
         
         # Default

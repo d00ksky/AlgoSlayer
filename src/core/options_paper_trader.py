@@ -159,12 +159,13 @@ class OptionsPaperTrader:
             cursor.execute("SELECT SUM(net_pnl) FROM options_outcomes")
             pnl_result = cursor.fetchone()
             total_pnl = pnl_result[0] if pnl_result and pnl_result[0] else 0.0
-            expected_balance = 1000.0 + total_pnl  # Initial balance + P&L
+            # Use 2000 as initial balance since July 29, 2025 reset
+            expected_balance = 2000.0 + total_pnl  # Reset balance + P&L
             
             if abs(self.account_balance - expected_balance) > 0.01:
                 logger.warning(f"⚠️ Balance discrepancy detected!")
                 logger.warning(f"   • DB Balance: ${self.account_balance:.2f}")
-                logger.warning(f"   • Expected (1000 + P&L): ${expected_balance:.2f}")
+                logger.warning(f"   • Expected (2000 + P&L): ${expected_balance:.2f}")
                 logger.warning(f"   • Total P&L: ${total_pnl:.2f}")
                 logger.warning(f"   • Difference: ${self.account_balance - expected_balance:.2f}")
         else:

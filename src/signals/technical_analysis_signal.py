@@ -302,6 +302,8 @@ class TechnicalAnalysisSignal:
     
     def _create_neutral_signal(self, reason: str) -> Dict:
         """Create neutral signal with reason"""
+        direction = 'HOLD'
+        confidence = 0.5
         return {
             "signal_name": self.signal_name,
             "direction": "HOLD",

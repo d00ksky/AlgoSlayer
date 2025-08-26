@@ -272,27 +272,27 @@ class TrumpGeopoliticalSignal(BaseSignal):
         
         # Strong positive for defense
         if combined_score > 1.0:
-            confidence = 85
+            confidence = 0.85
             return "BUY", confidence, f"Strong pro-defense political sentiment (score: {combined_score:.1f})"
         
         # Moderate positive
         elif combined_score > 0.3:
-            confidence = 70
+            confidence = 0.70
             return "BUY", confidence, f"Pro-defense political sentiment (score: {combined_score:.1f})"
         
         # Neutral to slightly positive
         elif combined_score > -0.1:
-            confidence = 55
+            confidence = 0.55
             return "HOLD", confidence, f"Neutral political sentiment (score: {combined_score:.1f})"
         
         # Moderate negative
         elif combined_score > -0.5:
-            confidence = 70
+            confidence = 0.70
             return "SELL", confidence, f"Anti-defense political sentiment (score: {combined_score:.1f})"
         
         # Strong negative
         else:
-            confidence = 85
+            confidence = 0.85
             return "SELL", confidence, f"Strong anti-defense political sentiment (score: {combined_score:.1f})"
     
     def _extract_key_themes(self, news_articles: List[Dict]) -> List[str]:

@@ -251,37 +251,37 @@ class DefenseContractSignal(BaseSignal):
         
         # Strong positive sentiment
         if combined_score > 1.5:
-            confidence = 90
+            confidence = 0.90
             return "BUY", confidence, f"Strong positive defense news (score: {combined_score:.1f})"
         
         # Moderate positive sentiment
         elif combined_score > 0.5:
-            confidence = 75
+            confidence = 0.75
             return "BUY", confidence, f"Positive defense news (score: {combined_score:.1f})"
         
         # Slight positive sentiment
         elif combined_score > 0.1:
-            confidence = 65
+            confidence = 0.65
             return "BUY", confidence, f"Mildly positive defense news (score: {combined_score:.1f})"
         
         # Neutral sentiment
         elif combined_score > -0.1:
-            confidence = 50
+            confidence = 0.50
             return "HOLD", confidence, f"Neutral defense news (score: {combined_score:.1f})"
         
         # Slight negative sentiment
         elif combined_score > -0.5:
-            confidence = 65
+            confidence = 0.65
             return "SELL", confidence, f"Mildly negative defense news (score: {combined_score:.1f})"
         
         # Moderate negative sentiment
         elif combined_score > -1.5:
-            confidence = 75
+            confidence = 0.75
             return "SELL", confidence, f"Negative defense news (score: {combined_score:.1f})"
         
         # Strong negative sentiment
         else:
-            confidence = 90
+            confidence = 0.90
             return "SELL", confidence, f"Strong negative defense news (score: {combined_score:.1f})"
     
     def _extract_key_stories(self, rtx_news: List, defense_news: List) -> List[str]:
