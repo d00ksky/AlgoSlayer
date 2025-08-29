@@ -35,58 +35,58 @@ class MultiStrategyManager:
         self.strategy_configs = {
             "conservative": StrategyConfig(
                 name="Conservative",
-                confidence_threshold=0.5,
-                min_signals_required=2,
-                position_size_pct=0.15,
+                confidence_threshold=0.85,  # INCREASED: 50%→85% for quality trades
+                min_signals_required=4,      # INCREASED: 2→4 signals for better agreement
+                position_size_pct=0.10,     # REDUCED: 15%→10% during recalibration
                 description="High confidence, multiple signal agreement, small positions"
             ),
             "moderate": StrategyConfig(
-                name="Moderate",
-                confidence_threshold=0.5,
-                min_signals_required=3,
-                position_size_pct=0.20,
+                name="Moderate", 
+                confidence_threshold=0.80,   # INCREASED: 50%→80%
+                min_signals_required=5,      # INCREASED: 3→5 signals
+                position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Balanced approach with moderate risk"
             ),
             "aggressive": StrategyConfig(
                 name="Aggressive",
-                confidence_threshold=0.5,
-                min_signals_required=2,
-                position_size_pct=0.25,
+                confidence_threshold=0.75,   # INCREASED: 50%→75%
+                min_signals_required=4,      # INCREASED: 2→4 signals
+                position_size_pct=0.15,     # REDUCED: 25%→15%
                 description="Lower threshold, larger positions, more trades"
             ),
             "scalping": StrategyConfig(
                 name="Scalping",
-                confidence_threshold=0.40,
-                min_signals_required=3,
-                position_size_pct=0.15,
+                confidence_threshold=0.70,  # INCREASED: 40%→70%
+                min_signals_required=4,     # INCREASED: 3→4 signals
+                position_size_pct=0.10,     # REDUCED: 15%→10%
                 description="Quick trades, 15min-2hr holds"
             ),
             "swing": StrategyConfig(
                 name="Swing",
-                confidence_threshold=0.40,
-                min_signals_required=3,
-                position_size_pct=0.20,
+                confidence_threshold=0.70,  # INCREASED: 40%→70%
+                min_signals_required=4,     # INCREASED: 3→4 signals
+                position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Multi-day holds, trend following"
             ),
             "momentum": StrategyConfig(
                 name="Momentum",
-                confidence_threshold=0.6,
-                min_signals_required=3,
-                position_size_pct=0.20,
+                confidence_threshold=0.75,  # INCREASED: 60%→75%
+                min_signals_required=4,     # INCREASED: 3→4 signals
+                position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Trend following, momentum based"
             ),
             "volatility": StrategyConfig(
                 name="Volatility",
-                confidence_threshold=0.63,
-                min_signals_required=3,
-                position_size_pct=0.18,
+                confidence_threshold=0.78,  # INCREASED: 63%→78%
+                min_signals_required=4,     # INCREASED: 3→4 signals
+                position_size_pct=0.10,     # REDUCED: 18%→10%
                 description="IV expansion plays"
             ),
             "mean_reversion": StrategyConfig(
                 name="Mean Reversion",
-                confidence_threshold=0.62,
-                min_signals_required=3,
-                position_size_pct=0.18,
+                confidence_threshold=0.77,  # INCREASED: 62%→77%
+                min_signals_required=4,     # INCREASED: 3→4 signals
+                position_size_pct=0.10,     # REDUCED: 18%→10%
                 description="Contrarian plays"
             )
         }
@@ -456,6 +456,201 @@ class MultiStrategyManager:
                 insights.append("Aggressive strategy making 50%+ more trades as expected")
                 
         return insights
+
+    async def start_multi_strategy_trading(self):
+        """Start the multi-strategy trading system"""
+        logger.info("🚀 STARTING 8-STRATEGY MULTI-STRATEGY SYSTEM")
+        logger.info("=" * 60)
+        
+        # Initialize all strategies
+        self._load_or_create_strategies()
+        
+        # Display strategy status
+        for strategy_id, strategy in self.active_strategies.items():
+            config = strategy["config"]
+            balance = strategy["balance"]
+            status = self._get_strategy_status(strategy)
+            logger.info(f"📊 {config.name}: ${balance:.2f} balance, {config.confidence_threshold:.0%} threshold, {status}")
+        
+        logger.info("=" * 60)
+        logger.info("🧠 Real-time ML learning and weight adaptation: ACTIVE")
+        logger.info("🔄 Cross-strategy knowledge sharing: ENABLED") 
+        logger.info("⚡ Independent strategy trading: READY")
+        logger.info("=" * 60)
+        
+        # Import required trading components
+        from src.core.options_prediction_engine import options_prediction_engine
+        from src.core.options_data_engine import options_data_engine
+        from src.core.options_paper_trader import OptionsPaperTrader
+        
+        # Import all AI signals (same as working scheduler)
+        from src.signals.news_sentiment_signal import NewsSentimentSignal
+        from src.signals.technical_analysis_signal import TechnicalAnalysisSignal
+        from src.signals.options_flow_signal import OptionsFlowSignal
+        from src.signals.volatility_analysis_signal import VolatilityAnalysisSignal
+        from src.signals.momentum_signal import MomentumSignal
+        from src.signals.sector_correlation_signal import SectorCorrelationSignal
+        from src.signals.mean_reversion_signal import MeanReversionSignal
+        from src.signals.market_regime_signal import MarketRegimeSignal
+        from src.signals.trump_geopolitical_signal import TrumpGeopoliticalSignal
+        from src.signals.defense_contract_signal import DefenseContractSignal
+        from src.signals.rtx_earnings_signal import RTXEarningsSignal
+        from src.signals.options_iv_percentile_signal import OptionsIVPercentileSignal
+        
+        # Initialize AI signals (copied from working scheduler)
+        signals = {
+            # Classic signals
+            "news_sentiment": NewsSentimentSignal(),
+            "technical_analysis": TechnicalAnalysisSignal(),
+            "options_flow": OptionsFlowSignal(),
+            "volatility_analysis": VolatilityAnalysisSignal(),
+            "momentum": MomentumSignal(),
+            "sector_correlation": SectorCorrelationSignal(),
+            "mean_reversion": MeanReversionSignal(),
+            "market_regime": MarketRegimeSignal(),
+            # New high-value options signals
+            "trump_geopolitical": TrumpGeopoliticalSignal(),
+            "defense_contract": DefenseContractSignal(),
+            "rtx_earnings": RTXEarningsSignal(),
+            "options_iv_percentile": OptionsIVPercentileSignal()
+        }
+        
+        # Create strategy-specific paper traders
+        strategy_traders = {}
+        for strategy_id, strategy in self.active_strategies.items():
+            db_suffix = f"_{strategy_id}"
+            trader = OptionsPaperTrader(db_suffix=db_suffix, initial_balance=strategy["balance"])
+            strategy_traders[strategy_id] = trader
+        
+        logger.info("🔄 Starting real multi-strategy trading cycles...")
+        
+        try:
+            while True:
+                # Run full AI trading cycle for each strategy
+                for strategy_id, strategy in self.active_strategies.items():
+                    config = strategy["config"]
+                    trader = strategy_traders[strategy_id]
+                    
+                    logger.info(f"📊 Running {config.name} strategy cycle...")
+                    
+                    try:
+                        # Generate AI signals (copied from working scheduler)
+                        logger.info(f"🤖 Generating AI signals for {config.name}...")
+                        
+                        # Run all signals in parallel for speed (same as working scheduler)
+                        signal_tasks = [
+                            signal_instance.analyze('RTX') 
+                            for signal_name, signal_instance in signals.items()
+                        ]
+                        
+                        # Wait for all signals to complete
+                        signal_results_raw = await asyncio.gather(*signal_tasks, return_exceptions=True)
+                        
+                        # Process results (same logic as working scheduler)
+                        signal_results = {}
+                        successful_signals = 0
+                        
+                        for i, result in enumerate(signal_results_raw):
+                            signal_name = list(signals.keys())[i]
+                            
+                            if isinstance(result, Exception):
+                                logger.error(f"❌ Signal {signal_name} error: {result}")
+                                continue
+                            
+                            if result and isinstance(result, dict):
+                                signal_results[signal_name] = result
+                                successful_signals += 1
+                                logger.info(f"✅ {signal_name}: {result.get('direction', 'UNKNOWN')} ({result.get('confidence', 0):.1%})")
+                            else:
+                                logger.warning(f"⚠️ Signal {signal_name} returned no data")
+                        
+                        if successful_signals == 0:
+                            logger.warning(f"⚠️ No actionable signals for {config.name}")
+                            continue
+                        
+                        # Aggregate signals (simplified version)
+                        buy_signals = [s for s in signal_results.values() if s.get('direction') == 'BUY']
+                        sell_signals = [s for s in signal_results.values() if s.get('direction') == 'SELL']
+                        
+                        if len(buy_signals) > len(sell_signals):
+                            direction = 'BUY'
+                            confidence = sum(s.get('confidence', 0.5) for s in buy_signals) / len(buy_signals)
+                        elif len(sell_signals) > len(buy_signals):
+                            direction = 'SELL' 
+                            confidence = sum(s.get('confidence', 0.5) for s in sell_signals) / len(sell_signals)
+                        else:
+                            direction = 'HOLD'
+                            confidence = 0.5
+                        
+                        signals_data = {
+                            'direction': direction,
+                            'overall_confidence': confidence,
+                            'individual_signals': signal_results,
+                            'signals_agreeing': successful_signals
+                        }
+                        
+                        logger.info(f"📊 {config.name}: {direction} {confidence:.1%} confidence, {successful_signals} signals")
+                        
+                        # Check if signals meet strategy requirements
+                        if signals_data['overall_confidence'] < config.confidence_threshold:
+                            logger.info(f"📊 {config.name}: Confidence {signals_data['overall_confidence']:.1%} < {config.confidence_threshold:.1%} threshold")
+                            continue
+                        
+                        # Count agreeing signals
+                        agreeing_signals = sum(1 for signal in signals_data['individual_signals'].values() 
+                                             if signal.get('confidence', 0) >= 0.6)
+                        
+                        if agreeing_signals < config.min_signals_required:
+                            logger.info(f"📊 {config.name}: Only {agreeing_signals}/{config.min_signals_required} signals agree")
+                            continue
+                        
+                        # Generate options prediction for this strategy
+                        logger.info(f"🎯 Creating {config.name} options prediction...")
+                        prediction = options_prediction_engine.generate_options_prediction(
+                            signals_data, trader.account_balance
+                        )
+                        
+                        if prediction:
+                            # Adjust position size based on strategy
+                            prediction['position_size_pct'] = config.position_size_pct
+                            
+                            # Execute trade using strategy-specific trader
+                            success = trader.open_position(prediction)
+                            if success:
+                                logger.success(f"✅ {config.name} executed trade: {prediction['contract_symbol']}")
+                                
+                                # Update strategy balance in database
+                                self.update_strategy_balance(strategy_id, trader.account_balance)
+                            else:
+                                logger.warning(f"⚠️ {config.name} trade failed validation")
+                        else:
+                            logger.info(f"📊 {config.name}: No suitable options found")
+                    
+                    except Exception as e:
+                        logger.error(f"❌ {config.name} strategy error: {e}")
+                    
+                    # Check existing positions for this strategy
+                    actions = trader.check_positions()
+                    if actions:
+                        for action in actions:
+                            logger.info(f"📊 {config.name}: {action}")
+                        
+                        # Update balance after position changes
+                        self.update_strategy_balance(strategy_id, trader.account_balance)
+                
+                # Wait between strategy cycles (each strategy runs every 15 minutes)
+                logger.info("⏸️ All strategies completed, waiting 15 minutes...")
+                await asyncio.sleep(900)  # 15 minutes between full cycles
+                
+        except Exception as e:
+            logger.error(f"❌ Multi-strategy trading error: {e}")
+            raise
+            
+    async def stop(self):
+        """Stop the multi-strategy trading system"""
+        logger.info("🛑 Stopping multi-strategy trading system...")
+        # For now, just log the stop action
+        # In a full implementation, we would stop individual strategy tasks
 
 if __name__ == "__main__":
     # Test the multi-strategy system

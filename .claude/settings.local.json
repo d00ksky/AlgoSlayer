@@ -63,8 +63,19 @@
       "Bash(pip3 install:*)",
       "Bash(brew install:*)",
       "Bash(mkdir:*)",
-      "Bash(launchctl:*)"
+      "Bash(launchctl:*)",
+      "Read(/root/.ssh/**)",
+      "Bash(PYTHONPATH=/opt/rtx-trading rtx-env/bin/python comprehensive_system_test.py)",
+      "Bash(PYTHONPATH=/opt/rtx-trading rtx-env/bin/python enhanced_automated_ml.py)",
+      "Bash(USE_MULTI_STRATEGY=true USE_OPTIONS_SYSTEM=true TRADING_ENABLED=true PAPER_TRADING=true python run_server.py)",
+      "Bash(USE_MULTI_STRATEGY=true USE_OPTIONS_SYSTEM=true TRADING_ENABLED=true PAPER_TRADING=true rtx-env/bin/python run_server.py)",
+      "Read(/etc/systemd/system/**)",
+      "Bash(for:*)",
+      "Bash(done)"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "/opt/rtx-trading"
+    ]
   }
 }

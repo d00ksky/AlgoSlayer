@@ -16,12 +16,12 @@ class OptionsConfig:
     EXPIRATION_PREFERENCE = os.getenv("EXPIRATION_PREFERENCE", "weekly")  # "weekly", "monthly", "both"
     STRIKE_SELECTION = os.getenv("STRIKE_SELECTION", "atm")  # "atm", "otm", "itm", "adaptive"
     
-    # Risk Management
+    # Risk Management - RECALIBRATED FOR BETTER PERFORMANCE
     MAX_DAYS_TO_EXPIRY = int(os.getenv("MAX_DTE", 45))
-    MIN_DAYS_TO_EXPIRY = int(os.getenv("MIN_DTE", 7))
-    MAX_POSITION_SIZE_PCT = float(os.getenv("MAX_POSITION_SIZE_PCT", 0.20))  # 20% of capital
-    STOP_LOSS_PCT = float(os.getenv("STOP_LOSS_PCT", 0.50))  # 50% loss
-    PROFIT_TARGET_PCT = float(os.getenv("PROFIT_TARGET_PCT", 1.00))  # 100% gain
+    MIN_DAYS_TO_EXPIRY = int(os.getenv("MIN_DTE", 14))  # CHANGED: 7→14 days minimum
+    MAX_POSITION_SIZE_PCT = float(os.getenv("MAX_POSITION_SIZE_PCT", 0.15))  # REDUCED: 20%→15% of capital
+    STOP_LOSS_PCT = float(os.getenv("STOP_LOSS_PCT", 0.30))  # REDUCED: 50%→30% loss
+    PROFIT_TARGET_PCT = float(os.getenv("PROFIT_TARGET_PCT", 0.50))  # REDUCED: 100%→50% gain (take profits faster)
     
     # Options Quality Filters
     MIN_VOLUME = int(os.getenv("MIN_OPTION_VOLUME", 50))
@@ -64,13 +64,13 @@ class OptionsConfig:
         if user_override > 0:
             return user_override
         
-        # Adaptive sizing based on account growth (increased for options)
+        # RECALIBRATED: More conservative sizing during recalibration period
         if account_balance <= 1500:
-            return max(400, max_per_trade)  # Use 400 OR 20%, whichever is higher
+            return max(200, max_per_trade)  # REDUCED: 400→200 OR 15%, whichever is higher
         elif account_balance <= 3000:
-            return min(600, max_per_trade * 0.75)  # More conservative as we grow
+            return min(300, max_per_trade * 0.75)  # REDUCED: 600→300, more conservative
         else:
-            return min(800, max_per_trade * 0.60)  # Even more conservative
+            return min(400, max_per_trade * 0.60)  # REDUCED: 800→400, even more conservative
     
     @classmethod
     def get_contracts_for_trade(cls, option_price: float, account_balance: float) -> int:

@@ -358,19 +358,22 @@ class OptionsDataEngine:
             else:  # ITM puts
                 suitable = strike > stock_price * 1.005
         
-        else:  # "adaptive" - use confidence to determine strategy
+        else:  # "adaptive" - RECALIBRATED for better win rate
             if confidence > 0.8:
-                # High confidence: ATM for maximum delta
-                suitable = abs(strike - stock_price) / stock_price <= 0.05
-            elif confidence > 0.65:
-                # Medium confidence: Slightly OTM for better risk/reward
+                # High confidence: ATM to slightly ITM for higher probability
                 if direction == "BUY":
-                    suitable = strike >= stock_price * 0.98 and strike <= stock_price * 1.05
+                    suitable = strike >= stock_price * 0.97 and strike <= stock_price * 1.02  # ATM to 2% ITM calls
                 else:
-                    suitable = strike >= stock_price * 0.95 and strike <= stock_price * 1.02
+                    suitable = strike >= stock_price * 0.98 and strike <= stock_price * 1.03  # ATM to 3% ITM puts
+            elif confidence > 0.65:
+                # Medium confidence: Closer to ATM, less aggressive
+                if direction == "BUY":
+                    suitable = strike >= stock_price * 0.98 and strike <= stock_price * 1.02  # Much tighter range
+                else:
+                    suitable = strike >= stock_price * 0.98 and strike <= stock_price * 1.02
             else:
-                # Lower confidence: More conservative ATM
-                suitable = abs(strike - stock_price) / stock_price <= 0.02
+                # Lower confidence: Stay very close to ATM
+                suitable = abs(strike - stock_price) / stock_price <= 0.015  # Even tighter: 1.5%
         
         if not suitable:
             logger.debug(f"   ❌ Strike ${strike:.0f} unsuitable for ${stock_price:.2f} stock (mode: {strike_selection})")
