@@ -25,7 +25,8 @@ class TelegramBot:
         self.bot_token = config.telegram.BOT_TOKEN
         self.chat_id = config.telegram.CHAT_ID
         self.base_url = f"https://api.telegram.org/bot{self.bot_token}"
-        
+        self._webhook_cleared = False
+
         if not self.bot_token or not self.chat_id:
             logger.warning("⚠️ Telegram credentials not configured")
             self.enabled = False
@@ -752,10 +753,10 @@ fi
         """Get updates from Telegram"""
         if not self.bot_token:
             return []
-            
+
         url = f"https://api.telegram.org/bot{self.bot_token}/getUpdates"
         params = {'offset': offset, 'timeout': 5}
-        
+
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, params=params) as response:
@@ -917,14 +918,16 @@ _Please check system manually or contact support._"""
         """Process incoming messages from Telegram"""
         if not self.bot_token or not self.chat_id:
             return
-            
+
         last_update_id = 0
         logger.info("📱 Starting Telegram message listener...")
-        
+
+        await self._ensure_long_polling_mode()
+
         while True:
             try:
                 updates = await self.get_updates(last_update_id + 1)
-                
+
                 for update in updates:
                     last_update_id = update.get('update_id', 0)
                     
@@ -945,6 +948,31 @@ _Please check system manually or contact support._"""
                 await asyncio.sleep(5)
             
             await asyncio.sleep(1)
+
+    async def _ensure_long_polling_mode(self) -> None:
+        """Ensure Telegram webhook is disabled so getUpdates does not return 409."""
+        if not self.enabled or self._webhook_cleared:
+            return
+
+        url = f"{self.base_url}/deleteWebhook"
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url) as response:
+                    if response.status == 200:
+                        payload = await response.json()
+                        if payload.get("ok"):
+                            self._webhook_cleared = True
+                            logger.info("📱 Telegram webhook cleared; using long polling")
+                        else:
+                            logger.warning(
+                                f"📱 Telegram deleteWebhook returned non-ok payload: {payload}"
+                            )
+                    else:
+                        logger.warning(
+                            f"📱 Telegram deleteWebhook failed: HTTP {response.status}"
+                        )
+        except Exception as exc:
+            logger.error(f"📱 Telegram deleteWebhook error: {exc}")
     
     async def send_dashboard_message(self) -> bool:
         """Send live performance dashboard"""
