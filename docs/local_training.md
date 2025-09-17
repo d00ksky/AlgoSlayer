@@ -109,3 +109,32 @@ rsync -avz trained_models/coord_* root@your.server.ip:/opt/rtx-trading/trained_m
 - **Model skips**: If TensorFlow or XGBoost is absent, the coordinator logs a skip and trains only the available models. Install the extras to enable the full pipeline.
 
 With this workflow the server keeps running light, autonomous tasks, while you drop in occasionally to refresh the heavyweight models with reproducible steps.
+
+## 9. Automated Periodic Check (With Approval)
+
+You can automate the heavy‑training check locally, but require a macOS prompt before it runs:
+
+```bash
+# One‑time install (creates a LaunchAgent that runs every 6 hours)
+./scripts/install_launch_agent.sh
+
+# Logs
+tail -n 100 hybrid_work/periodic_heavy_training.log
+tail -n 100 ~/Library/Logs/algoslayer_heavytraining.log
+
+# Manual one‑off run
+source .venv/bin/activate && python scripts/check_and_prompt_train.py
+
+# Uninstall the LaunchAgent
+./scripts/remove_launch_agent.sh
+```
+
+How it works:
+- The checker syncs stats from the server and decides if heavy training is recommended.
+- If recommended, a macOS dialog asks you to approve before starting.
+- On approval, it runs the full analyze → train → deploy cycle and logs results.
+
+Notes:
+- Requires you to be logged in on macOS for the dialog to appear.
+- Prompts are rate‑limited (default: no more than once every 12 hours).
+- Configuration and server credentials come from the same paths used by the coordinator.

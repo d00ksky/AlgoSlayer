@@ -61,7 +61,9 @@ class HybridCoordinator:
         self.local_models_dir = Path('trained_models')
         self.server_learning_path = '/opt/rtx-trading/continuous_learning.py'
         self.server_models_path = '/opt/rtx-trading/trained_models/'
-        self.server_data_path = '/opt/rtx-trading/ml_training_data/signal_performance.db'
+        # Prefer consolidated training DB maintained on server
+        # Fallback path (older setups) was /opt/rtx-trading/ml_training_data/signal_performance.db
+        self.server_data_path = '/opt/rtx-trading/data/signal_performance.db'
         self.server_export_path = '/opt/rtx-trading/data_export/'
         
         # Create local directories

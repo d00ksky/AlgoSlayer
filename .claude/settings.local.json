@@ -64,6 +64,7 @@
       "Bash(brew install:*)",
       "Bash(mkdir:*)",
       "Bash(launchctl:*)",
+<<<<<<< Updated upstream
       "Read(/root/.ssh/**)",
       "Bash(PYTHONPATH=/opt/rtx-trading rtx-env/bin/python comprehensive_system_test.py)",
       "Bash(PYTHONPATH=/opt/rtx-trading rtx-env/bin/python enhanced_automated_ml.py)",
@@ -72,6 +73,10 @@
       "Read(/etc/systemd/system/**)",
       "Bash(for:*)",
       "Bash(done)"
+=======
+      "Bash(git pull:*)",
+      "Bash(git log:*)"
+>>>>>>> Stashed changes
     ],
     "deny": [],
     "additionalDirectories": [
