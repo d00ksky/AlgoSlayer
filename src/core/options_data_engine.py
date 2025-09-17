@@ -7,7 +7,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from loguru import logger
 import warnings
 warnings.filterwarnings('ignore')
@@ -17,9 +17,9 @@ from config.options_config import options_config
 class OptionsDataEngine:
     """Real-time options data with validation and quality checks"""
     
-    def __init__(self, symbol: str = "RTX"):
+    def __init__(self, symbol: str = "RTX", ticker: Optional[Any] = None):
         self.symbol = symbol
-        self.ticker = yf.Ticker(symbol)
+        self.ticker = ticker or yf.Ticker(symbol)
         self.last_update = None
         self.cached_chain = {}
         

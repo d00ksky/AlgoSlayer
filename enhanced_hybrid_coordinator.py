@@ -21,6 +21,7 @@ import sqlite3
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from importlib import import_module
 from pathlib import Path
 import pickle
 import paramiko
@@ -32,11 +33,8 @@ warnings.filterwarnings('ignore')
 # Add project root to path
 sys.path.append(os.path.dirname(__file__))
 
-# Import our Phase 2 models
+# Import our Phase 2 feature engineering (lightweight dependency)
 from src.ml.advanced_features import AdvancedFeatureEngineer
-from src.ml.lstm_model import LSTMTradingModel, LSTMWithAttention
-from src.ml.ensemble_stacker import EnsembleStacker
-from src.ml.multitask_model import MultiTaskTradingModel
 
 class HybridCoordinator:
     """
@@ -78,7 +76,24 @@ class HybridCoordinator:
         logger.info("🤝 Enhanced Hybrid Coordinator initialized")
         logger.info(f"🖥️  Server: {self.server_config['hostname']}")
         logger.info(f"⚡ Will coordinate with Claude Code's continuous learning")
-    
+
+    def _resolve_model_class(self, dotted_path: str):
+        """Return class object for optional advanced models or None if unavailable."""
+        module_path, _, class_name = dotted_path.partition(":")
+        if not module_path or not class_name:
+            logger.error(f"❌ Invalid class path: {dotted_path}")
+            return None
+
+        try:
+            module = import_module(module_path)
+            return getattr(module, class_name)
+        except ImportError as exc:
+            logger.warning(f"⚠️ Skipping {class_name}: missing dependency ({exc})")
+        except AttributeError as exc:
+            logger.warning(f"⚠️ Skipping {class_name}: attribute not found ({exc})")
+
+        return None
+
     async def check_server_learning_status(self) -> Dict:
         """
         Check status of Claude Code's continuous learning system
@@ -449,19 +464,19 @@ class HybridCoordinator:
         model_configs = [
             {
                 'name': 'ensemble_advanced',
-                'class': EnsembleStacker,
+                'class_path': 'src.ml.ensemble_stacker:EnsembleStacker',
                 'config': {'use_lstm': False, 'use_attention': False},
                 'priority': 'high'
             },
             {
                 'name': 'lstm_standard',
-                'class': LSTMTradingModel,
+                'class_path': 'src.ml.lstm_model:LSTMTradingModel',
                 'config': {'sequence_length': 20, 'feature_dim': X.shape[1]},
                 'priority': 'medium'
             },
             {
                 'name': 'multitask_neural',
-                'class': MultiTaskTradingModel,
+                'class_path': 'src.ml.multitask_model:MultiTaskTradingModel',
                 'config': {'feature_dim': X.shape[1]},
                 'priority': 'medium'
             }
@@ -470,10 +485,21 @@ class HybridCoordinator:
         # Train each model
         for config in model_configs:
             try:
+                model_class = self._resolve_model_class(config['class_path'])
+                if model_class is None:
+                    logger.info(f"⏭️  Skipping {config['name']} due to unavailable dependencies")
+                    continue
+
                 logger.info(f"🧠 Training {config['name']}...")
-                
-                model_result = await self._train_single_advanced_model(config, X, y)
-                
+
+                model_result = await self._train_single_advanced_model(
+                    config['name'],
+                    model_class,
+                    config['config'],
+                    X,
+                    y
+                )
+
                 if model_result:
                     results['models'][config['name']] = model_result
                     results['models_trained'] += 1
@@ -491,13 +517,16 @@ class HybridCoordinator:
         
         return results
     
-    async def _train_single_advanced_model(self, config: Dict, X: pd.DataFrame, y: pd.DataFrame) -> Optional[Dict]:
+    async def _train_single_advanced_model(
+        self,
+        model_name: str,
+        model_class,
+        model_config: Dict,
+        X: pd.DataFrame,
+        y: pd.DataFrame,
+    ) -> Optional[Dict]:
         """Train a single advanced model"""
         try:
-            model_name = config['name']
-            model_class = config['class']
-            model_config = config['config']
-            
             # Split data
             split_idx = int(0.8 * len(X))
             X_train, X_test = X[:split_idx], X[split_idx:]

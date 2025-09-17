@@ -651,6 +651,16 @@ journalctl -u rtx-trading -f | grep -E "BUY|SELL|confidence"
 
 ## 🧪 Testing
 
+```bash
+# Fast, deterministic unit checks (default)
+pytest -q
+
+# Full integration suite (requires live services & >4GB RAM)
+RUN_FULL_SUITE=true pytest -q
+```
+
+See `docs/local_dev_setup.md` for macOS setup details and `docs/local_training.md` for the heavy-training workflow.
+
 ### Comprehensive Test Suite
 
 ```bash

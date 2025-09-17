@@ -1,91 +1,114 @@
 #!/usr/bin/env python3
-"""
-Test options data feed in detail
-"""
+"""Unit tests for the options data engine."""
 
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from types import SimpleNamespace
 
+import pandas as pd
+import pytest
+
+from config.options_config import options_config
 from src.core.options_data_engine import OptionsDataEngine
-import yfinance as yf
 
-print('🔍 Detailed Options Data Analysis')
-print('=' * 50)
 
-# Check RTX options via yfinance directly
-rtx = yf.Ticker('RTX')
-options_dates = rtx.options
-print(f'Available option dates: {len(options_dates)}')
-print(f'Dates: {options_dates[:5] if len(options_dates) >= 5 else options_dates}')
+class DummyTicker:
+    """Minimal ticker stub returning deterministic option data."""
 
-if options_dates:
-    # Get options for first available date
-    exp_date = options_dates[0]
-    option_chain = rtx.option_chain(exp_date)
-    calls = option_chain.calls
-    puts = option_chain.puts
-    
-    print(f'\\nFor expiry {exp_date}:')
-    print(f'Calls available: {len(calls)}')
-    print(f'Puts available: {len(puts)}')
-    
-    if len(calls) > 0:
-        print(f'Call strike range: ${calls["strike"].min():.2f} - ${calls["strike"].max():.2f}')
-        
-        # Show some sample calls
-        print("Sample calls:")
-        for i in range(min(3, len(calls))):
-            row = calls.iloc[i]
-            print(f"  Strike ${row['strike']:.2f}: Bid ${row['bid']:.2f}, Ask ${row['ask']:.2f}")
-    
-    # Now test our engine
-    print('\\n' + '=' * 30)
-    print('Testing Our Options Engine')
-    print('=' * 30)
-    
-    engine = OptionsDataEngine()
-    our_contracts = engine.get_real_options_chain()
-    print(f'Our engine found: {len(our_contracts)} contracts')
-    
-    if our_contracts:
-        print('Our contracts:')
-        for i, contract in enumerate(our_contracts[:5]):
-            print(f'  {i+1}. {contract.get("contractSymbol", "N/A")}')
-            print(f'     Price: ${contract.get("lastPrice", 0):.2f}')
-            print(f'     Bid/Ask: ${contract.get("bid", 0):.2f}/${contract.get("ask", 0):.2f}')
-            print(f'     Volume: {contract.get("volume", 0)}')
-            print()
+    def __init__(self, calls: pd.DataFrame, puts: pd.DataFrame):
+        self.options = ["2099-01-05"]
+        self._chain = SimpleNamespace(calls=calls, puts=puts)
 
-# Also test multi-strategy database isolation
-print('\\n' + '=' * 50)
-print('🗄️ Testing Multi-Strategy Database Isolation')
-print('=' * 50)
+    def option_chain(self, exp_date: str) -> SimpleNamespace:  # pragma: no cover - simple passthrough
+        return self._chain
 
-# Check if separate strategy databases exist
-import sqlite3
 
-strategies = ['conservative', 'moderate', 'aggressive']
-for strategy in strategies:
-    db_path = f'data/{strategy}_trading.db'
-    if os.path.exists(db_path):
-        print(f'✅ {strategy}: Database exists')
-        
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        
-        # Check balance
-        cursor.execute('SELECT balance FROM account_balance ORDER BY timestamp DESC LIMIT 1')
-        balance_result = cursor.fetchone()
-        balance = balance_result[0] if balance_result else 0
-        
-        # Check positions
-        cursor.execute('SELECT COUNT(*) FROM options_outcomes WHERE exit_time IS NULL')
-        positions = cursor.fetchone()[0]
-        
-        print(f'   Balance: ${balance:.2f}, Positions: {positions}')
-        conn.close()
-    else:
-        print(f'❌ {strategy}: Database missing')
+@pytest.fixture()
+def sample_ticker():
+    call_rows = pd.DataFrame(
+        [
+            {
+                "contractSymbol": "RTXDUMMYC",
+                "strike": 121.0,
+                "bid": 2.5,
+                "ask": 2.7,
+                "lastPrice": 2.6,
+                "volume": 250,
+                "openInterest": 320,
+                "impliedVolatility": 0.25,
+                "delta": 0.55,
+                "gamma": 0.04,
+                "theta": -0.02,
+                "vega": 0.11,
+            },
+            {
+                "contractSymbol": "RTXDUMMYC2",
+                "strike": 122.0,
+                "bid": 1.9,
+                "ask": 2.1,
+                "lastPrice": 2.0,
+                "volume": 120,
+                "openInterest": 210,
+                "impliedVolatility": 0.22,
+                "delta": 0.48,
+                "gamma": 0.03,
+                "theta": -0.01,
+                "vega": 0.09,
+            },
+        ]
+    )
 
-print('\\n✅ Analysis complete')
+    put_rows = pd.DataFrame(
+        [
+            {
+                "contractSymbol": "RTXDUMMYP",
+                "strike": 119.0,
+                "bid": 2.8,
+                "ask": 3.1,
+                "lastPrice": 3.0,
+                "volume": 180,
+                "openInterest": 400,
+                "impliedVolatility": 0.3,
+                "delta": -0.45,
+                "gamma": 0.05,
+                "theta": -0.015,
+                "vega": 0.12,
+            }
+        ]
+    )
+
+    return DummyTicker(call_rows, put_rows)
+
+
+@pytest.fixture(autouse=True)
+def force_market_hours(monkeypatch):
+    monkeypatch.setattr(options_config, "is_market_hours", lambda: True)
+
+
+def test_get_real_options_chain_with_stub(monkeypatch, sample_ticker):
+    """Ensure the engine can surface deterministic data without network access."""
+    engine = OptionsDataEngine(symbol="RTX", ticker=sample_ticker)
+    monkeypatch.setattr(engine, "_is_valid_expiration", lambda _: True)
+
+    chain = engine.get_real_options_chain(force_refresh=True)
+
+    assert len(chain) == 3
+    first_contract = next(iter(chain.values()))
+    assert first_contract["type"] in {"call", "put"}
+    assert first_contract["bid"] < first_contract["ask"]
+
+
+def test_get_best_options_respects_direction(monkeypatch, sample_ticker):
+    """Verify directional filtering returns only relevant contracts."""
+    engine = OptionsDataEngine(symbol="RTX", ticker=sample_ticker)
+    monkeypatch.setattr(engine, "_is_valid_expiration", lambda _: True)
+    monkeypatch.setattr(engine, "get_current_stock_price", lambda: 120.0)
+
+    chain = engine.get_real_options_chain(force_refresh=True)
+    engine.cached_chain = chain
+
+    calls = engine.get_best_options_for_direction("BUY", confidence=0.8, account_balance=5000)
+    assert calls
+    assert all(option["type"] == "call" for option in calls)
+
+    puts = engine.get_best_options_for_direction("SELL", confidence=0.8, account_balance=5000)
+    assert puts
+    assert all(option["type"] == "put" for option in puts)
