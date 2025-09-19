@@ -3,7 +3,7 @@ Telegram Bot for RTX Trading Notifications
 Professional hedge fund-style mobile alerts
 """
 import asyncio
-import aiohttp
+import httpx
 from datetime import datetime, time as dt_time
 from typing import Dict, List, Optional
 from loguru import logger
@@ -70,26 +70,26 @@ class TelegramBot:
             return False
         
         try:
-            # Sanitize message for Telegram
             sanitized_message = self._sanitize_message(message, parse_mode)
-            
+
             url = f"{self.base_url}/sendMessage"
             data = {
                 "chat_id": self.chat_id,
                 "text": sanitized_message,
                 "parse_mode": parse_mode,
-                "disable_web_page_preview": True
+                "disable_web_page_preview": True,
             }
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=data) as response:
-                    if response.status == 200:
-                        logger.debug("📱 Telegram message sent successfully")
-                        return True
-                    else:
-                        logger.error(f"📱 Telegram send failed: {response.status}")
-                        return False
-                        
+
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(url, json=data)
+                if response.status_code == 200:
+                    logger.debug("📱 Telegram message sent successfully")
+                    return True
+                logger.error(
+                    f"📱 Telegram send failed: {response.status_code} {response.text}"
+                )
+                return False
+
         except Exception as e:
             logger.error(f"📱 Telegram error: {e}")
             return False
@@ -755,17 +755,18 @@ fi
             return []
 
         url = f"https://api.telegram.org/bot{self.bot_token}/getUpdates"
-        params = {'offset': offset, 'timeout': 5}
+        params = {"offset": offset, "timeout": 5}
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, params=params) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        return data.get('result', [])
-                    else:
-                        logger.warning(f"Failed to get Telegram updates: {response.status}")
-                        return []
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.get(url, params=params)
+                if response.status_code == 200:
+                    data = response.json()
+                    return data.get("result", [])
+                logger.warning(
+                    f"Failed to get Telegram updates: {response.status_code} {response.text}"
+                )
+                return []
         except Exception as e:
             logger.error(f"Error getting Telegram updates: {e}")
             return []
@@ -956,21 +957,21 @@ _Please check system manually or contact support._"""
 
         url = f"{self.base_url}/deleteWebhook"
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url) as response:
-                    if response.status == 200:
-                        payload = await response.json()
-                        if payload.get("ok"):
-                            self._webhook_cleared = True
-                            logger.info("📱 Telegram webhook cleared; using long polling")
-                        else:
-                            logger.warning(
-                                f"📱 Telegram deleteWebhook returned non-ok payload: {payload}"
-                            )
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(url)
+                if response.status_code == 200:
+                    payload = response.json()
+                    if payload.get("ok"):
+                        self._webhook_cleared = True
+                        logger.info("📱 Telegram webhook cleared; using long polling")
                     else:
                         logger.warning(
-                            f"📱 Telegram deleteWebhook failed: HTTP {response.status}"
+                            f"📱 Telegram deleteWebhook returned non-ok payload: {payload}"
                         )
+                else:
+                    logger.warning(
+                        f"📱 Telegram deleteWebhook failed: HTTP {response.status_code} {response.text}"
+                    )
         except Exception as exc:
             logger.error(f"📱 Telegram deleteWebhook error: {exc}")
     
