@@ -297,14 +297,17 @@ class OptionsPredictionEngine:
         try:
             # Basic validation
             if not prediction.get('contract_symbol'):
+                logger.error("❌ Validation: missing contract symbol")
                 return False
-            
+
             if prediction.get('total_cost', 0) <= 0:
+                logger.error("❌ Validation: non-positive total cost")
                 return False
-            
+
             if prediction.get('contracts', 0) <= 0:
+                logger.error("❌ Validation: zero contracts")
                 return False
-            
+
             # Affordability check
             account_balance = prediction.get('account_balance', 0)
             if prediction['total_cost'] > account_balance:
@@ -319,14 +322,17 @@ class OptionsPredictionEngine:
             
             # Reasonableness checks
             if prediction['entry_price'] < 0.05:  # Too cheap
+                logger.error("❌ Validation: entry price too low")
                 return False
-            
+
             if prediction['entry_price'] > 50:  # Too expensive for our budget
+                logger.error("❌ Validation: entry price too high")
                 return False
-            
+
             if prediction['days_to_expiry'] < options_config.MIN_DAYS_TO_EXPIRY:
+                logger.error("❌ Validation: DTE below minimum")
                 return False
-            
+
             return True
             
         except Exception as e:
@@ -420,7 +426,8 @@ class OptionsPredictionEngine:
             'volatility': 0.73     # +5% boost from learning
         }
         
-        threshold = learning_thresholds.get(strategy_id, 0.75)  # Default to Conservative
+        from config.options_config import options_config
+        threshold = learning_thresholds.get(strategy_id, options_config.MIN_CONFIDENCE)
         
         logger.debug(f"📊 {strategy_id}: Using learning-enhanced threshold {threshold:.1%}")
         

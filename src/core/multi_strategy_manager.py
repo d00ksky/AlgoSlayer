@@ -7,11 +7,14 @@ each with its own ML optimization and performance tracking.
 
 import json
 import sqlite3
+import asyncio
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
-from loguru import logger
-import asyncio
 from dataclasses import dataclass
+from loguru import logger
+
+from config.options_config import options_config
+from src.core.options_scheduler import OptionsScheduler
 
 @dataclass
 class StrategyConfig:
@@ -30,61 +33,62 @@ class MultiStrategyManager:
         self.db_path = db_path
         self.strategies_file = "data/active_strategies.json"
         self.starting_capital = 2000.0  # Increased for realistic options trading
+        self._aggregator = OptionsScheduler()
         
         # Define the eight strategies
         self.strategy_configs = {
             "conservative": StrategyConfig(
                 name="Conservative",
-                confidence_threshold=0.85,  # INCREASED: 50%→85% for quality trades
+                confidence_threshold=0.75,
                 min_signals_required=4,      # INCREASED: 2→4 signals for better agreement
                 position_size_pct=0.10,     # REDUCED: 15%→10% during recalibration
                 description="High confidence, multiple signal agreement, small positions"
             ),
             "moderate": StrategyConfig(
                 name="Moderate", 
-                confidence_threshold=0.80,   # INCREASED: 50%→80%
+                confidence_threshold=0.70,
                 min_signals_required=5,      # INCREASED: 3→5 signals
                 position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Balanced approach with moderate risk"
             ),
             "aggressive": StrategyConfig(
                 name="Aggressive",
-                confidence_threshold=0.75,   # INCREASED: 50%→75%
+                confidence_threshold=0.65,
                 min_signals_required=4,      # INCREASED: 2→4 signals
                 position_size_pct=0.15,     # REDUCED: 25%→15%
                 description="Lower threshold, larger positions, more trades"
             ),
             "scalping": StrategyConfig(
                 name="Scalping",
-                confidence_threshold=0.70,  # INCREASED: 40%→70%
+                confidence_threshold=0.65,
                 min_signals_required=4,     # INCREASED: 3→4 signals
                 position_size_pct=0.10,     # REDUCED: 15%→10%
                 description="Quick trades, 15min-2hr holds"
             ),
             "swing": StrategyConfig(
                 name="Swing",
-                confidence_threshold=0.70,  # INCREASED: 40%→70%
+                confidence_threshold=0.68,
                 min_signals_required=4,     # INCREASED: 3→4 signals
                 position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Multi-day holds, trend following"
             ),
             "momentum": StrategyConfig(
                 name="Momentum",
-                confidence_threshold=0.75,  # INCREASED: 60%→75%
+                confidence_threshold=0.65,
                 min_signals_required=4,     # INCREASED: 3→4 signals
                 position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Trend following, momentum based"
             ),
             "volatility": StrategyConfig(
                 name="Volatility",
-                confidence_threshold=0.78,  # INCREASED: 63%→78%
+                confidence_threshold=0.66,
                 min_signals_required=4,     # INCREASED: 3→4 signals
                 position_size_pct=0.10,     # REDUCED: 18%→10%
                 description="IV expansion plays"
             ),
             "mean_reversion": StrategyConfig(
                 name="Mean Reversion",
-                confidence_threshold=0.77,  # INCREASED: 62%→77%
+                confidence_threshold=0.66,
                 min_signals_required=4,     # INCREASED: 3→4 signals
                 position_size_pct=0.10,     # REDUCED: 18%→10%
                 description="Contrarian plays"
@@ -568,37 +572,34 @@ class MultiStrategyManager:
                             logger.warning(f"⚠️ No actionable signals for {config.name}")
                             continue
                         
-                        # Aggregate signals (simplified version)
-                        buy_signals = [s for s in signal_results.values() if s.get('direction') == 'BUY']
-                        sell_signals = [s for s in signal_results.values() if s.get('direction') == 'SELL']
-                        
-                        if len(buy_signals) > len(sell_signals):
-                            direction = 'BUY'
-                            confidence = sum(s.get('confidence', 0.5) for s in buy_signals) / len(buy_signals)
-                        elif len(sell_signals) > len(buy_signals):
-                            direction = 'SELL' 
-                            confidence = sum(s.get('confidence', 0.5) for s in sell_signals) / len(sell_signals)
-                        else:
-                            direction = 'HOLD'
-                            confidence = 0.5
-                        
+                        aggregated = self._aggregator._aggregate_signals(signal_results)
+                        direction = aggregated.get('direction', 'HOLD')
+                        confidence = aggregated.get('confidence', 0.5)
+                        expected_move = aggregated.get('expected_move_pct', 0.0)
+
                         signals_data = {
                             'direction': direction,
-                            'overall_confidence': confidence,
+                            'confidence': confidence,
+                            'expected_move': expected_move,
                             'individual_signals': signal_results,
-                            'signals_agreeing': successful_signals
+                            'signals_agreeing': successful_signals,
+                            'signal_weights': self._aggregator.signal_weights,
                         }
-                        
+
                         logger.info(f"📊 {config.name}: {direction} {confidence:.1%} confidence, {successful_signals} signals")
-                        
+
                         # Check if signals meet strategy requirements
-                        if signals_data['overall_confidence'] < config.confidence_threshold:
-                            logger.info(f"📊 {config.name}: Confidence {signals_data['overall_confidence']:.1%} < {config.confidence_threshold:.1%} threshold")
+                        min_required_conf = max(config.confidence_threshold, options_config.MIN_CONFIDENCE)
+                        if confidence < min_required_conf:
+                            logger.info(f"📊 {config.name}: Confidence {confidence:.1%} < {min_required_conf:.1%} threshold")
                             continue
-                        
+
                         # Count agreeing signals
-                        agreeing_signals = sum(1 for signal in signals_data['individual_signals'].values() 
-                                             if signal.get('confidence', 0) >= 0.6)
+                        agreeing_signals = sum(
+                            1
+                            for signal in signal_results.values()
+                            if signal.get('confidence', 0) >= 0.6 and signal.get('direction') == direction
+                        )
                         
                         if agreeing_signals < config.min_signals_required:
                             logger.info(f"📊 {config.name}: Only {agreeing_signals}/{config.min_signals_required} signals agree")
@@ -607,7 +608,10 @@ class MultiStrategyManager:
                         # Generate options prediction for this strategy
                         logger.info(f"🎯 Creating {config.name} options prediction...")
                         prediction = options_prediction_engine.generate_options_prediction(
-                            signals_data, trader.account_balance
+                            signals_data,
+                            trader.account_balance,
+                            strategy_id=strategy_id,
+                            strategy_weights=config.signal_weights,
                         )
                         
                         if prediction:

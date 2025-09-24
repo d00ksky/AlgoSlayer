@@ -18,7 +18,7 @@ class OptionsConfig:
     
     # Risk Management - RECALIBRATED FOR BETTER PERFORMANCE
     MAX_DAYS_TO_EXPIRY = int(os.getenv("MAX_DTE", 45))
-    MIN_DAYS_TO_EXPIRY = int(os.getenv("MIN_DTE", 14))  # CHANGED: 7→14 days minimum
+    MIN_DAYS_TO_EXPIRY = int(os.getenv("MIN_DTE", 7))  # Allow weekly expiries while staying out of last few days
     MAX_POSITION_SIZE_PCT = float(os.getenv("MAX_POSITION_SIZE_PCT", 0.15))  # REDUCED: 20%→15% of capital
     STOP_LOSS_PCT = float(os.getenv("STOP_LOSS_PCT", 0.30))  # REDUCED: 50%→30% loss
     PROFIT_TARGET_PCT = float(os.getenv("PROFIT_TARGET_PCT", 0.50))  # REDUCED: 100%→50% gain (take profits faster)
@@ -28,6 +28,7 @@ class OptionsConfig:
     MIN_OPEN_INTEREST = int(os.getenv("MIN_OPEN_INTEREST", 100))
     MAX_BID_ASK_SPREAD_PCT = float(os.getenv("MAX_SPREAD_PCT", 0.20))  # 20% max spread
     MIN_OPTION_PRICE = float(os.getenv("MIN_OPTION_PRICE", 0.10))  # $0.10 minimum
+    MIN_CONFIDENCE = float(os.getenv("MIN_OPTIONS_CONFIDENCE", 0.65))
     
     # IV Preferences
     IV_PREFERENCE = os.getenv("IV_PREFERENCE", "low")  # "low", "high", "any"

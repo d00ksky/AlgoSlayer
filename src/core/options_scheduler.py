@@ -87,6 +87,7 @@ class OptionsScheduler:
         self.last_options_prediction = None
         self.prediction_count = 0
         self.cycle_count = 0
+        self.telemetry_db = "data/options_performance.db"
         
         # Market open status tracking
         self.market_open_message_sent = False
@@ -350,6 +351,7 @@ class OptionsScheduler:
         buy_signals = []
         sell_signals = []
         high_conf_signals = []
+        telemetry_snapshot = []
         
         for signal_name, result in signal_results.items():
             if "error" in result:
@@ -372,7 +374,9 @@ class OptionsScheduler:
                 'weight': weight,
                 'weighted_strength': weight * confidence
             }
-            
+
+            telemetry_snapshot.append(signal_data)
+
             if direction == "BUY":
                 buy_signals.append(signal_data)
             elif direction == "SELL":
@@ -395,7 +399,7 @@ class OptionsScheduler:
             strongest_signal = max(high_conf_signals, key=lambda x: x['confidence'] * x['weight'])
             if strongest_signal['confidence'] > 0.85:
                 logger.info(f"   🎯 Using strongest signal: {strongest_signal['name']} ({strongest_signal['confidence']:.1%})")
-                return {
+                result = {
                     "direction": strongest_signal['direction'],
                     "confidence": strongest_signal['confidence'] * 0.9,  # Slight discount for safety
                     "expected_move_pct": strongest_signal['strength'] * 0.05,
@@ -403,6 +407,24 @@ class OptionsScheduler:
                     "sell_strength": sell_strength,
                     "dominant_signal": strongest_signal['name']
                 }
+
+                snapshot = {
+                    'timestamp': datetime.now().isoformat(),
+                    'final_direction': result['direction'],
+                    'final_confidence': result['confidence'],
+                    'buy_strength': buy_strength,
+                    'sell_strength': sell_strength,
+                    'total_strength': buy_strength + sell_strength,
+                    'strength_diff': abs(buy_strength - sell_strength),
+                    'signals': telemetry_snapshot,
+                }
+
+                try:
+                    self._persist_signal_snapshot(snapshot)
+                except Exception as exc:
+                    logger.warning(f"⚠️ Failed to persist signal snapshot: {exc}")
+
+                return result
         
         # Standard aggregation with lower thresholds
         strength_diff = abs(buy_strength - sell_strength)
@@ -426,14 +448,32 @@ class OptionsScheduler:
         expected_move = min(0.06, strength_diff * 0.8)  # More conservative
         
         logger.info(f"   📊 Final: {final_direction} ({final_confidence:.1%})")
-        
-        return {
+
+        result = {
             "direction": final_direction,
             "confidence": final_confidence,
             "expected_move_pct": expected_move,
             "buy_strength": buy_strength,
             "sell_strength": sell_strength
         }
+
+        snapshot = {
+            'timestamp': datetime.now().isoformat(),
+            'final_direction': result['direction'],
+            'final_confidence': result['confidence'],
+            'buy_strength': buy_strength,
+            'sell_strength': sell_strength,
+            'total_strength': total_strength,
+            'strength_diff': strength_diff,
+            'signals': telemetry_snapshot,
+        }
+
+        try:
+            self._persist_signal_snapshot(snapshot)
+        except Exception as exc:
+            logger.warning(f"⚠️ Failed to persist signal snapshot: {exc}")
+
+        return result
     
 
     def _adjust_weights_for_regime(self, base_weights: Dict, regime_type: str) -> Dict:
@@ -482,14 +522,21 @@ class OptionsScheduler:
         
         if signals_data.get("direction", "HOLD") == "HOLD":
             return None
-        
-        if signals_data.get("confidence", 0.5) < 0.75:  # Higher threshold for options
-            logger.info(f"📊 Confidence {signals_data['confidence']:.1%} below 75% options threshold")
+
+        current_confidence = signals_data.get("confidence", 0.5)
+        logger.info(f"📊 Evaluating options prediction with confidence {current_confidence:.3f}")
+
+        min_confidence = getattr(options_config, 'MIN_CONFIDENCE', 0.65)
+
+        if current_confidence < min_confidence:
+            logger.info(f"📊 Confidence {current_confidence:.1%} below {min_confidence:.1%} options threshold")
             return None
-        
+
         # Generate options prediction
         prediction = options_prediction_engine.generate_options_prediction(
-            signals_data, options_paper_trader.account_balance
+            signals_data,
+            options_paper_trader.account_balance,
+            strategy_id=getattr(self, 'strategy_id', 'options_single')
         )
         
         if prediction:
@@ -660,7 +707,52 @@ class OptionsScheduler:
             
         except Exception as e:
             logger.error(f"❌ Error checking ML notification: {e}")
-    
+
+    def _persist_signal_snapshot(self, snapshot: Dict) -> None:
+        """Persist aggregation snapshot to SQLite for later analysis."""
+        import sqlite3
+        import json
+
+        conn = sqlite3.connect(self.telemetry_db)
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS signal_snapshots (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                final_direction TEXT,
+                final_confidence REAL,
+                buy_strength REAL,
+                sell_strength REAL,
+                total_strength REAL,
+                strength_diff REAL,
+                signals_json TEXT
+            )
+            """
+        )
+
+        conn.execute(
+            """
+            INSERT INTO signal_snapshots (
+                timestamp, final_direction, final_confidence,
+                buy_strength, sell_strength, total_strength,
+                strength_diff, signals_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                snapshot['timestamp'],
+                snapshot['final_direction'],
+                snapshot['final_confidence'],
+                snapshot['buy_strength'],
+                snapshot['sell_strength'],
+                snapshot['total_strength'],
+                snapshot['strength_diff'],
+                json.dumps(snapshot['signals']),
+            ),
+        )
+
+        conn.commit()
+        conn.close()
+
     def stop(self):
         """Stop the trading scheduler"""
         self.running = False
