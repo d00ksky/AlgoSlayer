@@ -40,56 +40,56 @@ class MultiStrategyManager:
             "conservative": StrategyConfig(
                 name="Conservative",
                 confidence_threshold=0.75,
-                min_signals_required=4,      # INCREASED: 2→4 signals for better agreement
+                min_signals_required=3,
                 position_size_pct=0.10,     # REDUCED: 15%→10% during recalibration
                 description="High confidence, multiple signal agreement, small positions"
             ),
             "moderate": StrategyConfig(
                 name="Moderate", 
                 confidence_threshold=0.70,
-                min_signals_required=5,      # INCREASED: 3→5 signals
+                min_signals_required=3,
                 position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Balanced approach with moderate risk"
             ),
             "aggressive": StrategyConfig(
                 name="Aggressive",
                 confidence_threshold=0.65,
-                min_signals_required=4,      # INCREASED: 2→4 signals
+                min_signals_required=2,
                 position_size_pct=0.15,     # REDUCED: 25%→15%
                 description="Lower threshold, larger positions, more trades"
             ),
             "scalping": StrategyConfig(
                 name="Scalping",
                 confidence_threshold=0.65,
-                min_signals_required=4,     # INCREASED: 3→4 signals
+                min_signals_required=2,
                 position_size_pct=0.10,     # REDUCED: 15%→10%
                 description="Quick trades, 15min-2hr holds"
             ),
             "swing": StrategyConfig(
                 name="Swing",
                 confidence_threshold=0.68,
-                min_signals_required=4,     # INCREASED: 3→4 signals
+                min_signals_required=2,
                 position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Multi-day holds, trend following"
             ),
             "momentum": StrategyConfig(
                 name="Momentum",
                 confidence_threshold=0.65,
-                min_signals_required=4,     # INCREASED: 3→4 signals
+                min_signals_required=2,
                 position_size_pct=0.12,     # REDUCED: 20%→12%
                 description="Trend following, momentum based"
             ),
             "volatility": StrategyConfig(
                 name="Volatility",
                 confidence_threshold=0.66,
-                min_signals_required=4,     # INCREASED: 3→4 signals
+                min_signals_required=2,
                 position_size_pct=0.10,     # REDUCED: 18%→10%
                 description="IV expansion plays"
             ),
             "mean_reversion": StrategyConfig(
                 name="Mean Reversion",
                 confidence_threshold=0.66,
-                min_signals_required=4,     # INCREASED: 3→4 signals
+                min_signals_required=2,
                 position_size_pct=0.10,     # REDUCED: 18%→10%
                 description="Contrarian plays"
             )
@@ -595,14 +595,10 @@ class MultiStrategyManager:
                             continue
 
                         # Count agreeing signals
-                        agreeing_signals = sum(
-                            1
-                            for signal in signal_results.values()
-                            if signal.get('confidence', 0) >= 0.6 and signal.get('direction') == direction
-                        )
+                        agreeing_signals = aggregated.get('aligned_count', 0)
                         
                         if agreeing_signals < config.min_signals_required:
-                            logger.info(f"📊 {config.name}: Only {agreeing_signals}/{config.min_signals_required} signals agree")
+                            logger.info(f"📊 {config.name}: Support {agreeing_signals}/{config.min_signals_required} signals")
                             continue
                         
                         # Generate options prediction for this strategy

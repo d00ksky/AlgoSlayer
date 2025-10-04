@@ -4,7 +4,9 @@ Enhanced scheduler that focuses on options predictions and trading
 Integrates all AI signals with options-specific logic
 """
 import asyncio
-from datetime import datetime, time as dt_time
+import json
+import sqlite3
+from datetime import datetime, time as dt_time, timedelta, date
 from typing import Dict, List, Optional
 from loguru import logger
 
@@ -88,10 +90,14 @@ class OptionsScheduler:
         self.prediction_count = 0
         self.cycle_count = 0
         self.telemetry_db = "data/options_performance.db"
-        
+
         # Market open status tracking
         self.market_open_message_sent = False
         self.last_market_open_date = None
+        self.market_close_message_sent = False
+        self.last_market_close_date = None
+
+        self._ensure_snapshot_schema()
         
         # Initialize lives tracker (temporarily disabled for deployment)
         # from src.core.lives_tracker import LivesTracker
@@ -137,10 +143,13 @@ class OptionsScheduler:
                 
                 # Send market open status message (once per day)
                 await self._check_and_send_market_open_status()
-                
+
                 # Check for automated ML notifications
                 await self._check_and_send_ml_notification()
-                
+
+                # Send market close summary if applicable
+                await self._check_and_send_market_close_status()
+
                 # Run trading cycle
                 await self._run_trading_cycle()
                 
@@ -449,12 +458,18 @@ class OptionsScheduler:
         
         logger.info(f"   📊 Final: {final_direction} ({final_confidence:.1%})")
 
+        aligned = [sig for sig in telemetry_snapshot if sig['direction'] == final_direction]
+        aligned_count = len(aligned)
+        aligned_weight = sum(sig['weight'] for sig in aligned)
+
         result = {
             "direction": final_direction,
             "confidence": final_confidence,
             "expected_move_pct": expected_move,
             "buy_strength": buy_strength,
-            "sell_strength": sell_strength
+            "sell_strength": sell_strength,
+            "aligned_count": aligned_count,
+            "aligned_weight": aligned_weight,
         }
 
         snapshot = {
@@ -465,6 +480,8 @@ class OptionsScheduler:
             'sell_strength': sell_strength,
             'total_strength': total_strength,
             'strength_diff': strength_diff,
+            'aligned_count': aligned_count,
+            'aligned_weight': aligned_weight,
             'signals': telemetry_snapshot,
         }
 
@@ -676,13 +693,11 @@ class OptionsScheduler:
             if (self.last_market_open_date != current_date and 
                 not self.market_open_message_sent):
                 
-                # Send market open status at 9:30 AM ET or shortly after
-                market_open_time = dt_time(9, 30)  # 9:30 AM ET
-                
-                # Send if it's after market open (9:30 AM) and before 10:00 AM
+                market_open_time = dt_time(9, 30)
                 if market_open_time <= current_time <= dt_time(10, 0):
                     logger.info("📱 Sending daily market open status message...")
-                    success = await telegram_bot.send_market_open_status()
+                    summary = self._build_previous_day_summary(current_date)
+                    success = await telegram_bot.send_market_open_status(summary)
                     
                     if success:
                         self.market_open_message_sent = True
@@ -708,6 +723,35 @@ class OptionsScheduler:
         except Exception as e:
             logger.error(f"❌ Error checking ML notification: {e}")
 
+    async def _check_and_send_market_close_status(self):
+        try:
+            import pytz
+
+            et = pytz.timezone('US/Eastern')
+            now = datetime.now(et)
+            current_date = now.date()
+
+            if self.last_market_close_date != current_date:
+                self.market_close_message_sent = False
+
+            if not self.market_close_message_sent and dt_time(16, 0) <= now.time() <= dt_time(16, 30):
+                summary = self._build_daily_summary(current_date)
+                open_positions = []
+                for pos in options_paper_trader.open_positions.values():
+                    open_positions.append({
+                        'contract_symbol': pos.get('contract_symbol', 'N/A'),
+                        'entry_price': pos.get('entry_price', 0.0),
+                        'confidence': pos.get('confidence', 0.0),
+                    })
+                success = await telegram_bot.send_market_close_summary(summary, open_positions)
+                if success:
+                    self.market_close_message_sent = True
+                    self.last_market_close_date = current_date
+                    logger.success("✅ Market close summary sent")
+
+        except Exception as e:
+            logger.error(f"❌ Error sending market close summary: {e}")
+
     def _persist_signal_snapshot(self, snapshot: Dict) -> None:
         """Persist aggregation snapshot to SQLite for later analysis."""
         import sqlite3
@@ -725,18 +769,30 @@ class OptionsScheduler:
                 sell_strength REAL,
                 total_strength REAL,
                 strength_diff REAL,
+                aligned_count INTEGER,
+                aligned_weight REAL,
                 signals_json TEXT
             )
             """
         )
+
+        # Ensure new columns exist for backward compatibility
+        try:
+            conn.execute("ALTER TABLE signal_snapshots ADD COLUMN aligned_count INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            conn.execute("ALTER TABLE signal_snapshots ADD COLUMN aligned_weight REAL DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
 
         conn.execute(
             """
             INSERT INTO signal_snapshots (
                 timestamp, final_direction, final_confidence,
                 buy_strength, sell_strength, total_strength,
-                strength_diff, signals_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                strength_diff, aligned_count, aligned_weight, signals_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 snapshot['timestamp'],
@@ -746,9 +802,124 @@ class OptionsScheduler:
                 snapshot['sell_strength'],
                 snapshot['total_strength'],
                 snapshot['strength_diff'],
+                snapshot.get('aligned_count', 0),
+                snapshot.get('aligned_weight', 0.0),
                 json.dumps(snapshot['signals']),
             ),
         )
+
+        conn.commit()
+        conn.close()
+
+    def _build_daily_summary(self, target_date: date) -> Dict:
+        summary = {
+            'date': target_date,
+            'signal_count': 0,
+            'buy_count': 0,
+            'sell_count': 0,
+            'hold_count': 0,
+            'avg_confidence': 0.0,
+            'avg_buy_strength': 0.0,
+            'avg_sell_strength': 0.0,
+            'avg_aligned_weight': 0.0,
+            'top_signals': [],
+            'predictions': 0,
+            'prediction_status': {},
+        }
+
+        conn = sqlite3.connect(self.telemetry_db)
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT final_direction, final_confidence, buy_strength, sell_strength,
+                   aligned_weight, signals_json
+            FROM signal_snapshots
+            WHERE DATE(timestamp) = ?
+            """,
+            (target_date.isoformat(),)
+        )
+        rows = cur.fetchall()
+
+        summary['signal_count'] = len(rows)
+        signal_contributors = {}
+
+        for direction, confidence, buy_strength, sell_strength, aligned_weight, signals_json in rows:
+            summary['avg_confidence'] += confidence
+            summary['avg_buy_strength'] += buy_strength
+            summary['avg_sell_strength'] += sell_strength
+            summary['avg_aligned_weight'] += aligned_weight
+
+            match direction:
+                case 'BUY':
+                    summary['buy_count'] += 1
+                case 'SELL':
+                    summary['sell_count'] += 1
+                case _:
+                    summary['hold_count'] += 1
+
+            try:
+                signals = json.loads(signals_json)
+            except Exception:
+                signals = []
+
+            for sig in signals:
+                name = sig.get('name')
+                if not name:
+                    continue
+                signal_contributors.setdefault(name, 0)
+                if sig.get('direction') == direction:
+                    signal_contributors[name] += 1
+
+        if rows:
+            count = len(rows)
+            summary['avg_confidence'] /= count
+            summary['avg_buy_strength'] /= count
+            summary['avg_sell_strength'] /= count
+            summary['avg_aligned_weight'] /= count
+
+        summary['top_signals'] = sorted(signal_contributors.items(), key=lambda x: x[1], reverse=True)[:3]
+
+        cur.execute(
+            """
+            SELECT status, COUNT(*) FROM options_predictions
+            WHERE DATE(timestamp) = ?
+            GROUP BY status
+            """,
+            (target_date.isoformat(),)
+        )
+        for status, count in cur.fetchall():
+            summary['prediction_status'][status or 'UNKNOWN'] = count
+            summary['predictions'] += count
+
+        try:
+            cur.execute("SELECT balance_after FROM account_history ORDER BY rowid DESC LIMIT 1")
+            row = cur.fetchone()
+            if row:
+                summary['balance'] = row[0]
+        except Exception:
+            summary['balance'] = None
+
+        conn.close()
+        return summary
+
+    def _build_previous_day_summary(self, current_date: date) -> Optional[Dict]:
+        for offset in range(1, 6):
+            candidate = current_date - timedelta(days=offset)
+            stats = self._build_daily_summary(candidate)
+            if stats['signal_count'] or stats['predictions']:
+                return stats
+        return None
+
+    def _ensure_snapshot_schema(self) -> None:
+        conn = sqlite3.connect(self.telemetry_db)
+        cur = conn.cursor()
+        cur.execute("PRAGMA table_info(signal_snapshots)")
+        columns = {row[1] for row in cur.fetchall()}
+
+        if 'aligned_count' not in columns:
+            cur.execute("ALTER TABLE signal_snapshots ADD COLUMN aligned_count INTEGER DEFAULT 0")
+        if 'aligned_weight' not in columns:
+            cur.execute("ALTER TABLE signal_snapshots ADD COLUMN aligned_weight REAL DEFAULT 0")
 
         conn.commit()
         conn.close()

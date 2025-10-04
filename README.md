@@ -661,6 +661,17 @@ RUN_FULL_SUITE=true pytest -q
 
 See `docs/local_dev_setup.md` for macOS setup details and `docs/local_training.md` for the heavy-training workflow.
 
+## 📨 Telegram Reports
+
+- The server now posts a **Market Open Status** (09:30–10:00 ET) summarizing the previous day's signals and a **Market Close Summary** (16:00–16:30 ET) with intraday trades and open positions.
+- Aggregated signal snapshots are recorded in `data/options_performance.db → signal_snapshots`. Inspect them with:
+
+```bash
+./scripts/analyze_signal_snapshots.py --limit 200
+```
+
+- Reports are delivered automatically while `rtx-trading.service` is running—just monitor Telegram.
+
 ### Comprehensive Test Suite
 
 ```bash

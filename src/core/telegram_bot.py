@@ -771,8 +771,8 @@ fi
             logger.error(f"Error getting Telegram updates: {e}")
             return []
     
-    async def send_market_open_status(self) -> bool:
-        """Send daily market open status message with system health and positions"""
+    async def send_market_open_status(self, summary: Optional[Dict] = None) -> bool:
+        """Send daily market open status message with optional previous-day summary."""
         try:
             # Get current time in ET
             import pytz
@@ -892,7 +892,22 @@ fi
                 message += f"💰 *Max Position Size:* ${max_investment:.0f}\n"
             except:
                 message += "💰 *Max Position Size:* Error checking\n"
-            
+
+            if summary and summary.get('signal_count'):
+                prev_date = summary['date']
+                message += "\n📊 *Yesterday Recap*\n"
+                message += f"• Signals logged: {summary['signal_count']}" \
+                           f" (BUY {summary['buy_count']}, SELL {summary['sell_count']})\n"
+                message += f"• Avg confidence: {summary['avg_confidence']:.0%}\n"
+                if summary.get('predictions'):
+                    executed = summary['prediction_status'].get('CLOSED', 0)
+                    open_count = summary['prediction_status'].get('OPEN', 0)
+                    message += f"• Predictions: {summary['predictions']} (CLOSED {executed}, OPEN {open_count})\n"
+                if summary.get('top_signals'):
+                    leaders = ", ".join(f"{name}:{count}" for name, count in summary['top_signals'])
+                    message += f"• Top contributors: {leaders}\n"
+                message += f"• Date: {prev_date.strftime('%Y-%m-%d')}\n"
+
             message += f"\n✅ *Status:* All systems operational\n"
             message += f"📱 *Notifications:* Active (you'll get alerts when trades execute)\n"
             message += f"\n_Good luck trading today! 🚀_"
@@ -949,6 +964,60 @@ _Please check system manually or contact support._"""
                 await asyncio.sleep(5)
             
             await asyncio.sleep(1)
+
+    async def send_market_close_summary(self, summary: Dict, open_positions: List[Dict]) -> bool:
+        """Send market close summary with daily telemetry."""
+        try:
+            import pytz
+
+            et = pytz.timezone('US/Eastern')
+            now = datetime.now(et)
+
+            lines = [
+                f"🔔 *MARKET CLOSE SUMMARY* — {now.strftime('%A, %B %d')}",
+                f"⏰ *Time:* {now.strftime('%H:%M ET')}",
+                "",
+                "📊 *Trading Recap*",
+                f"• Cycles logged: {summary.get('signal_count', 0)}",
+                f"• BUY signals: {summary.get('buy_count', 0)}",
+                f"• SELL signals: {summary.get('sell_count', 0)}",
+                f"• Avg confidence: {summary.get('avg_confidence', 0.0):.0%}",
+                f"• Avg aligned weight: {summary.get('avg_aligned_weight', 0.0):.2f}",
+            ]
+
+            if summary.get('predictions'):
+                status = summary.get('prediction_status', {})
+                lines.append(
+                    "• Predictions: "
+                    f"{summary['predictions']} (CLOSED {status.get('CLOSED', 0)}, OPEN {status.get('OPEN', 0)})"
+                )
+
+            top_signals = summary.get('top_signals') or []
+            if top_signals:
+                leaders = ", ".join(f"{name}:{count}" for name, count in top_signals)
+                lines.append(f"• Top contributors: {leaders}")
+
+            balance = summary.get('balance')
+            if balance is not None:
+                lines.append("")
+                lines.append("💼 *Positions & Balance*")
+                lines.append(f"• Balance: ${balance:.2f}")
+
+            lines.append(f"• Open positions: {len(open_positions)}")
+            for pos in open_positions[:3]:
+                lines.append(
+                    f"   • {pos.get('contract_symbol', 'N/A')} @ ${pos.get('entry_price', 0):.2f}"
+                    f" ({pos.get('confidence', 0):.0%})"
+                )
+
+            lines.append("")
+            lines.append("📝 _Signal telemetry stored in options_performance.db → signal_snapshots._")
+
+            return await self.send_message("\n".join(lines), parse_mode="Markdown")
+
+        except Exception as exc:
+            logger.error(f"Error sending market close summary: {exc}")
+            return await self.send_message("⚠️ *Market close summary failed to send.*")
 
     async def _ensure_long_polling_mode(self) -> None:
         """Ensure Telegram webhook is disabled so getUpdates does not return 409."""

@@ -16,7 +16,8 @@ def load_snapshots(db_path: Path, limit: int | None = None):
         """
         SELECT timestamp, final_direction, final_confidence,
                buy_strength, sell_strength, total_strength,
-               strength_diff, signals_json
+               strength_diff, aligned_count, aligned_weight,
+               signals_json
         FROM signal_snapshots
         ORDER BY id DESC
         """
@@ -35,7 +36,7 @@ def summarize(rows):
     direction_counts = defaultdict(int)
     signal_stats = defaultdict(lambda: defaultdict(float))
 
-    for ts, direction, confidence, buy_strength, sell_strength, total_strength, strength_diff, signals_json in rows:
+    for ts, direction, confidence, buy_strength, sell_strength, total_strength, strength_diff, aligned_count, aligned_weight, signals_json in rows:
         direction_counts[direction] += 1
         signals = json.loads(signals_json)
         for sig in signals:
