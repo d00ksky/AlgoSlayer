@@ -3,6 +3,7 @@ Telegram Bot for RTX Trading Notifications
 Professional hedge fund-style mobile alerts
 """
 import asyncio
+import os
 import httpx
 from datetime import datetime, time as dt_time
 from typing import Dict, List, Optional
@@ -22,17 +23,25 @@ class TelegramBot:
     """Professional trading notifications via Telegram"""
     
     def __init__(self):
-        self.bot_token = config.telegram.BOT_TOKEN
-        self.chat_id = config.telegram.CHAT_ID
-        self.base_url = f"https://api.telegram.org/bot{self.bot_token}"
+        self.bot_token = (config.telegram.BOT_TOKEN or "").strip()
+        self.chat_id = (config.telegram.CHAT_ID or "").strip()
         self._webhook_cleared = False
+        self._max_send_attempts = 3
+
+        disable_flag = os.getenv("DISABLE_TELEGRAM", "false").lower() == "true"
+        if disable_flag:
+            logger.warning("⚠️ Telegram notifications disabled via DISABLE_TELEGRAM flag")
+            self.enabled = False
+            self.base_url = ""
+            return
 
         if not self.bot_token or not self.chat_id:
-            logger.warning("⚠️ Telegram credentials not configured")
-            self.enabled = False
-        else:
-            self.enabled = True
-            logger.info("📱 Telegram bot initialized successfully")
+            logger.error("❌ Telegram credentials missing - set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID")
+            raise RuntimeError("Telegram configuration missing required credentials")
+
+        self.base_url = f"https://api.telegram.org/bot{self.bot_token}"
+        self.enabled = True
+        logger.info("📱 Telegram bot initialized successfully")
     
     def _sanitize_message(self, message: str, parse_mode: str = "HTML") -> str:
         """Sanitize message for Telegram parsing"""
@@ -69,30 +78,56 @@ class TelegramBot:
             logger.warning("📱 Telegram not configured - message not sent")
             return False
         
-        try:
-            sanitized_message = self._sanitize_message(message, parse_mode)
+        sanitized_message = self._sanitize_message(message, parse_mode)
+        url = f"{self.base_url}/sendMessage"
+        payload = {
+            "chat_id": self.chat_id,
+            "text": sanitized_message,
+            "parse_mode": parse_mode,
+            "disable_web_page_preview": True,
+        }
 
-            url = f"{self.base_url}/sendMessage"
-            data = {
-                "chat_id": self.chat_id,
-                "text": sanitized_message,
-                "parse_mode": parse_mode,
-                "disable_web_page_preview": True,
-            }
+        backoff_seconds = 1.0
+        for attempt in range(1, self._max_send_attempts + 1):
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    response = await client.post(url, json=payload)
+                    if response.status_code == 200:
+                        logger.debug("📱 Telegram message sent successfully")
+                        return True
 
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.post(url, json=data)
-                if response.status_code == 200:
-                    logger.debug("📱 Telegram message sent successfully")
-                    return True
-                logger.error(
-                    f"📱 Telegram send failed: {response.status_code} {response.text}"
-                )
-                return False
+                    status = response.status_code
+                    text = response.text
+                    logger.error(f"📱 Telegram send failed (attempt {attempt}/{self._max_send_attempts}): {status} {text}")
 
-        except Exception as e:
-            logger.error(f"📱 Telegram error: {e}")
-            return False
+                    if status in (401, 403):
+                        # Credentials invalid; fail fast so the caller can respond.
+                        raise RuntimeError("Telegram rejected credentials (401/403).")
+
+                    if status == 429:
+                        retry_after = response.headers.get("Retry-After")
+                        if retry_after:
+                            try:
+                                backoff_seconds = max(backoff_seconds, float(retry_after))
+                            except ValueError:
+                                pass
+
+                if attempt < self._max_send_attempts:
+                    await asyncio.sleep(backoff_seconds)
+                    backoff_seconds = min(backoff_seconds * 2, 30.0)
+
+            except RuntimeError as fatal_exc:
+                logger.error(f"📱 Telegram fatal error: {fatal_exc}")
+                raise
+            except Exception as exc:
+                logger.error(f"📱 Telegram error (attempt {attempt}/{self._max_send_attempts}): {exc}")
+                if attempt < self._max_send_attempts:
+                    await asyncio.sleep(backoff_seconds)
+                    backoff_seconds = min(backoff_seconds * 2, 30.0)
+                else:
+                    return False
+
+        return False
     
     async def send_system_startup(self, trading_mode: str) -> bool:
         """Send system startup notification"""
@@ -760,18 +795,38 @@ fi
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
                 response = await client.get(url, params=params)
-                if response.status_code == 200:
+                status_code = response.status_code
+                if status_code == 200:
                     data = response.json()
                     return data.get("result", [])
-                logger.warning(
-                    f"Failed to get Telegram updates: {response.status_code} {response.text}"
-                )
+
+                if status_code == 409:
+                    logger.warning("📱 Telegram getUpdates returned 409 - attempting to clear webhook")
+                    await self._ensure_long_polling_mode()
+                    await asyncio.sleep(1)
+                    return []
+
+                if status_code == 429:
+                    logger.warning("📱 Telegram getUpdates rate limited (429)")
+                    await asyncio.sleep(3)
+                    return []
+
+                if status_code in (401, 403):
+                    logger.error(f"📱 Telegram getUpdates unauthorized ({status_code}) - check credentials immediately")
+                    raise RuntimeError("Telegram getUpdates unauthorized.")
+
+                logger.warning(f"Failed to get Telegram updates: {status_code} {response.text}")
+                await asyncio.sleep(1)
                 return []
+        except RuntimeError:
+            # Propagate fatal errors (e.g., auth issues) so the caller can react.
+            raise
         except Exception as e:
             logger.error(f"Error getting Telegram updates: {e}")
+            await asyncio.sleep(1)
             return []
     
-    async def send_market_open_status(self, summary: Optional[Dict] = None) -> bool:
+    async def send_market_open_status(self, summary: Optional[Dict] = None, note: Optional[str] = None) -> bool:
         """Send daily market open status message with optional previous-day summary."""
         try:
             # Get current time in ET
@@ -784,6 +839,8 @@ fi
 
 🤖 *SYSTEM STATUS*
 """
+            if note:
+                message += f"\n⚠️ *Note:* {note}\n"
             
             # Check service status
             try:
@@ -965,7 +1022,7 @@ _Please check system manually or contact support._"""
             
             await asyncio.sleep(1)
 
-    async def send_market_close_summary(self, summary: Dict, open_positions: List[Dict]) -> bool:
+    async def send_market_close_summary(self, summary: Dict, open_positions: List[Dict], note: Optional[str] = None) -> bool:
         """Send market close summary with daily telemetry."""
         try:
             import pytz
@@ -976,14 +1033,22 @@ _Please check system manually or contact support._"""
             lines = [
                 f"🔔 *MARKET CLOSE SUMMARY* — {now.strftime('%A, %B %d')}",
                 f"⏰ *Time:* {now.strftime('%H:%M ET')}",
-                "",
-                "📊 *Trading Recap*",
-                f"• Cycles logged: {summary.get('signal_count', 0)}",
-                f"• BUY signals: {summary.get('buy_count', 0)}",
-                f"• SELL signals: {summary.get('sell_count', 0)}",
-                f"• Avg confidence: {summary.get('avg_confidence', 0.0):.0%}",
-                f"• Avg aligned weight: {summary.get('avg_aligned_weight', 0.0):.2f}",
             ]
+
+            if note:
+                lines.append(f"⚠️ *Note:* {note}")
+
+            lines.extend(
+                [
+                    "",
+                    "📊 *Trading Recap*",
+                    f"• Cycles logged: {summary.get('signal_count', 0)}",
+                    f"• BUY signals: {summary.get('buy_count', 0)}",
+                    f"• SELL signals: {summary.get('sell_count', 0)}",
+                    f"• Avg confidence: {summary.get('avg_confidence', 0.0):.0%}",
+                    f"• Avg aligned weight: {summary.get('avg_aligned_weight', 0.0):.2f}",
+                ]
+            )
 
             if summary.get('predictions'):
                 status = summary.get('prediction_status', {})

@@ -12,7 +12,9 @@ class ConfigValidator:
     
     # Required environment variables
     REQUIRED_VARS = {
-        "OPENAI_API_KEY": "OpenAI API key for news sentiment analysis"
+        "OPENAI_API_KEY": "OpenAI API key for news sentiment analysis",
+        "TELEGRAM_BOT_TOKEN": "Telegram bot token for notifications",
+        "TELEGRAM_CHAT_ID": "Telegram chat ID for notifications",
     }
     
     # Optional but recommended variables
@@ -90,12 +92,13 @@ class ConfigValidator:
             errors.append("IBKR_REQUIRED=true but TRADING_ENABLED=false - inconsistent configuration")
         
         # Check Telegram configuration
-        bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
-        chat_id = os.getenv("TELEGRAM_CHAT_ID")
-        if bot_token and not chat_id:
-            errors.append("TELEGRAM_BOT_TOKEN provided but TELEGRAM_CHAT_ID missing")
-        elif chat_id and not bot_token:
-            errors.append("TELEGRAM_CHAT_ID provided but TELEGRAM_BOT_TOKEN missing")
+        if "TELEGRAM_BOT_TOKEN" not in cls.REQUIRED_VARS or "TELEGRAM_CHAT_ID" not in cls.REQUIRED_VARS:
+            bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+            chat_id = os.getenv("TELEGRAM_CHAT_ID")
+            if bot_token and not chat_id:
+                errors.append("TELEGRAM_BOT_TOKEN provided but TELEGRAM_CHAT_ID missing")
+            elif chat_id and not bot_token:
+                errors.append("TELEGRAM_CHAT_ID provided but TELEGRAM_BOT_TOKEN missing")
         
         # Log results
         if errors:

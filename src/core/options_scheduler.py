@@ -13,6 +13,7 @@ from loguru import logger
 from config.trading_config import config, TradingModeConfig
 from config.options_config import options_config
 from src.core.telegram_bot import telegram_bot
+from src.core.notification_center import notification_center
 from src.core.options_data_engine import options_data_engine
 from src.core.options_prediction_engine import options_prediction_engine
 from src.core.options_paper_trader import options_paper_trader
@@ -96,6 +97,7 @@ class OptionsScheduler:
         self.last_market_open_date = None
         self.market_close_message_sent = False
         self.last_market_close_date = None
+        self._notification_task: Optional[asyncio.Task] = None
 
         self._ensure_snapshot_schema()
         
@@ -122,17 +124,21 @@ class OptionsScheduler:
         self.start_time = datetime.now()
         
         logger.info("🚀 Starting autonomous options trading")
-        await telegram_bot.send_message(
+        await notification_center.ensure_started()
+        await notification_center.send_message(
             "🚀 **RTX Options Trading Started**\n\n"
             f"Mode: {self.trading_mode.get_mode_description()}\n"
             f"Balance: ${options_paper_trader.account_balance:.2f}\n"
-            f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            parse_mode="Markdown",
         )
         
         try:
             # Start Telegram listener as background task
             telegram_task = asyncio.create_task(telegram_bot.process_incoming_messages())
             logger.info("📱 Started Telegram command listener")
+            self._notification_task = asyncio.create_task(self._notification_watchdog())
+            logger.info("📡 Notification watchdog started")
             
             while self.running:
                 # Check if market is open
@@ -160,7 +166,7 @@ class OptionsScheduler:
             logger.info("⏹️ Keyboard interrupt received")
         except Exception as e:
             logger.error(f"❌ Scheduler error: {e}")
-            await telegram_bot.send_message(f"🚨 **Scheduler Error:** {e}")
+            await notification_center.send_message(f"🚨 **Scheduler Error:** {e}", parse_mode="Markdown")
         finally:
             self.running = False
             # Cancel Telegram listener task
@@ -168,6 +174,12 @@ class OptionsScheduler:
                 telegram_task.cancel()
                 try:
                     await telegram_task
+                except asyncio.CancelledError:
+                    pass
+            if self._notification_task:
+                self._notification_task.cancel()
+                try:
+                    await self._notification_task
                 except asyncio.CancelledError:
                     pass
             logger.info("⏹️ Autonomous trading stopped")
@@ -218,7 +230,7 @@ class OptionsScheduler:
             
         except Exception as e:
             logger.error(f"❌ Trading cycle error: {e}")
-            await telegram_bot.send_message(f"🚨 **Cycle Error:** {e}")
+            await notification_center.send_message(f"🚨 **Cycle Error:** {e}", parse_mode="Markdown")
         
         cycle_duration = (datetime.now() - cycle_start).total_seconds()
         logger.info(f"✅ Trading cycle #{self.cycle_count} completed in {cycle_duration:.1f}s")
@@ -252,7 +264,7 @@ class OptionsScheduler:
             logger.info(f"🎯 Found {len(actions)} position actions to execute")
             for action in actions:
                 logger.info(f"📈 Position action: {action}")
-                await telegram_bot.send_message(f"📈 **Position Update**\n{action}")
+                await notification_center.send_message(f"📈 **Position Update**\n{action}", parse_mode="Markdown")
         else:
             logger.info("✓ All positions within normal parameters")
     
@@ -607,7 +619,7 @@ class OptionsScheduler:
         success = options_paper_trader.open_position(prediction)
         
         if success:
-            await telegram_bot.send_message(
+            await notification_center.send_message(
                 f"🎯 **OPTIONS TRADE EXECUTED**\n\n"
                 f"📊 **Contract Details:**\n"
                 f"• Action: {prediction['action']}\n"
@@ -628,12 +640,14 @@ class OptionsScheduler:
                 f"🎯 **Exit Strategy:**\n"
                 f"• Target: ${prediction['profit_target_price']:.2f} (+100%)\n"
                 f"• Stop Loss: ${prediction['stop_loss_price']:.2f} (-50%)\n"
-                f"• Time Exit: {prediction['exit_before_expiry_days']}d before expiry"
+                f"• Time Exit: {prediction['exit_before_expiry_days']}d before expiry",
+                parse_mode="Markdown",
             )
         else:
-            await telegram_bot.send_message(
+            await notification_center.send_message(
                 f"❌ **Trade Failed**\n\n"
-                f"Could not execute: {prediction['contract_symbol']}"
+                f"Could not execute: {prediction['contract_symbol']}",
+                parse_mode="Markdown",
             )
     
     async def _send_cycle_update(self, signals_data: Dict, prediction: Optional[Dict]):
@@ -677,9 +691,21 @@ class OptionsScheduler:
             message += f"{performance['total_trades']} trades, "
             message += f"PF: {performance['profit_factor']:.1f}"
         
-        await telegram_bot.send_message(message)
+        await notification_center.send_message(message, parse_mode="Markdown")
     
-    async def _check_and_send_market_open_status(self):
+    async def _notification_watchdog(self):
+        """Ensure heartbeat notifications fire even if trading loop starts late."""
+        try:
+            while self.running:
+                await self._check_and_send_market_open_status(via_watchdog=True)
+                await self._check_and_send_market_close_status(via_watchdog=True)
+                await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            logger.debug("🔕 Notification watchdog cancelled")
+        except Exception as exc:
+            logger.error(f"❌ Notification watchdog error: {exc}")
+
+    async def _check_and_send_market_open_status(self, via_watchdog: bool = False):
         """Check if we should send the daily market open status message"""
         try:
             # Get current date in ET timezone
@@ -689,27 +715,42 @@ class OptionsScheduler:
             current_date = now.date()
             current_time = now.time()
             
-            # Check if it's a new trading day and we haven't sent the message yet
-            if (self.last_market_open_date != current_date and 
-                not self.market_open_message_sent):
-                
-                market_open_time = dt_time(9, 30)
-                if market_open_time <= current_time <= dt_time(10, 0):
-                    logger.info("📱 Sending daily market open status message...")
-                    summary = self._build_previous_day_summary(current_date)
-                    success = await telegram_bot.send_market_open_status(summary)
-                    
-                    if success:
-                        self.market_open_message_sent = True
-                        self.last_market_open_date = current_date
-                        logger.success("✅ Market open status message sent successfully")
-                    else:
-                        logger.error("❌ Failed to send market open status message")
-                        
-            # Reset flag for new day
-            elif self.last_market_open_date != current_date:
-                self.market_open_message_sent = False
+            # Skip weekends but reset flags so Monday triggers correctly
+            if now.weekday() >= 5:
                 self.last_market_open_date = current_date
+                self.market_open_message_sent = False
+                return
+            
+            if self.last_market_open_date != current_date:
+                self.market_open_message_sent = False
+            
+            if self.market_open_message_sent:
+                return
+            
+            # Only start sending after market open
+            if current_time < dt_time(9, 30):
+                return
+            
+            # Determine if we're late so we can annotate the message
+            late_note = None
+            if current_time >= dt_time(16, 0):
+                late_note = "Service restarted after market close; sending open status retroactively."
+            elif current_time > dt_time(10, 0):
+                late_note = "Service started after the usual notification window; sending status now."
+            elif via_watchdog:
+                # Normal window triggered by watchdog
+                late_note = None
+            
+            logger.info("📱 Sending daily market open status message...")
+            summary = self._build_previous_day_summary(current_date)
+            success = await notification_center.send_market_open_status(summary, note=late_note)
+            
+            if success:
+                self.market_open_message_sent = True
+                self.last_market_open_date = current_date
+                logger.success("✅ Market open status message sent successfully")
+            else:
+                logger.error("❌ Failed to send market open status message")
                 
         except Exception as e:
             logger.error(f"❌ Error checking market open status: {e}")
@@ -718,12 +759,12 @@ class OptionsScheduler:
         """Check if we should send automated ML status notification"""
         try:
             # Send automated ML notification if conditions are met
-            await telegram_bot.send_automated_ml_notification()
+            await notification_center.send_automated_ml_notification()
             
         except Exception as e:
             logger.error(f"❌ Error checking ML notification: {e}")
 
-    async def _check_and_send_market_close_status(self):
+    async def _check_and_send_market_close_status(self, via_watchdog: bool = False):
         try:
             import pytz
 
@@ -734,20 +775,34 @@ class OptionsScheduler:
             if self.last_market_close_date != current_date:
                 self.market_close_message_sent = False
 
-            if not self.market_close_message_sent and dt_time(16, 0) <= now.time() <= dt_time(16, 30):
-                summary = self._build_daily_summary(current_date)
-                open_positions = []
-                for pos in options_paper_trader.open_positions.values():
-                    open_positions.append({
-                        'contract_symbol': pos.get('contract_symbol', 'N/A'),
-                        'entry_price': pos.get('entry_price', 0.0),
-                        'confidence': pos.get('confidence', 0.0),
-                    })
-                success = await telegram_bot.send_market_close_summary(summary, open_positions)
-                if success:
-                    self.market_close_message_sent = True
-                    self.last_market_close_date = current_date
-                    logger.success("✅ Market close summary sent")
+            if self.market_close_message_sent:
+                return
+
+            if now.weekday() >= 5:
+                self.last_market_close_date = current_date
+                self.market_close_message_sent = False
+                return
+
+            if now.time() < dt_time(16, 0):
+                return
+
+            late_note = None
+            if now.time() > dt_time(17, 0):
+                late_note = "Service resumed after the scheduled close window; summary sent late."
+
+            summary = self._build_daily_summary(current_date)
+            open_positions = []
+            for pos in options_paper_trader.open_positions.values():
+                open_positions.append({
+                    'contract_symbol': pos.get('contract_symbol', 'N/A'),
+                    'entry_price': pos.get('entry_price', 0.0),
+                    'confidence': pos.get('confidence', 0.0),
+                })
+            success = await notification_center.send_market_close_summary(summary, open_positions, note=late_note)
+            if success:
+                self.market_close_message_sent = True
+                self.last_market_close_date = current_date
+                logger.success("✅ Market close summary sent")
 
         except Exception as e:
             logger.error(f"❌ Error sending market close summary: {e}")

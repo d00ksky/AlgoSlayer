@@ -15,6 +15,7 @@ from src.core.options_scheduler import OptionsScheduler
 from src.core.options_prediction_engine import OptionsPredictionEngine
 from src.core.options_paper_trader import OptionsPaperTrader
 from src.core.telegram_bot import telegram_bot
+from src.core.notification_center import notification_center
 from src.core.adaptive_learning_system import AdaptiveLearningSystem
 from src.core.dynamic_thresholds import dynamic_threshold_manager
 from src.core.dashboard import dashboard
@@ -99,6 +100,7 @@ class ParallelStrategyRunner:
             
         self.running = True
         logger.info("🚀 Starting parallel multi-strategy trading")
+        await notification_center.ensure_started()
         
         # Send startup notification
         await self._send_startup_notification()
@@ -109,6 +111,9 @@ class ParallelStrategyRunner:
         
         try:
             while self.running:
+                # Always run notification checks (market open/close, ML status)
+                await self._run_notification_checks()
+
                 # Check if market is open
                 if not options_config.is_market_hours():
                     logger.info("⏰ Market closed - sleeping")
@@ -135,12 +140,22 @@ class ParallelStrategyRunner:
                 
         except Exception as e:
             logger.error(f"❌ Parallel trading error: {e}")
-            await telegram_bot.send_message(f"❌ Multi-strategy error: {str(e)}")
+            await notification_center.send_message(f"❌ Multi-strategy error: {str(e)}", parse_mode="Markdown")
         finally:
             # Cancel telegram task if it exists
             if 'telegram_task' in locals() and not telegram_task.done():
                 telegram_task.cancel()
                 logger.info("📱 Telegram listener stopped")
+    
+    async def _run_notification_checks(self) -> None:
+        """Run daily heartbeat notifications and ML status checks."""
+        try:
+            # Reuse scheduler helpers for consistent formatting
+            await self.scheduler._check_and_send_market_open_status()
+            await self.scheduler._check_and_send_ml_notification()
+            await self.scheduler._check_and_send_market_close_status()
+        except Exception as exc:
+            logger.error(f"❌ Notification check error: {exc}")
             
     async def _check_all_positions(self):
         """Check all open positions for exit conditions"""
@@ -342,7 +357,7 @@ class ParallelStrategyRunner:
         message += "• Volatility: 73% conf (+5% from #3 performer)\n"
         message += "\n🎯 Simulation-based learning active! 🚀"
         
-        await telegram_bot.send_message(message)
+        await notification_center.send_message(message, parse_mode="Markdown")
         
     async def _send_performance_update(self):
         """Send periodic performance update with dashboard"""
@@ -368,7 +383,7 @@ class ParallelStrategyRunner:
                     
             message += "\n💡 Use /dashboard for full details"
                 
-            await telegram_bot.send_message(message)
+            await notification_center.send_message(message, parse_mode="Markdown")
             
         except Exception as e:
             logger.error(f"❌ Performance update error: {e}")

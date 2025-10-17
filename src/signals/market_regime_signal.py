@@ -19,8 +19,13 @@ class MarketRegimeSignal:
         self.weight = config.SIGNAL_WEIGHTS.get(self.signal_name, 0.10)
         self.last_analysis = None
         
-        # Market indices for regime analysis
-        self.market_indices = ['SPY', 'QQQ', 'VIX', 'DXY']  # S&P 500, NASDAQ, VIX, Dollar
+        # Market indices for regime analysis (alias -> yfinance ticker)
+        self.market_indices = {
+            'SPY': 'SPY',           # S&P 500
+            'QQQ': 'QQQ',           # NASDAQ
+            'VIX': '^VIX',          # Volatility index
+            'DXY': 'DX-Y.NYB',      # US Dollar index
+        }
         
     async def analyze(self, symbol: str = "RTX") -> Dict:
         """Analyze current market regime for trading signals"""
@@ -53,7 +58,7 @@ class MarketRegimeSignal:
         
         market_data = {}
         
-        for ticker in self.market_indices:
+        for alias, ticker in self.market_indices.items():
             try:
                 yf_ticker = yf.Ticker(ticker)
                 data = yf_ticker.history(period=period)
@@ -62,7 +67,7 @@ class MarketRegimeSignal:
                     # Calculate returns and volatility
                     data['Returns'] = data['Close'].pct_change()
                     data['Volatility'] = data['Returns'].rolling(window=20).std() * np.sqrt(252)
-                    market_data[ticker] = data
+                    market_data[alias] = data
                     
             except Exception as e:
                 logger.warning(f"📊 Failed to get {ticker} data: {e}")

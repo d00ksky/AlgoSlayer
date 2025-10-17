@@ -67,11 +67,14 @@ class OptionsConfig:
         
         # RECALIBRATED: More conservative sizing during recalibration period
         if account_balance <= 1500:
-            return max(200, max_per_trade)  # REDUCED: 400→200 OR 15%, whichever is higher
+            return max(200, max_per_trade)  # Maintain minimum buying power for smaller accounts
         elif account_balance <= 3000:
-            return min(300, max_per_trade * 0.75)  # REDUCED: 600→300, more conservative
+            # Allow at least ~$275 so one RTX contract can clear filters
+            adjusted_cap = max(275, max_per_trade * 0.85)
+            return min(max_per_trade, adjusted_cap)
         else:
-            return min(400, max_per_trade * 0.60)  # REDUCED: 800→400, even more conservative
+            adjusted_cap = max(350, max_per_trade * 0.75)
+            return min(max_per_trade, adjusted_cap)
     
     @classmethod
     def get_contracts_for_trade(cls, option_price: float, account_balance: float) -> int:
@@ -84,8 +87,16 @@ class OptionsConfig:
         # Maximum contracts we can afford
         max_contracts = int(max_investment / cost_per_contract)
         
+        if max_contracts == 0:
+            single_contract_cost = (option_price * 100) + cls.calculate_commission("BUY_TO_OPEN_CALL", 1)
+            # Allow a single contract when it keeps risk under ~20% of capital
+            risk_cap = account_balance * min(0.20, cls.MAX_POSITION_SIZE_PCT * 1.5)
+            if single_contract_cost <= risk_cap:
+                return 1
+            return 0
+        
         # Conservative: Start with 1-2 contracts max
-        return min(max_contracts, 2) if max_contracts > 0 else 0
+        return min(max_contracts, 2)
     
     @classmethod
     def calculate_commission(cls, action: str, contracts: int) -> float:
